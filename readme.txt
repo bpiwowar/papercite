@@ -1,12 +1,12 @@
 === Plugin Name ===
-Contributors:
+Contributors: Benjamin Piwowarski
 Donate link: 
 Tags: formatting, bibtex
 Requires at least: 1.5
 Tested up to: 3.0
 Stable tag: 0.1
 
-papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts. The input data is a local or remote bibtex file and the output is HTML. This plugin is based on the bib2html plugin.
+papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts.
 
 == Description ==
 
