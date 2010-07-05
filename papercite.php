@@ -96,6 +96,14 @@ class Papercite {
     }
   }
 
+  function getCiteFormat($type) {
+      $OSBiBPath = dirname(__FILE__) . '/OSBiB/';
+      include_once($OSBiBPath.'format/CITEFORMAT.php');
+      $citeformat = new CITEFORMAT();
+      list($info, $citation, $styleCommon, $styleTypes) = $citeformat->loadStyle("styles/bibliography/", "APA");
+      $citeformat->getStyle($styleCommon, $styleTypes);
+      return $citeformat;
+  }
 
   function getFormat($type) {
     if (!$this->formats[$type]) {
