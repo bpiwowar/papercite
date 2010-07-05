@@ -1,5 +1,5 @@
 === Plugin Name ===
-Contributors: Benjamin Piwowarski
+Contributors: bpiwowar
 Donate link: 
 Tags: formatting, bibtex
 Requires at least: 1.5
