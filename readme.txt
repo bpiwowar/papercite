@@ -26,6 +26,7 @@ Features:
 * possibility of editing the bibtex file directly from the wordpress administration page
 
 Features compared to bib2html (0.9.3):
+
 * adds the possibility of writing a text with reference to a bibtex file, and to print the bibliography at the end.
 * it checks if a PDF file whose name match the key exists and link to it if this is so
 * it uses the DOI information to create an external link
