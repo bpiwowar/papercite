@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>OSBib-Format</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+<!--
+.style3 {color: #00CC00}
+.style9 {color: #CC00FF}
+.style11 {color: #FF0000}
+.style13 {color: #FF00FF}
+-->
+</style>
+</head>
+
+<body>
+<h1>OSBib-Format</h1>
+<h3>XML structure ~ Bibliography</h3>
+<p> A collection of PHP classes to manage bibliographic formatting for OS bibliography software 
+using the OSBib standard. Taken from and originally developed in WIKINDX (<a href="http://wikindx.sourceforge.net">http://wikindx.sourceforge.net</a>). </p>
+<p>Released through <a href="http://bibliophile.sourceforge.net">http://bibliophile.sourceforge.net</a> under the GPL licence.</p>
+<p>If you make improvements, please consider contacting the administrators at <a href="http://bibliophile.sourceforge.net">bibliophile.sourceforge.net</a> so that your improvements can be added to the release package.</p>
+<p><em>May 2005<br>
+  </em>Mark Grimshaw (<a href="http://wikindx.sourceforge.net">WIKINDX</a>)<br>
+  Andrea Rossato (<a href="http://uniwakka.sourceforge.net/HomePage">Uniwakka</a>)<br>
+  Guillaume Gardey (<a href="http://biborb.glymn.net/doku.php">BibOrb</a>)<br>
+Christian Boulanger (<a href="http://bibliograph.panya.de/">Bibliograph</a>)</p>
+<hr>
+<p><a href="#introduction">INTRODUCTION</a><br>
+<a href="#structure">STRUCTURE</a></p>
+<hr>
+<h3><a name="introduction"></a>INTRODUCTION</h3>
+<p>Use <span class="style3"><code><a href="osbib.html#bibformatLoadstyle">BIBFORMAT::loadStyle()</a> </code></span>to load and parse the XML file into usable arrays. The XML file is logically divided into four areas, <em>info</em> (general information about the formatting style), <em>citation</em> (see <a href="citation_xml.html">citation_xml</a>), <em>styleCommon</em> (common styling for bibliographic lists) and <em>styleTypes</em> (specific formatting depending on the type of resource).</p>
+<p>The <em>info </em>array as returned by <span class="style3"><code><a href="osbib.html#bibformatLoadstyle">BIBFORMAT::loadStyle()</a></code></span> will look something like:<br>
+    <code><span class="style9">Array ( [name] =&gt; APA [description] =&gt; American Psychological Association (APA) [language] =&gt; English [version] =&gt; 1.0 )</span></code></p>
+<p>The <em>styleCommon</em> array, as returned by <span class="style3"><code><a href="osbib.html#bibformatLoadstyle">BIBFORMAT::loadStyle()</a></code></span> and after being further parsed by <span class="style3"><code><a href="osbib.html#bibformatGetstyle">BIBFORMAT::getStyle()</a></code></span> will look something like:<br>
+    <code class="style9">Array ( [titleCapitalization] =&gt; 0 [primaryCreatorFirstStyle] =&gt; 1 [primaryCreatorOtherStyle] =&gt; 1 [primaryCreatorInitials] =&gt; 0 [primaryCreatorFirstName] =&gt; 1 [otherCreatorFirstStyle] =&gt; 0 [otherCreatorOtherStyle] =&gt; 0 [otherCreatorInitials] =&gt; 0 [dayFormat] =&gt; 0 [otherCreatorFirstName] =&gt; 1 [primaryCreatorList] =&gt; 1 [otherCreatorList] =&gt; 0 [monthFormat] =&gt; 1 [editionFormat] =&gt; 1 [primaryCreatorListMore] =&gt; 7 [primaryCreatorListLimit] =&gt; 6 [dateFormat] =&gt; 1 [primaryCreatorListAbbreviation] =&gt; , et al. [otherCreatorListMore] =&gt; [runningTimeFormat] =&gt; 1 [primaryCreatorRepeatString] =&gt; [primaryCreatorRepeat] =&gt; 0 [otherCreatorListLimit] =&gt; [otherCreatorListAbbreviation] =&gt; [pageFormat] =&gt; 2 [editorSwitch] =&gt; 1 [editorSwitchIfYes] =&gt; editor (^Ed.^Eds.^). [primaryCreatorSepFirstBetween] =&gt; , [primaryCreatorSepNextBetween] =&gt; , [primaryCreatorSepNextLast] =&gt; , &amp; [otherCreatorSepFirstBetween] =&gt; , [otherCreatorSepNextBetween] =&gt; &amp; [otherCreatorSepNextLast] =&gt; &amp; [primaryTwoCreatorsSep] =&gt; , &amp; [otherTwoCreatorsSep] =&gt; &amp; )</code></p>
+<p>Not all elements need be present so you should always test with PHP's <code>array_key_exists()</code> function. </p>
+<p>Because OSBib uses numeric indexing from 0 upwards, you should be careful to use something like:<br>
+    <span class="style3"><code>if($styleCommon['primaryCreatorListAbbreviation'] === FALSE)<br>
+  ...</code></span></p>
+<p>to test for a FALSE value of an array element.</p>
+<p>The <em>styleTypes</em> array for a book (each type of resource has its own definition array), as returned by <span class="style3"><code><a href="osbib.html#bibformatLoadstyle">BIBFORMAT::loadStyle()</a></code></span> and after being further parsed by <span class="style3"><code><a href="osbib.html#bibformatGetstyle">BIBFORMAT::getStyle()</a></code></span> will look something like (array elements will depend on the type's template definition):<br>
+    <code class="style9">Array ( [author] =&gt; Array ( [dependentPre] =&gt; [dependentPreAlternative] =&gt; [dependentPostAlternative] =&gt; [singular] =&gt; [plural] =&gt; [pre] =&gt; [post] =&gt; . ) [publicationYear] =&gt; Array ( [dependentPre] =&gt; [dependentPreAlternative] =&gt; [dependentPostAlternative] =&gt; [singular] =&gt; [plural] =&gt; [pre] =&gt; ( [post] =&gt; ). ) [title] =&gt; Array ( [dependentPre] =&gt; [dependentPreAlternative] =&gt; [dependentPostAlternative] =&gt; [singular] =&gt; [plural] =&gt; [pre] =&gt; [i] [post] =&gt; [/i] ) [translator] =&gt; Array ( [dependentPre] =&gt; [dependentPost] =&gt; [dependentPreAlternative] =&gt; [dependentPostAlternative] =&gt; [singular] =&gt; [plural] =&gt; [pre] =&gt; [post] =&gt; , Trans.__DEPENDENT_ON_NEXT_FIELD__ ) [edition] =&gt; Array ( [dependentPre] =&gt; [dependentPost] =&gt; [dependentPreAlternative] =&gt; [dependentPostAlternative] =&gt; [singular] =&gt; [plural] =&gt; [pre] =&gt; [post] =&gt; ed.__DEPENDENT_ON_NEXT_FIELD__ ) [volumeNumber] =&gt; Array ( [dependentPre] =&gt; [dependentPreAlternative] =&gt; [dependentPostAlternative] =&gt; [singular] =&gt; [plural] =&gt; [pre] =&gt; Vol. [post] =&gt; ) [publisherLocation] =&gt; Array ( [dependentPre] =&gt; [dependentPreAlternative] =&gt; [dependentPostAlternative] =&gt; [singular] =&gt; [plural] =&gt; [pre] =&gt; . [post] =&gt; : ) [publisherName] =&gt; Array ( [dependentPre] =&gt; [dependentPreAlternative] =&gt; [dependentPostAlternative] =&gt; [singular] =&gt; [plural] =&gt; [pre] =&gt; __DEPENDENT_ON_PREVIOUS_FIELD__ [post] =&gt; ) [ultimate] =&gt; . [independent] =&gt; Array ( [3] =&gt; ( [5] =&gt; ) ) )</code></p>
+<hr>
+<h3><a name="structure"></a>STRUCTURE</h3>
+<p>The description here relates to the various elements of the <em>styleCommon</em> array. Each element will have either an INTEGER value or a STRING value. </p>
+<table width="100%"  border="0" cellpadding="10" bgcolor="#CCCCCC">
+  <tr>
+    <td><h4>Creator formatting:</h4>
+    <p><span class="style11">Primary creators:<br>
+    </span>Primary creators are usually the author(s) of a resource but, depending on the type of resource, may be composers, inventors etc. etc. etc. 
+    <p><span class="style3"><code>INTEGER primaryCreatorFirstStyle</code></span> Ordering and display of the name elements for the first of the primary creators. <br>
+        <code><span class="style3">INTEGER primaryCreatorOtherStyle</span></code> Ordering and display of the name elements for the remaining primary creators.     
+    <pre>
+	 0	=>	'Joe Bloggs'
+	 1	=>	'Bloggs, Joe'
+	 2	=>	'Bloggs Joe'
+	 3	=>	Last name only</pre><p><span class="style3"><code>INTEGER primaryCreatorInitials</code></span> Formatting of initials for the primary creators.     
+    <pre>
+	 0	=>	'T. U. '
+	 1	=>	'T.U.'
+	 2	=>	'T U '
+	 3	=>	'TU'</pre>    <p><span class="style3"><code>INTEGER primaryCreatorFirstName</code></span> Formatting of first name for the primary creators.     
+    <pre>
+	 0	=>	Print the full first name(s)
+	 1	=>	Print initial(s) only</pre>    <p><span class="style3"><code>STRING primaryCreatorUpperCase</code></span> Uppercase/lowercase primary creator names. The value will be 'on' for yes otherwise the array element does not exist.</p>
+    <p><span class="style3"><code>STRING primaryTwoCreatorsSep</code></span> Separator in the case of just two primary creators. </p>        <p><span class="style3"><code>STRING primaryCreatorSepFirstBetween</code></span> Separator between the first two primary creators in the case where there are more than two. </p>    
+    <p><span class="style3"><code>STRING primaryCreatorSepNextBetween</code></span> Separator between the following primary creators after the first two in the case where there are more than two.</p>    
+    <p><span class="style3"><code>STRING primaryCreatorSepNextLast </code></span> Separator between the last two primary creators in the case where there are more than two.</p>
+    <p><span class="style3"><code>INTEGER primaryCreatorList</code></span> Abbreviations for multiple primary creators. </p>
+	<pre>
+	 0	=>	Print the full creator list
+	 1	=>	Limit the creator list
+</pre>    <p><span class="style3"><code>INTEGER primaryCreatorListMore</code></span> If more than this number of primary creators, format as per the limit defined here. Requires <span class="style3"><code>primaryCreatorList</code></span> to be '1'. </p>
+    <p><span class="style3"><code>INTEGER primaryCreatorListLimit</code></span> Print only this number of primary creators if limit is exceeded as defined here. Requires <span class="style3"><code>primaryCreatorList</code></span> to be '1'.</p>
+    <p><span class="style3"><code>STRING primaryCreatorListAbbreviation</code></span> If limit is exceeded as defined here, replace remaining primary creators with this string. Requires <span class="style3"><code>primaryCreatorList</code></span> to be '1'.</p>
+    <p><span class="style3"><code>STRING primaryCreatorListAbbreviationItalic</code></span> Italicize <span class="style3"><code>primaryCreatorListAbbreviation</code></span>. Requires <span class="style3"><code>primaryCreatorList</code></span> to be '1'. The value will be 'on' for yes otherwise the array element does not exist.</p>
+    <p><span class="style3"><code>INTEGER primaryCreatorRepeat</code></span> Consecutive citations in the bibliographic list by the same primary creator(s). </p>    <pre>
+	 0	=>	Print the creator list
+	 1	=>	Do not print the creator list
+	 2	=>	Replace the creator list with string below
+</pre>    <p><span class="style3"><code>STRING primaryCreatorRepeatString</code></span> String to replace primary creator(s) with if '2' is chosen for <span class="style3"><code>primaryCreatorRepeat</code></span> above. </p>    <p><span class="style11">Other creators:<br>
+      </span>Other creators include editors, translators, agents, attorneys etc. etc. etc. The usage is as explained above. </p>
+    <p><span class="style3"><code>INTEGER otherCreatorFirstStyle</code></span> Ordering and display of the name elements for the first of the other creators (editors, translators etc.).<br>
+        <code><span class="style3">INTEGER otherCreatorOtherStyle</span></code> Ordering and display of the name elements for the remaining other creators.<span class="style3"><code><br>
+      INTEGER otherCreatorInitials</code></span> Formatting of initials for the other creators.<br>
+      <span class="style3"><code>INTEGER otherCreatorFirstName</code></span> Formatting of first name for the other creators.<br>
+      <span class="style3"><code>STRING otherCreatorUpperCase</code></span> Uppercase/lowercase other creator names.<br>
+      <span class="style3"><code>STRING otherTwoCreatorsSep</code></span> Separator in the case of just two other creators.<br>
+      <span class="style3"><code>STRING otherCreatorSepFirstBetween</code></span> Separator between the first two other creators in the case where there are more than two.<br>
+      <span class="style3"><code>STRING otherCreatorSepNextBetween</code></span> Separator between the following other creators after the first two in the case where there are more than two.<br>
+      <span class="style3"><code>STRING otherCreatorSepNextLast </code></span> Separator between the last two other creators in the case where there are more than two.<br>
+      <span class="style3"><code>INTEGER otherCreatorList</code></span> Abbreviations for multiple other creators.<br>
+      <span class="style3"><code>INTEGER otherCreatorListMore</code></span> If more than this number of other creators, format as per the limit defined here. Requires <span class="style3"><code>otherCreatorList</code></span> to be '1'.<br>
+      <span class="style3"><code>INTEGER otherCreatorListLimit</code></span> Print only this number of other creators if limit is exceeded as defined here. Requires <span class="style3"><code>otherCreatorList</code></span> to be '1'.<br>
+      <span class="style3"><code>STRING otherCreatorListAbbreviation</code></span> If limit is exceeded as defined here, replace remaining other creators with this string. Requires <span class="style3"><code>otherCreatorList</code></span> to be '1'.<br>
+      <span class="style3"><code>STRING otherCreatorListAbbreviationItalic</code></span> Italicize <span class="style3"><code>otherCreatorListAbbreviation</code></span>. Requires <span class="style3"><code>otherCreatorList</code></span> to be '1'.</p></td>
+  </tr>
+</table>
+<br>
+<table width="100%"  border="0" cellpadding="10" bgcolor="#CCCCCC">
+  <tr>
+    <td><h4><span class="style3"><code><a name="utf8EncodeUtf8" id="utf8EncodeUtf8"></a></code></span>Miscellaneous formatting:</h4>
+    <p><span class="style11">Editor switch:<br>
+        </span>If a resource, such as a book, has an editor(s) but no author(s), then some bibliographic styles require that the editor(s) take the usual place of the author(s) when printing the bibliographic list.    
+    <p><span class="style3"><code>INTEGER editorSwitch </code></span> Consecutive citations in the bibliographic list by the same primary creator(s). 
+    <pre>
+	 0	=>	No switch
+	 1	=>	Switch
+</pre>    <p><span class="style3"><code>STRING editorSwitchIfYes </code></span> If '1' is chosen for <span class="style3"><code>editorSwitch</code></span> above, this is the template definition string such as 
+  
+
+    <span class="style13"><code>editor (^Ed.^Eds.^)</code></span> that the primary creator definition string in each resource type's template definition is replaced with.</p>
+    <p><span class="style11">Title capitalization:<br>
+    </span><span class="style3"><code>INTEGER titleCapitalization</code></span></p>
+    <pre>
+	 0	=>	Title as entered/stored in the database
+	 1	=>	Only first character of first word capitalised
+</pre>    <p>Note that <span class="style3"><code><a href="osbib.html#bibformatFormattitle">BIBFORMAT::formatTitle()</a></code></span> allows characters to be protected from case changes.</p>
+    <p><span class="style11">Edition:<br>
+    </span><span class="style3"><code>INTEGER editionFormat </code></span></p>
+    <pre>
+	 0	=>	'3'
+	 1	=>	'3rd'</pre>    <p><span class="style11">Page number:<br>
+     </span><span class="style3"><code>INTEGER pageFormat </code></span></p>
+	 <pre>
+	 0	=>	'132-9'
+	 1	=>	'132-39'
+	 2	=>	'132-139'
+</pre>
+	 <p><span class="style11">Day:<br>
+     </span><span class="style3"><code>INTEGER dayFormat </code></span></p>
+	 <pre>
+	 0	=>	'10'
+	 1	=>	'10th'</pre>
+	 <p><span class="style11">Month:<br>
+     </span><span class="style3"><code>INTEGER monthFormat </code></span></p>
+	 <pre>
+	 0	=>	'Feb'
+	 1	=>	'February'
+	 2	=>	"User-defined"
+</pre>
+If '2', the <em>styleCommon</em> array
+will	have 12 string elements for each month: <code><span class="style3">userMonth_1 </span></code>.. <span class="style3"><code>userMonth_12</code></span>
+<p><span class="style11">Date:<br>
+     </span><span class="style3"><code>INTEGER dateFormat </code></span></p>
+	 <pre>
+	 0	=>	Day followed by Month
+	 1	=>	Month followed by Day
+</pre>
+	 <p><span class="style11">Running time:<br>
+     </span><span class="style3"><code>INTEGER runningTimeFormat </code></span></p>
+    <pre>
+	 0	=>	'3'45"'
+	 1	=>	'3:45'
+	 2	=>	'3,45'
+	 3	=>	'3 hours, 45 minutes'
+	 4	=>	'3 hours and 45 minutes'</pre><p><span class="style11">Date ranges:<br>
+    </span><span class="style3"><code>STRING dateRangeDelimit1 </code></span> Separator between start and end dates if day and month given.<br>
+      <span class="style3"><code>STRING dateRangeDelimit2</code></span> Separator between start and end dates if month only given.<br>
+      <span class="style3"><code>INTEGER dateRangeSameMonth </code></span>If start and end months are the same.</p>
+    <pre>
+	 0	=>	"Print both months",
+	 1	=>	"Print start month only",</pre></td>
+  </tr>
+</table>
+<p>&nbsp; </p>
+</body>
+</html>

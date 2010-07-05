@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>OSBib-Format</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+<!--
+.style3 {color: #00CC00}
+.style9 {color: #CC00FF}
+.style11 {color: #FF0000}
+.style13 {color: #FF00FF}
+-->
+</style>
+</head>
+
+<body>
+<h1>OSBib-Format</h1>
+<h3>XML structure ~ Citation (In-text and Footnote style) </h3>
+<p> A collection of PHP classes to manage bibliographic formatting for OS bibliography software 
+using the OSBib standard. Taken from and originally developed in WIKINDX (<a href="http://wikindx.sourceforge.net">http://wikindx.sourceforge.net</a>). </p>
+<p>Released through <a href="http://bibliophile.sourceforge.net">http://bibliophile.sourceforge.net</a> under the GPL licence.</p>
+<p>If you make improvements, please consider contacting the administrators at <a href="http://bibliophile.sourceforge.net">bibliophile.sourceforge.net</a> so that your improvements can be added to the release package.</p>
+<p><em>May 2005<br>
+  </em>Mark Grimshaw (<a href="http://wikindx.sourceforge.net">WIKINDX</a>)<br>
+  Andrea Rossato (<a href="http://uniwakka.sourceforge.net/HomePage">Uniwakka</a>)<br>
+  Guillaume Gardey (<a href="http://biborb.glymn.net/doku.php">BibOrb</a>)<br>
+Christian Boulanger (<a href="http://bibliograph.panya.de/">Bibliograph</a>)</p>
+<hr>
+<p><a href="#introduction">INTRODUCTION</a><br>
+<a href="#structure">STRUCTURE</a></p>
+<hr>
+<h3><a name="introduction"></a>INTRODUCTION</h3>
+<p>Use <span class="style3"><code><a href="osbib.html#bibformatLoadstyle">BIBFORMAT::loadStyle()</a> </code></span>to load and parse the XML file into usable arrays. The XML file is logically divided into four areas, <em>info</em> (see <a href="bibliography_xml.html">bibliography_xml</a>), <em>citation</em> (see below), <em>styleCommon</em> (see <a href="bibliography_xml.html">bibliography_xml</a>) and <em>styleTypes</em> (see <a href="bibliography_xml.html">bibliography_xml</a>).</p>
+<p>The <em>citation</em> array, as returned by <span class="style3"><code><a href="osbib.html#bibformatLoadstyle">BIBFORMAT::loadStyle()</a></code></span> and after being further parsed within CITEFORMAT <span class="style3"><code><a href="osbib.html#bibformatGetstyle"></a></code></span> will look something like:<br>
+    <code><span class="style9">Array ( [creatorStyle] =&gt; 0 [creatorOtherStyle] =&gt; 0 [creatorInitials] =&gt; 1 [creatorFirstName] =&gt; 1 [twoCreatorsSep] =&gt; &amp; [creatorSepFirstBetween] =&gt; , [creatorListSubsequentAbbreviation] =&gt; et al. [creatorSepNextBetween] =&gt; , [creatorSepNextLast] =&gt; , &amp; [creatorList] =&gt; 1 [creatorListMore] =&gt; 3 [creatorListLimit] =&gt; 1 [creatorListAbbreviation] =&gt; et al. [creatorUppercase] =&gt; on [creatorListSubsequentAbbreviationItalic] =&gt; on [creatorListAbbreviationItalic] =&gt; on [creatorListSubsequent] =&gt; 1 [creatorListSubsequentMore] =&gt; 3 [creatorListSubsequentLimit] =&gt; 1 [consecutiveCreator] =&gt; 1 [consecutiveCreatorSep] =&gt; , [template] =&gt; (|creator|%, %year|: pages|) [useInitials] =&gt; on [consecutiveCitationSep] =&gt; ; [yearFormat] =&gt; 2 [pageFormat] =&gt; 1 [templateSuperscript] =&gt; on [ambiguousName] =&gt; on [ambiguousMore] =&gt; on [ambiguousTitle] =&gt; on [ambiguousYear] =&gt; on [ibid] =&gt; ibid. [idem] =&gt; idem. [opCit] =&gt; op. cit. [ambiguousNameFormat] =&gt; 4 [ambiguousYearFormat] =&gt; 1 [footnotePagePosition] =&gt; 1 [footnotePageTemplate] =&gt; , pages [ibidPage] =&gt; on [footnoteStyle] =&gt; 0 [footnoteCitationPageFormat] =&gt; 2) </span></code></p>
+<p>Not all elements need be present so you should always test with PHP's <code>array_key_exists()</code> function. </p>
+<p>Because OSBib uses numeric indexing from 0 upwards, you should be careful to use something like:<br>
+    <span class="style3"><code>if($citation['creatorListSubsequentLimit'] === FALSE)<br>
+  ...</code></span></p>
+<p>to test for a FALSE value of an array element.</p>
+<hr>
+<h3><a name="structure"></a>STRUCTURE</h3>
+<p>The description here relates to the various elements of the <em>citation</em> array. Each element will have either an INTEGER value or a STRING value. </p>
+<table width="100%"  border="0" cellpadding="10" bgcolor="#CCCCCC">
+  <tr>
+    <td><h4>In-text citation style:</h4>
+    <p><span class="style11">Primary creators:<br>
+    </span>Primary creators are usually the author(s) of a resource but, depending on the type of resource, may be composers, inventors etc. etc. etc. 
+    <p><span class="style3"><code>INTEGER creatorStyle</code></span> Ordering and display of the name elements for the first of the primary creators.    
+    <p><code><span class="style3">INTEGER creatorOtherStyle</span></code> Ordering and display of the name elements for the remaining primary creators.     
+    <pre>
+	 0	=>	'Joe Bloggs'
+	 1	=>	'Bloggs, Joe'
+	 2	=>	'Bloggs Joe'
+	 3	=>	Last name only</pre>        <p><code><span class="style3">STRING useInitials </span></code> If 'Last name only' is selected above, use initials to differentiate between creators with the same surname
+
+The value will be 'on' for yes otherwise the array element does not exist.
+      <p><span class="style3"><code>INTEGER creatorInitials</code></span> Formatting of initials for the primary creators.     
+    <pre>
+	 0	=>	'T. U. '
+	 1	=>	'T.U.'
+	 2	=>	'T U '
+	 3	=>	'TU'</pre>    <p><span class="style3"><code>INTEGER creatorFirstName</code></span> Formatting of first name for the primary creators.     
+    <pre>
+	 0	=>	Print the full first name(s)
+	 1	=>	Print initial(s) only</pre>    <p><span class="style3"><code>STRING twoCreatorsSep</code></span> Separator in the case of just two primary creators. </p>        <p><span class="style3"><code>STRING creatorSepFirstBetween</code></span> Separator between the first two primary creators in the case where there are more than two. </p>    
+    <p><span class="style3"><code>STRING creatorSepNextBetween</code></span> Separator between the following primary creators after the first two in the case where there are more than two.</p>    
+    <p><span class="style3"><code>STRING creatorSepNextLast </code></span> Separator between the last two primary creators in the case where there are more than two.</p>
+    <p><span class="style3"><code>STRING creatorUpperCase</code></span> Uppercase/lowercase primary creator names. The value will be 'on' for yes otherwise the array element does not exist.</p>    <p><span class="style3"><code>INTEGER creatorList</code></span> Abbreviations for multiple primary creators. </p>
+	<pre>
+	 0	=>	Print the full creator list
+	 1	=>	Limit the creator list
+</pre>    <p><span class="style3"><code>INTEGER creatorListMore</code></span> If more than this number of primary creators, format as per the limit defined here. Requires <span class="style3"><code>creatorList</code></span> to be '1'. </p>
+    <p><span class="style3"><code>INTEGER creatorListLimit</code></span> Print only this number of primary creators if limit is exceeded as defined here. Requires <span class="style3"><code>creatorList</code></span> to be '1'.</p>
+    <p><span class="style3"><code>STRING creatorListAbbreviation</code></span> If limit is exceeded as defined here, replace remaining primary creators with this string. Requires <span class="style3"><code>creatorList</code></span> to be '1'.</p>
+    <p><span class="style3"><code>STRING creatorListAbbreviationItalic</code></span> Italicize <span class="style3"><code>creatorListAbbreviation</code></span>. Requires <span class="style3"><code>creatorList</code></span> to be '1'. The value will be 'on' for yes otherwise the array element does not exist.</p>
+    <p><span class="style3"><code>INTEGER consecutiveCreator </code></span> Consecutive and juxtaposed citations by the same primary creator(s). </p>    <pre>
+	 0	=>	Print the creator list
+	 1	=>	Do not print the creator list</pre>    <p><span class="style3"><code>STRING consecutiveCreatorSep</code></span> String to separate consecutive and juxtaposed citations by the same primary creator(s) with if '1' is chosen for <span class="style3"><code>consecutiveCreator</code></span> above. e.g. (Grimshaw, Gardey &amp; Rossato 2005 p.32, 2001 pp.100-123). </p>    
+    <p><span class="style11">Creator subsequent citations:<br>
+    </span><span class="style3"><code>INTEGER creatorListSubsequent</code></span> Abbreviations for multiple primary creators.<br>
+      <span class="style3"><code>INTEGER creatorListSubsequentMore</code></span> If more than this number of primary creators, format as per the limit defined here. Requires <span class="style3"><code>creatorListSubsequent</code></span> to be '1'. <br>
+      <span class="style3"><code>INTEGER creatorListSubsequentLimit</code></span> Print only this number of primary creators if limit is exceeded as defined here. Requires <span class="style3"><code>creatorListSubsequent</code></span> to be '1'.<br>
+      <span class="style3"><code>STRING creatorListSubsequentAbbreviation</code></span> If limit is exceeded as defined here, replace remaining primary creators with this string. Requires <span class="style3"><code>creatorListSubsequent</code></span> to be '1'.<br>
+      <span class="style3"><code>STRING creatorListSubsequentAbbreviationItalic</code></span> Italicize <span class="style3"><code>creatorListSubsequentAbbreviation</code></span>. Requires <span class="style3"><code>creatorListSubsequent</code></span> to be '1'. The value will be 'on' for yes otherwise the array element does not exist.</p>
+    <p><span class="style11">Citations:<br>
+      </span><code><span class="style3">STRING template </span></code>This is the template definition string such as <code><span class="style9">(|creator|%, %year|: ^p.^pp.^ pages|)</span></code>.</p>
+    <p><span class="style3"><code>STRING templateSuperscript </code></span> Italicize <span class="style3"><code>template</code></span>. The value will be 'on' for yes otherwise the array element does not exist. This would normally be used for integers in conjunction with footnote citation styles below.</p>
+    <p><span class="style3"><code>STRING consecutiveCitationSep </code></span> String to separate consecutive and juxtaposed citations with (Grimshaw, Gardey &amp; Rossato 2005 p.32; Pozzi 2001 pp.100-123).</p>
+    <p><span class="style3"><code>INTEGER pageFormat </code></span></p>
+    <pre>
+	 0	=>	'132-9'
+	 1	=>	'132-39'
+	 2	=>	'132-139'
+</pre>    <p><span class="style3"><code>INTEGER yearFormat </code></span></p>
+    <pre>
+	 0	=>	"1998"
+	 1	=>	"'98"
+	 2	=>	"98"
+</pre><p><span class="style11">Ambiguous citations:<br>
+      </span>These should be processed in the order given here until the citation is no longer ambiguous.</p>
+    <p><span class="style3"><code>STRING ambiguousName </code></span> Use the full name or initials (as defined by<code><span class="style3"> ambiguousNameFormat</span></code> below) of the primary creator(s) to disambiguate the citation. The value will be 'on' for yes otherwise the array element does not exist.</p>
+    <p><span class="style3"><code>STRING ambiguousMore</code></span> Use more of the primary creator(s) to disambiguate the citation. The value will be 'on' for yes otherwise the array element does not exist.</p>
+    <p><span class="style3"><code>STRING ambiguousTitle</code></span> Use the resource title to disambiguate the citation. The value will be 'on' for yes otherwise the array element does not exist.</p>
+    <p><span class="style3"><code>STRING ambiguousYear</code></span> Add a lowercase letter after the publication year (as defined by<code><span class="style3"> ambiguousYearFormat</span></code> below) to disambiguate the citation. The value will be 'on' for yes otherwise the array element does not exist.</p>
+    <p><span class="style3"><code>INTEGER ambiguousNameFormat</code></span></p>
+    <pre>
+	 0	=>	"Full name",
+	 1	=>	'T. U. '
+	 2	=>	'T.U.'
+	 3	=>	'T U '
+	 4	=>	'TU'</pre>
+<p><span class="style3"><code>INTEGER ambiguousYearFormat</code></span></p>
+<pre>
+	 0	=>	"Full name"
+	 1	=>	'1999a, b'
+	 2	=>	'1999a, 1999b'</pre></td>
+  </tr>
+</table>
+<br>
+<table width="100%"  border="0" cellpadding="10" bgcolor="#CCCCCC">
+  <tr>
+    <td><h4>Footnote citation style:</h4>
+      <p>For footnote style citations, OSBib will format the citation as for bibliographic lists with the addition of page numbers. For articles that are part of a collection and that would normally display the complete page range of the article, this page range will be removed leaving just the citation page(s).       </p>      
+      <p><span class="style3"><code>INTEGER footnoteStyle</code></span> How to format the citation.
+      <pre>
+	 0	=>	"Format like bibliography"
+	 1	=>	"Format like in-text citation"</pre>      <p><span class="style3"><code>STRING ibid </code></span> Replace consecutive citations for the same resource and the same page with this string.       
+      <p><span class="style3"><code>STRING ibidPage </code></span>  If a string is given for <span class="style3"><code>ibid</code></span> above, print the citation page number(s) as well if <span class="style3"><code>footnoteCitationPageFormat</code></span>  below is not 0. If no string is given, the full citation should be printed. The value will be 'on' for yes otherwise the array element does not exist.
+      <p><span class="style3"><code>STRING idem </code></span>Replace consecutive citations for the same resource but a different page with this string. If no string is given, the behaviour should follow that of <span class="style3"><code>ibid </code></span> and <span class="style3"><code>ibidPage </code></span> above.
+      <p><span class="style3"><code>STRING opCit </code></span>Replace previously cited resources
+
+ with this string.
+ If no string is given, the behaviour should follow that of <span class="style3"><code>ibid </code></span> and <span class="style3"><code>ibidPage </code></span> above.      
+      <p><span class="style3"><code>INTEGER footnoteCitationPageFormat</code></span>
+If 1 is chosen, the pages' field in the bibliographic templates for each type of resource should be used for the citation page(s). <pre>
+	 0	=>	"Never print citation page(s)"
+	 1	=>	"Same as the bibliographic templates"
+	 2	=>	"Use the template below"</pre>            <p><span class="style3"><code>STRING footnotePageTemplate </code></span> This is the template definition string such as <code><span class="style9">, ^p.^pp.^ pages</span></code> for the page number(s) if 2 is chosen for <span class="style3"><code>footnoteCitationPageFormat</code></span> above.     
+	 <p><span class="style3"><code>INTEGER footnotePagePosition </code></span>
+     <pre>
+	 0	=>	"Before citation"
+	 1	=>	"After citation"</pre>
+    </td>
+  </tr>
+</table>
+<p>&nbsp; </p>
+</body>
+</html>
