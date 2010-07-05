@@ -68,6 +68,11 @@ Just change it.
  * Adapted the plugin from bib2html 0.9.3
  * Added the bibshow and bibcite commands
 
+== Upgrade Notice ==
+
+= 0.1 =
+First version
+
 == A brief Markdown Example ==
 
 When writing a page/post, you can use the tags [bibtex], [bibcite] and [bibshow] as follows:
