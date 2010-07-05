@@ -10,9 +10,9 @@ papercite (based on bib2html 0.9.3) format bibtex entries as HTML.
 
 == Description ==
 
-If you need to maintain a bibliography in bibtex format and also write a Web page to publish the list of your publications, then bib2html is the right solution for you. 
+If you need to maintain a bibliography in bibtex format and also write a Web page to publish the list of your publications, then papercite is the right solution for you. 
 
-bib2html enables to add bibtex entries formatted as HTML in Wordpress pages and posts. The input data is the bibtex file (either local or remote) and the output is HTML. The entries are formatted by default using the IEEE style. Bibtex source file and a link to the publication are also available from the HTML. 
+papercite enables to add bibtex entries formatted as HTML in Wordpress pages and posts. The input data is the bibtex file (either local or remote) and the output is HTML. The entries are formatted by default using the IEEE style. Bibtex source file and a link to the publication are also available from the HTML. 
 
 Features:
 
@@ -25,7 +25,11 @@ Features:
 * expose URL of each document (if network-reachable)
 * possibility of editing the bibtex file directly from the wordpress administration page
 
-The bib2html plugin has been developed and tested under Wordpress 3.0.
+Features compared to bib2html (0.9.3):
+* adds the possibility of writing a text with reference to a bibtex file, and to print the bibliography at the end.
+* object oriented redesign of the plugin, so that further extensions are easy to make
+
+The papercite plugin has been developed and tested under Wordpress 3.0. It is based on bib2html version 0.9.3.
 
 == Installation ==
 
