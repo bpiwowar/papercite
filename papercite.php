@@ -287,6 +287,10 @@ class Papercite {
   }
 
   function showEntries(&$refs) {
+    static $counter = 0;
+
+    $counter++;
+
 #    print_r($refs);
       $tpl = new TemplatePower(dirname(__FILE__) . '/bibentry-html.tpl');
       $bibformat = $this->getFormat("IEEE");
@@ -311,10 +315,9 @@ class Papercite {
 	$tpl->assign("type", $entry['bibtexEntryType']);
 	$tpl->assign("url", toDownload($entry));
 	$tpl->assign("pdf", $this->pdf($entry));
-	$tpl->assign("key", strtr($bibkey, ":", "-"));
+	$tpl->assign("key", $counter . "-" . strtr($bibkey, ":", "-"));
+
 	$tpl->assign("entry", str_replace(array('{', '}'), '', $bibformat->map()));
-
-
 	$tpl->assign("bibtex", $this->formatBibtex($entry['bibtexEntry']));
       }        
      
