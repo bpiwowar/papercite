@@ -6,7 +6,7 @@ Requires at least: 1.5
 Tested up to: 3.0
 Stable tag: 0.1
 
-papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts.
+papercite (based on bib2html 0.9.3) format bibtex entries as HTML.
 
 == Description ==
 
