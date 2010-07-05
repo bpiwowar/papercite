@@ -4,7 +4,7 @@ Donate link:
 Tags: formatting, bibtex
 Requires at least: 1.5
 Tested up to: 3.0
-Stable tag: 0.1
+Stable tag: 0.2
 
 papercite (based on bib2html 0.9.3) format bibtex entries as HTML.
 
@@ -27,6 +27,8 @@ Features:
 
 Features compared to bib2html (0.9.3):
 * adds the possibility of writing a text with reference to a bibtex file, and to print the bibliography at the end.
+* it checks if a PDF file whose name match the key exists and link to it if this is so
+* it uses the DOI information to create an external link
 * object oriented redesign of the plugin, so that further extensions are easy to make
 
 The papercite plugin has been developed and tested under Wordpress 3.0. It is based on bib2html version 0.9.3.
@@ -71,9 +73,13 @@ Just change it.
 = 0.1 =
  * Adapted the plugin from bib2html 0.9.3
  * Added the bibshow and bibcite commands
+= 0.2 =
+ * Added deny/allow parameters to [bibtex] so the plugin can replace bib2html
 
 == Upgrade Notice ==
 
+= 0.2 =
+All bib2html users should at least use this version so they don't break their installation
 = 0.1 =
 First version
 

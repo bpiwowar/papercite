@@ -199,7 +199,7 @@ class Papercite {
     $command = $matches[1];
 
     switch($command) {
-      // Outputs some bibtex entries
+      // Outputs some bibtex entries (to remain compatible with bib2html)
     case "bibtex":
       $data = $this->getData($options["file"]);
       if (!$data) return;
@@ -216,6 +216,21 @@ class Papercite {
 	}
 	$entries = $a;
       } else {
+	// First filter if needed
+	$allow = $options["allow"];
+	$deny = $options["deny"];
+	if ($allow || $deny) {
+	  $allow = split(",",$allow);
+	  $deny = split(",", $deny);
+	  $entries2 = $entries;
+	  $entries = array();
+	  foreach($entries2 as &$entry) {
+	    $t = $entry["bibtexEntryType"];
+	    if ((sizeof($allow) > 0 &&  (in_array($t, $allow)) || !in_array($t, $deny)))
+		$entries[$entry["bibtexCitation"]] = $entry;
+	  }
+	}
+	    
 	// Show everyting
 	usort($entries, "sortByYear");
 	$reverse=true;
