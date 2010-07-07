@@ -1,6 +1,5 @@
 === Plugin Name ===
 Contributors: bpiwowar
-Donate link: 
 Tags: formatting, bibtex
 Requires at least: 1.5
 Tested up to: 3.0
@@ -38,7 +37,7 @@ The papercite plugin has been developed and tested under Wordpress 3.0. It is ba
 
 1. download the zip file and extract the content of the zip file into a local folder
 2. local bibtex files should be copied in papercite/data/ directory
-3. upload the folder bib2html into your wp-content/plugins/ directory
+3. upload the folder papercite into your wp-content/plugins/ directory
 4. log in the wordpress administration page and access the Plugins menu
 5. activate papercite
 
