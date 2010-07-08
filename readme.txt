@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 1.5
 Tested up to: 3.0
-Stable tag: 0.2
+Stable tag: 0.2.1
 
 papercite (based on bib2html 0.9.3) format bibtex entries as HTML.
 
@@ -70,14 +70,18 @@ Just change it.
 
 == Changelog ==
 
+= 0.2.1 =
+ * Added the template file
+= 0.2 =
+ * Added deny/allow parameters to [bibtex] so the plugin can replace bib2html
 = 0.1 =
  * Adapted the plugin from bib2html 0.9.3
  * Added the bibshow and bibcite commands
-= 0.2 =
- * Added deny/allow parameters to [bibtex] so the plugin can replace bib2html
 
 == Upgrade Notice ==
 
+= 0.2.1 = 
+All users should upgrade - plugin was broken until now
 = 0.2 =
 All bib2html users should at least use this version so they don't break their installation
 = 0.1 =

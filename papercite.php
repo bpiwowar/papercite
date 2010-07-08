@@ -4,7 +4,7 @@
    Plugin Name: papercite
    Plugin URI: http://www.bpiwowar.net/papercite
    Description: papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-   Version: 0.2
+   Version: 0.2.1
    Author: Benjamin Piwowarski
    Author URI: http://www.bpiwowar.net
   */
