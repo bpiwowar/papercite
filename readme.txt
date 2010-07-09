@@ -73,6 +73,9 @@ Just change it.
 
 == Changelog ==
 
+= 0.2.4 =
+  * Small bug fixes (if the file is an URL) and use of WP functions to
+  retrieve remote data (useful when you have proxies)
 = 0.2.3 =
  * Fixed a bug introduced in 0.2.2
  * Changed the default folder for data in order to avoid data loss
@@ -92,7 +95,9 @@ Just change it.
 == Upgrade Notice ==
 
 = 0.2.3 =
-All users should upgrade to this version - Please read the information
+Users using remote URLs for their bibliography should upgrade
+= 0.2.3 =
+All users must upgrade to this version - Please read the information
 about the new location of bibtex and pdfs.
 = 0.2.2 =
 Users using PHP 4 should upgrade

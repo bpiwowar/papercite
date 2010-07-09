@@ -4,7 +4,7 @@
    Plugin Name: papercite
    Plugin URI: http://www.bpiwowar.net/papercite
    Description: papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-   Version: 0.2.3
+   Version: 0.2.4
    Author: Benjamin Piwowarski
    Author URI: http://www.bpiwowar.net
   */
@@ -60,28 +60,25 @@ class Papercite {
 
   /** Initialise the bibtex parser */
   function init() {
-    if (!$this->parse) {
-      $OSBiBPath = dirname(__FILE__) . '/OSBiB/';
-      include_once($OSBiBPath.'format/bibtexParse/PARSEENTRIES.php');
-      include_once($OSBiBPath.'format/BIBFORMAT.php');
-      include_once(dirname(__FILE__) . '/class.TemplatePower.inc.php');
-      $this->initialised = true;
-      $this->parse = NEW PARSEENTRIES();
-      $this->parse->expandMacro = TRUE;
-      $this->parse->fieldExtract = TRUE;
-      $this->parse->removeDelimit = TRUE;
-    }
+    $OSBiBPath = dirname(__FILE__) . '/OSBiB/';
+    include_once($OSBiBPath.'format/bibtexParse/PARSEENTRIES.php');
+    include_once($OSBiBPath.'format/BIBFORMAT.php');
+    include_once(dirname(__FILE__) . '/class.TemplatePower.inc.php');
+    $this->parse = NEW PARSEENTRIES();
+    $this->parse->expandMacro = TRUE;
+    $this->parse->fieldExtract = TRUE;
+    $this->parse->removeDelimit = TRUE;
   }
 
 
 
   function getCiteFormat($type) {
-      $OSBiBPath = dirname(__FILE__) . '/OSBiB/';
-      include_once($OSBiBPath.'format/CITEFORMAT.php');
-      $citeformat = new CITEFORMAT();
-      list($info, $citation, $styleCommon, $styleTypes) = $citeformat->loadStyle("styles/bibliography/", "APA");
-      $citeformat->getStyle($styleCommon, $styleTypes);
-      return $citeformat;
+    $OSBiBPath = dirname(__FILE__) . '/OSBiB/';
+    include_once($OSBiBPath.'format/CITEFORMAT.php');
+    $citeformat = new CITEFORMAT();
+    list($info, $citation, $styleCommon, $styleTypes) = $citeformat->loadStyle("styles/bibliography/", "APA");
+    $citeformat->getStyle($styleCommon, $styleTypes);
+    return $citeformat;
   }
 
   function getFormat($type) {
@@ -98,23 +95,35 @@ class Papercite {
     
   /* Returns filename of cached version of given url  */
   function getCached($url) {
-    // check if cached file exists
-    $name = substr($url, strrpos($url, "/")+1);
 
-    mkdir(dirname(__FILE__) . "/cache/");
-    $file = dirname(__FILE__) . "/cache/" . $name . ".bib";
-    
+    // check if cached file exists
+    $name = strtolower(preg_replace("@[/:]@","_",$url));
+    $dir = dirname(__FILE__) . "/cache";
+    $file = "$dir/$name.bib";
+
+
     // check if file date exceeds 60 minutes   
     if (! (file_exists($file) && (filemtime($file) + 3600 > time())))  {
       // not returned yet, grab new version
-      $f=fopen($file,"wb");
-      if ($f) {
-	fwrite($f,file_get_contents($url));
-	fclose($f);
-      } else echo "Failed to write file" . $file . " - check directory permission according to your Web server privileges.";
+	// since wordpress 2.7, we can use the wp_remote_get function
+	if (function_exists("wp_remote_get")) {
+	  $response = wp_remote_get($url);
+	  if (array_key_exists("body",$response)) {
+	    $f=fopen($file,"wb");
+	    fwrite($f,$response["body"]);
+	    fclose($f);
+	  } else return NULL;
+	}
+	else {
+	  $f=fopen($file,"wb");
+	  fwrite($f,file_get_contents($url));
+	  fclose($f);
+	}
+
+	if (!$f) echo "Failed to write file " . $file . " - check directory permission according to your Web server privileges.";
     }
-   
-    return $name.".cached.bib";
+
+    return $file;
   }
 
   /**
@@ -122,27 +131,32 @@ class Papercite {
   */
   function getData($biburi) {
     if (!$this->cache[$biburi]) {
-    $isUrl = strpos($biburi, "http://");
-    if ($isUrl !== false) $biburi = $this->getCached($biburi);
-
-    $bibFile = dirname(__FILE__) . "/../papercite-data/bib/" . $biburi;
-    if (!file_exists($bibFile)) 
-      $bibFile = dirname(__FILE__) . "/data/" . $biburi;
-
-    if (!file_exists($bibFile)) {
-      return NULL;
-    }
-
-    if (file_exists($bibFile)) {
-      $data = file_get_contents($bibFile);
-      if (!empty($data)) {
-	$this->init();
-	$this->parse->loadBibtexString($data);
-	$this->parse->extractEntries();
-	$this->cache[$biburi] = $this->parse->returnArrays();
+      if (strpos($biburi, "http://") === 0) 
+	$bibFile = $this->getCached($biburi);
+      else {
+	$bibFile = dirname(__FILE__) . "/../papercite-data/bib/" . $biburi;
+	if (!file_exists($bibFile)) 
+	  $bibFile = dirname(__FILE__) . "/data/" . $biburi;
       }
+      
+      if (!file_exists($bibFile)) {
+	return NULL;
+      }
+      
+      if (file_exists($bibFile)) {
+	$data = file_get_contents($bibFile);
+	if (!empty($data)) {
+	  $this->init();
+	  $this->parse->loadBibtexString($data);
+	  $this->parse->extractEntries();
+	
+	  $this->cache[$biburi] = $this->parse->returnArrays();
+	}
+      }
+
     }
-    }
+
+
     return $this->cache[$biburi];
   }
     
@@ -218,7 +232,7 @@ class Papercite {
 	  foreach($entries2 as &$entry) {
 	    $t = $entry["bibtexEntryType"];
 	    if ((sizeof($allow) > 0 &&  (in_array($t, $allow)) || !in_array($t, $deny)))
-		$entries[$entry["bibtexCitation"]] = $entry;
+	      $entries[$entry["bibtexCitation"]] = $entry;
 	  }
 	}
 	    
@@ -282,65 +296,65 @@ class Papercite {
   }
 
 
-function sortByYear($a, $b) {
-  $f1 = $a['year']; 
-  $f2 = $b['year']; 
+  function sortByYear($a, $b) {
+    $f1 = $a['year']; 
+    $f2 = $b['year']; 
 
-  if ($f1 == $f2) return 0;
+    if ($f1 == $f2) return 0;
 
-  return ($f1 < $f2) ? -1 : 1;
-				 }
+    return ($f1 < $f2) ? -1 : 1;
+  }
 
-function toDownload($entry) {
-  if (array_key_exists('url',$entry)){
-    $string = " <a href='" . $entry['url'] . "' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/external.png' width='10' height='10' alt='Go to document' /></a>";
-    return $string;
-  } else if (array_key_exists('doi', $entry)) {
-     $string = " <a href='http://dx.doi.org/" . $entry['doi'] . "' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/external.png' width='10' height='10' alt='Go to document' /></a>";
-    return $string;
+  function toDownload($entry) {
+    if (array_key_exists('url',$entry)){
+      $string = " <a href='" . $entry['url'] . "' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/external.png' width='10' height='10' alt='Go to document' /></a>";
+      return $string;
+    } else if (array_key_exists('doi', $entry)) {
+      $string = " <a href='http://dx.doi.org/" . $entry['doi'] . "' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/external.png' width='10' height='10' alt='Go to document' /></a>";
+      return $string;
     }
-  return '';
-} 
+    return '';
+  } 
 
 
   function showEntries(&$refs) {
-	static $counter = 0;
+    static $counter = 0;
 
     $counter++;
 
 #    print_r($refs);
-      $tpl = new TemplatePower(dirname(__FILE__) . '/bibentry-html.tpl');
-      $bibformat = $this->getFormat("IEEE");
+    $tpl = new TemplatePower(dirname(__FILE__) . '/bibentry-html.tpl');
+    $bibformat = $this->getFormat("IEEE");
 
-      $tpl->prepare();
-      foreach($refs as $key => &$entry) {
-	$bibkey = $entry["bibtexCitation"];
+    $tpl->prepare();
+    foreach($refs as $key => &$entry) {
+      $bibkey = $entry["bibtexCitation"];
 
-	// Get the resource type ('book', 'article', 'inbook' etc.)
-	$resourceType = $entry['bibtexEntryType'];
+      // Get the resource type ('book', 'article', 'inbook' etc.)
+      $resourceType = $entry['bibtexEntryType'];
 	
-	//  adds all the resource elements automatically to the BIBFORMAT::item array
-	$bibformat->preProcess($resourceType, $entry);
+      //  adds all the resource elements automatically to the BIBFORMAT::item array
+      $bibformat->preProcess($resourceType, $entry);
 	
-	// get the formatted resource string ready for printing to the web browser
-	// the str_replace is used to remove the { } parentheses possibly present in title 
-	// to enforce uppercase, TODO: check if it can be done only on title 
-	$tpl->newBlock("bibtex_entry");
-	$tpl->assign("pkey", "[" . $key. "]");
-	$tpl->assign("year", $entry['year']);
+      // get the formatted resource string ready for printing to the web browser
+      // the str_replace is used to remove the { } parentheses possibly present in title 
+      // to enforce uppercase, TODO: check if it can be done only on title 
+      $tpl->newBlock("bibtex_entry");
+      $tpl->assign("pkey", "[" . $key. "]");
+      $tpl->assign("year", $entry['year']);
 	
-	$tpl->assign("type", $entry['bibtexEntryType']);
-	$tpl->assign("url", $this->toDownload($entry));
-	$tpl->assign("pdf", $this->pdf($entry));
-	$tpl->assign("key", $counter . "-" . strtr($bibkey, ":", "-"));
+      $tpl->assign("type", $entry['bibtexEntryType']);
+      $tpl->assign("url", $this->toDownload($entry));
+      $tpl->assign("pdf", $this->pdf($entry));
+      $tpl->assign("key", $counter . "-" . strtr($bibkey, ":", "-"));
 
-	$tpl->assign("entry", str_replace(array('{', '}'), '', $bibformat->map()));
-	$tpl->assign("bibtex", $this->formatBibtex($entry['bibtexEntry']));
-      }        
+      $tpl->assign("entry", str_replace(array('{', '}'), '', $bibformat->map()));
+      $tpl->assign("bibtex", $this->formatBibtex($entry['bibtexEntry']));
+    }        
      
-      return $tpl->getOutputContent();     
+    return $tpl->getOutputContent();     
   }
-}
+				 }
 
 
 // -------------------- Interface with WordPress
