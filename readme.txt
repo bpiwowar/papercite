@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 1.5
 Tested up to: 3.0
-Stable tag: 0.2.1
+Stable tag: 0.2.2
 
 papercite (based on bib2html 0.9.3) format bibtex entries as HTML.
 
@@ -70,6 +70,8 @@ Just change it.
 
 == Changelog ==
 
+= 0.2.2 =
+ * Removed PHP 5 specific code
 = 0.2.1 =
  * Added the template file
 = 0.2 =
@@ -80,6 +82,8 @@ Just change it.
 
 == Upgrade Notice ==
 
+= 0.2.2 =
+Users using PHP 4 should upgrade
 = 0.2.1 = 
 All users should upgrade - plugin was broken until now
 = 0.2 =

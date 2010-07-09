@@ -4,7 +4,7 @@
    Plugin Name: papercite
    Plugin URI: http://www.bpiwowar.net/papercite
    Description: papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-   Version: 0.2.1
+   Version: 0.2.2
    Author: Benjamin Piwowarski
    Author URI: http://www.bpiwowar.net
   */
@@ -70,16 +70,16 @@ function toDownload($entry) {
 // -------------------- The main class
 
 class Papercite {
-  public $parse = Null;
+  $parse = Null;
 
-  public $cites = array();
+  $cites = array();
 
   // List of publications for those citations
-  public $bibshows = array();
+  $bibshows = array();
 
   // Our caches (bibtex files and formats)
-  public $cache = array();
-  public $formats = array();
+  $cache = array();
+  $formats = array();
 
   /** Initialise the bibtex parser */
   function init() {
@@ -287,7 +287,7 @@ class Papercite {
   }
 
   function showEntries(&$refs) {
-    static $counter = 0;
+	static $counter = 0;
 
     $counter++;
 
