@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 1.5
 Tested up to: 3.0
-Stable tag: 0.2.3
+Stable tag: 0.2.4
 
 papercite (based on bib2html 0.9.3) format bibtex entries as HTML.
 
@@ -94,7 +94,7 @@ Just change it.
 
 == Upgrade Notice ==
 
-= 0.2.3 =
+= 0.2.4 =
 Users using remote URLs for their bibliography should upgrade
 = 0.2.3 =
 All users must upgrade to this version - Please read the information

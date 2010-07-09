@@ -107,10 +107,10 @@ class Papercite {
       // not returned yet, grab new version
 	// since wordpress 2.7, we can use the wp_remote_get function
 	if (function_exists("wp_remote_get")) {
-	  $response = wp_remote_get($url);
-	  if (array_key_exists("body",$response)) {
+	  $body = wp_remote_retrieve_body(wp_remote_get($url));
+	  if ($body) {
 	    $f=fopen($file,"wb");
-	    fwrite($f,$response["body"]);
+	    fwrite($f,$body);
 	    fclose($f);
 	  } else return NULL;
 	}
@@ -119,6 +119,7 @@ class Papercite {
 	  fwrite($f,file_get_contents($url));
 	  fclose($f);
 	}
+
 
 	if (!$f) echo "Failed to write file " . $file . " - check directory permission according to your Web server privileges.";
     }
