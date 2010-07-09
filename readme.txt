@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 1.5
 Tested up to: 3.0
-Stable tag: 0.2.2
+Stable tag: 0.2.3
 
 papercite (based on bib2html 0.9.3) format bibtex entries as HTML.
 
@@ -36,10 +36,15 @@ The papercite plugin has been developed and tested under Wordpress 3.0. It is ba
 == Installation ==
 
 1. download the zip file and extract the content of the zip file into a local folder
-2. local bibtex files should be copied in papercite/data/ directory
-3. upload the folder papercite into your wp-content/plugins/ directory
-4. log in the wordpress administration page and access the Plugins menu
-5. activate papercite
+2. upload the folder papercite into your wp-content/plugins/ directory
+3. log in the wordpress administration page and access the Plugins
+menu
+
+Then, you should activate papercite.
+
+Bibtex and PDF files are, since version 0.2.3, stored in the
+papercite-data folder in wp-content/plugins
+2. local bibtex files should be copied in papercite-data/bib directory
 
 == Frequently Asked Questions ==
 
@@ -65,11 +70,15 @@ Just change it.
 
 == Screenshots ==
 
-1. This is an example on how to use the tag into a page bib2html-tag.png
-2. This is an example of the output from my blog bib2html-output.png
 
 == Changelog ==
 
+= 0.2.3 =
+ * Fixed a bug introduced in 0.2.2
+ * Changed the default folder for data in order to avoid data loss
+ when upgrading
+ * Finished the encapsulation of all the code, so as to prevent name
+ clash with wordpress and/or other plugins
 = 0.2.2 =
  * Removed PHP 5 specific code
 = 0.2.1 =
@@ -82,6 +91,9 @@ Just change it.
 
 == Upgrade Notice ==
 
+= 0.2.3 =
+All users should upgrade to this version - Please read the information
+about the new location of bibtex and pdfs.
 = 0.2.2 =
 Users using PHP 4 should upgrade
 = 0.2.1 = 

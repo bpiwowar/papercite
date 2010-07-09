@@ -4,7 +4,7 @@
    Plugin Name: papercite
    Plugin URI: http://www.bpiwowar.net/papercite
    Description: papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-   Version: 0.2.2
+   Version: 0.2.3
    Author: Benjamin Piwowarski
    Author URI: http://www.bpiwowar.net
   */
@@ -45,41 +45,18 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
 
-
-function sortByYear($a, $b) {
-  $f1 = $a['year']; 
-  $f2 = $b['year']; 
-
-  if ($f1 == $f2) return 0;
-
-  return ($f1 < $f2) ? -1 : 1;
-				 }
-
-function toDownload($entry) {
-  if (array_key_exists('url',$entry)){
-    $string = " <a href='" . $entry['url'] . "' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/external.png' width='10' height='10' alt='Go to document' /></a>";
-    return $string;
-  } else if (array_key_exists('doi', $entry)) {
-     $string = " <a href='http://dx.doi.org/" . $entry['doi'] . "' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/external.png' width='10' height='10' alt='Go to document' /></a>";
-    return $string;
-    }
-  return '';
-} 
-
-
-// -------------------- The main class
-
 class Papercite {
-  $parse = Null;
 
-  $cites = array();
+  var $parse = false;
+
+  var $cites = array();
 
   // List of publications for those citations
-  $bibshows = array();
+  var $bibshows = array();
 
   // Our caches (bibtex files and formats)
-  $cache = array();
-  $formats = array();
+  var $cache = array();
+  var $formats = array();
 
   /** Initialise the bibtex parser */
   function init() {
@@ -95,6 +72,8 @@ class Papercite {
       $this->parse->removeDelimit = TRUE;
     }
   }
+
+
 
   function getCiteFormat($type) {
       $OSBiBPath = dirname(__FILE__) . '/OSBiB/';
@@ -121,7 +100,9 @@ class Papercite {
   function getCached($url) {
     // check if cached file exists
     $name = substr($url, strrpos($url, "/")+1);
-    $file = dirname(__FILE__) . "/data/" . $name . ".cached.bib";
+
+    mkdir(dirname(__FILE__) . "/cache/");
+    $file = dirname(__FILE__) . "/cache/" . $name . ".bib";
     
     // check if file date exceeds 60 minutes   
     if (! (file_exists($file) && (filemtime($file) + 3600 > time())))  {
@@ -143,8 +124,15 @@ class Papercite {
     if (!$this->cache[$biburi]) {
     $isUrl = strpos($biburi, "http://");
     if ($isUrl !== false) $biburi = $this->getCached($biburi);
-    $bibFile = dirname(__FILE__)."/data/".$biburi;
-      
+
+    $bibFile = dirname(__FILE__) . "/../papercite-data/bib/" . $biburi;
+    if (!file_exists($bibFile)) 
+      $bibFile = dirname(__FILE__) . "/data/" . $biburi;
+
+    if (!file_exists($bibFile)) {
+      return NULL;
+    }
+
     if (file_exists($bibFile)) {
       $data = file_get_contents($bibFile);
       if (!empty($data)) {
@@ -161,9 +149,12 @@ class Papercite {
   function pdf($entry) {
     $id = strtolower(preg_replace("@[/:]@", "-", $entry["bibtexCitation"]));
 
-    if (file_exists(dirname(__FILE__) . "/data/" . $id . ".pdf")) {
-      return " <a href='" .  get_bloginfo('wpurl') . "/wp-content/plugins/papercite/data/" . $id . ".pdf" . "' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/pdf.png' width='10' height='10' alt='PDF' /></a>";
+    foreach(array("../papercite-data/pdf", "data") as $subfolder) {
+      if (file_exists(dirname(__FILE__) . "/$subfolder/" . $id . ".pdf")) {
+	return " <a href='" .  get_bloginfo('wpurl') . "/wp-content/plugins/$subfolder/" . $id . ".pdf" . "' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/pdf.png' width='10' height='10' alt='PDF' /></a>";
+      }
     }
+
     return '';
   }
   
@@ -232,7 +223,7 @@ class Papercite {
 	}
 	    
 	// Show everyting
-	usort($entries, "sortByYear");
+	usort($entries, array($this, "sortByYear"));
 	$reverse=true;
 	if ($reverse) {
 	  $entries = array_reverse($entries);
@@ -248,7 +239,8 @@ class Papercite {
       // Output bibtex for cited references
     case "bibshow":
       $data = $this->getData($options["file"]);
-      if (!$data) return;
+      if (!$data) return "<span style='color: red'>[Could not find the bibliography file(s)]</span>";
+
       $refs = array();
       foreach($data[2] as &$entry) {
 	$key = $entry["bibtexCitation"];
@@ -259,6 +251,8 @@ class Papercite {
 
       // Just cite
     case "bibcite":
+      if (sizeof($this->bibshows) == 0) return "[?]";
+
       $key = $options["key"];
       $refs = &$this->bibshows[sizeof($this->bibshows)-1];
       if (array_key_exists($key, $refs)) {
@@ -272,6 +266,7 @@ class Papercite {
 
     case "/bibshow":
       // select from cites
+      if (sizeof($this->bibshows) == 0) return "";
       $data = &array_pop($this->bibshows);
       $refs = array();
       foreach($data as $key => &$entry) {
@@ -285,6 +280,28 @@ class Papercite {
       return "[error in papercite: unhandled]";
     }
   }
+
+
+function sortByYear($a, $b) {
+  $f1 = $a['year']; 
+  $f2 = $b['year']; 
+
+  if ($f1 == $f2) return 0;
+
+  return ($f1 < $f2) ? -1 : 1;
+				 }
+
+function toDownload($entry) {
+  if (array_key_exists('url',$entry)){
+    $string = " <a href='" . $entry['url'] . "' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/external.png' width='10' height='10' alt='Go to document' /></a>";
+    return $string;
+  } else if (array_key_exists('doi', $entry)) {
+     $string = " <a href='http://dx.doi.org/" . $entry['doi'] . "' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/external.png' width='10' height='10' alt='Go to document' /></a>";
+    return $string;
+    }
+  return '';
+} 
+
 
   function showEntries(&$refs) {
 	static $counter = 0;
@@ -313,7 +330,7 @@ class Papercite {
 	$tpl->assign("year", $entry['year']);
 	
 	$tpl->assign("type", $entry['bibtexEntryType']);
-	$tpl->assign("url", toDownload($entry));
+	$tpl->assign("url", $this->toDownload($entry));
 	$tpl->assign("pdf", $this->pdf($entry));
 	$tpl->assign("key", $counter . "-" . strtr($bibkey, ":", "-"));
 
