@@ -225,7 +225,6 @@ class Papercite {
 	// First filter if needed
 	$allow = $options["allow"];
 	$deny = $options["deny"];
-	print "<div style='font-weight: bold'>allow=$options[allow] deny=$options[deny]</div>";
 	if ($allow || $deny) {
 	  $allow = $allow ? split(",",$allow) : false;
 	  $deny =  $deny ? split(",", $deny) : false;
