@@ -4,7 +4,7 @@
    Plugin Name: papercite
    Plugin URI: http://www.bpiwowar.net/papercite
    Description: papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-   Version: 0.2.4
+   Version: 0.2.5
    Author: Benjamin Piwowarski
    Author URI: http://www.bpiwowar.net
   */
@@ -225,14 +225,16 @@ class Papercite {
 	// First filter if needed
 	$allow = $options["allow"];
 	$deny = $options["deny"];
+	print "<div style='font-weight: bold'>allow=$options[allow] deny=$options[deny]</div>";
 	if ($allow || $deny) {
-	  $allow = split(",",$allow);
-	  $deny = split(",", $deny);
+	  $allow = $allow ? split(",",$allow) : false;
+	  $deny =  $deny ? split(",", $deny) : false;
+
 	  $entries2 = $entries;
 	  $entries = array();
 	  foreach($entries2 as &$entry) {
 	    $t = $entry["bibtexEntryType"];
-	    if ((sizeof($allow) > 0 &&  (in_array($t, $allow)) || !in_array($t, $deny)))
+	    if ((!$allow || in_array($t, $allow)) && (!$deny || !in_array($t, $deny)))
 	      $entries[$entry["bibtexCitation"]] = $entry;
 	  }
 	}
