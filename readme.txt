@@ -70,6 +70,8 @@ Just change it.
 
 == Screenshots ==
 
+1. Cite mode
+2. bib2html mode
 
 == Changelog ==
 
