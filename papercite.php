@@ -4,7 +4,7 @@
    Plugin Name: papercite
    Plugin URI: http://www.bpiwowar.net/papercite
    Description: papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-   Version: 0.2.5
+   Version: 0.2.6
    Author: Benjamin Piwowarski
    Author URI: http://www.bpiwowar.net
   */
@@ -127,6 +127,15 @@ class Papercite {
     return $file;
   }
 
+
+  function getDataFile($uri) {
+    foreach(array("../../papercite-data","../papercite-data", "data") as $path) {
+      $path = dirname(__FILE__) . "/$path/$uri";
+      if (file_exists($path)) return $path;
+    }
+    
+  }
+
   /**
    Get the bibtex data from an URI
   */
@@ -135,12 +144,10 @@ class Papercite {
       if (strpos($biburi, "http://") === 0) 
 	$bibFile = $this->getCached($biburi);
       else {
-	$bibFile = dirname(__FILE__) . "/../papercite-data/bib/" . $biburi;
-	if (!file_exists($bibFile)) 
-	  $bibFile = dirname(__FILE__) . "/data/" . $biburi;
+	$bibFile = $this->getDataFile("bib/$biburi");
       }
       
-      if (!file_exists($bibFile)) {
+      if (!$bibFile || !file_exists($bibFile)) {
 	return NULL;
       }
       
@@ -195,14 +202,16 @@ class Papercite {
    */
   function process(&$matches) {
     // Get the options
+    
+    $command = $matches[1];
+
     $options_pairs = array();
-    preg_match_all("/^(?:(\w+)=(\S+))(?:\s+(\w+)=(\S+))*$/", $matches[2], $options_pairs, PREG_SET_ORDER);
-    $options_pairs = $options_pairs[0];
-    for($i = sizeof($options_pairs)-2; $i >= 0; $i-=2) {
-      $options[$options_pairs[$i]] =  $options_pairs[$i+1];
+    preg_match_all("/\s*(?:(\w+)=(\S+))(\s+|$)/", $matches[2], $options_pairs, PREG_SET_ORDER);
+    foreach($options_pairs as $x) {
+      $options[$x[1]] = $x[2];     
     }
 
-    $command = $matches[1];
+    $format = array_key_exists("format", $options) ? $options["format"] : "IEEE";
 
     switch($command) {
       // Outputs some bibtex entries (to remain compatible with bib2html)
@@ -214,10 +223,12 @@ class Papercite {
       if (array_key_exists('key', $options)) {
 	$keys = split(",", $options["key"]);
 	$a = array();
+	$n = 0;
 	foreach($entries as $entry) {
 	  if (in_array($entry["bibtexCitation"], $keys)) {
 	    $a[$entry["bibtexCitation"]] = $entry;
-	    break;
+	    $n = $n + 1;
+	    if ($n == sizeof($keys)) break;
 	  }
 	}
 	$entries = $a;
@@ -250,7 +261,7 @@ class Papercite {
 	$refs[$ref["bibtexCitation"]] = $ref;
       }
 
-      return  $this->showEntries($refs);
+      return  $this->showEntries($refs, $format);
 
       // Output bibtex for cited references
     case "bibshow":
@@ -290,7 +301,7 @@ class Papercite {
 	if ($num) $refs[$num] = $entry;
       }
       ksort($refs);
-      return $this->showEntries($refs);
+      return $this->showEntries($refs, $format);
 
     default:
       return "[error in papercite: unhandled]";
@@ -318,15 +329,16 @@ class Papercite {
     return '';
   } 
 
-
-  function showEntries(&$refs) {
+  /**
+   * Show a set of entries
+   */
+  function showEntries(&$refs, $format) {
     static $counter = 0;
 
     $counter++;
 
-#    print_r($refs);
     $tpl = new TemplatePower(dirname(__FILE__) . '/bibentry-html.tpl');
-    $bibformat = $this->getFormat("IEEE");
+    $bibformat = $this->getFormat($format);
 
     $tpl->prepare();
     foreach($refs as $key => &$entry) {
@@ -335,14 +347,14 @@ class Papercite {
       // Get the resource type ('book', 'article', 'inbook' etc.)
       $resourceType = $entry['bibtexEntryType'];
 	
-      //  adds all the resource elements automatically to the BIBFORMAT::item array
+      //  adds all the resource elements automatically to the BBFORMAT::item array
       $bibformat->preProcess($resourceType, $entry);
 	
       // get the formatted resource string ready for printing to the web browser
       // the str_replace is used to remove the { } parentheses possibly present in title 
       // to enforce uppercase, TODO: check if it can be done only on title 
       $tpl->newBlock("bibtex_entry");
-      $tpl->assign("pkey", "[" . $key. "]");
+      $tpl->assign("pkey", "[" . $key  . "]");
       $tpl->assign("year", $entry['year']);
 	
       $tpl->assign("type", $entry['bibtexEntryType']);

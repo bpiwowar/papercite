@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 1.5
 Tested up to: 3.0
-Stable tag: 0.2.5
+Stable tag: 0.2.6
 
 papercite (based on bib2html 0.9.3) format bibtex entries as HTML.
 
@@ -35,16 +35,15 @@ The papercite plugin has been developed and tested under Wordpress 3.0. It is ba
 
 == Installation ==
 
+Follow these step or use the plugin installer from WordPress to
+install papercite:
 1. download the zip file and extract the content of the zip file into a local folder
 2. upload the folder papercite into your wp-content/plugins/ directory
 3. log in the wordpress administration page and access the Plugins
 menu
 
-Then, you should activate papercite.
-
-Bibtex and PDF files are, since version 0.2.3, stored in the
-papercite-data folder in wp-content/plugins
-2. local bibtex files should be copied in papercite-data/bib directory
+Then, you should activate papercite, and follow the instructions
+given in *other notes*.
 
 == Frequently Asked Questions ==
 
@@ -75,7 +74,10 @@ Just change it.
 
 == Changelog ==
 
-= 0.2.5 =
+= 0.2.6 =
+  * Documentation update
+  * New parameter `format`
+ = 0.2.5 =
   * Fixed a bug with the allow filter
 = 0.2.4 =
   * Small bug fixes (if the file is an URL) and use of WP functions to
@@ -98,6 +100,8 @@ Just change it.
 
 == Upgrade Notice ==
 
+= 0.2.6 =
+Introduced the `format` parameter to format the entries
 = 0.2.5 =
 Bug fix - all users should upgrade
 = 0.2.4 =
@@ -116,27 +120,59 @@ First version
 
 == A brief Markdown Example ==
 
-When writing a page/post, you can use the tags [bibtex], [bibcite] and [bibshow] as follows:
+= Data structure =
 
-This is my whole list of publications: [bibtex file=mypub.bib]
+1. Create a folder in `wp-content/papercite-data`, with two
+subfolders: `bib` (this will contain the bibtex files) and `pdf` (this
+will contain the PDF file).
+2. Copy your bibtex files into the `bib` folder, and your pdf files
+into the `pdf` folder. To match a bibtex entry with a PDF file, the
+PDF file should have be named **KEY**`.pdf` where **KEY** is the
+bibtex key in lowercase, where `:` and `/` have been replaced by `-`.
+
+= Bibliography mode =
+
+This is my whole list of publications: `[bibtex file=mypub.bib]`
 If you want to filter the type of bibtex items, you can use one of the attributes allow, deny and key as follows:
 
 This is my latest conference paper:
-[bibtex file=mypub.bib key=CGW2006]
+`[bibtex file=mypub.bib key=CGW2006]`
+
+You can also have a list of keys to display more than one paper:
+`[bibtex file=mypub.bib key=CGW2006, CGW2007]`
 
 This is my bibliography maintained at citeulike.org
-[bibtex file=http://www.citeulike.org/bibtex/user/username]
+`[bibtex file=http://www.citeulike.org/bibtex/user/username]`
 
 This is my bibliography maintained at bibsonomy.org
-[bibtex file=http://bibsonomy.org/bib/user/username?items=1000]
+`[bibtex file=http://bibsonomy.org/bib/user/username?items=1000]`
+
+= Citation mode =
 
 The second way of using this plug-in (new to papercite), is to use bibcite and bibshow commands
 
-[bibshow file=mybib.bib]
+`[bibshow file=mybib.bib]`
 
-Here is one reference [bibcite key=Piwowarski2010Exploring-a-Multidimensional]
-and another [bibcite key=Piwowarski2009Sound-and-Complete]
+Here is one reference `[bibcite key=key1]`
+and another `[bibcite key=key2]`
 
 You end with the following to print the list of references:
 
-[/bibshow]
+`[/bibshow]`
+
+= Formatting the entries =
+
+You can modify the style of the citations by using the `format`
+parameter with the `bibshow` and `bibtex` commands.
+For example, 
+`[bibtex file=mypub.bib format=britishmedicaljournal]`
+
+The following format are currently available: 
+* ieee (default)
+* apa 
+* britishmedicaljournal 
+* chicago
+* harvard 
+* mla
+* turabian
+
