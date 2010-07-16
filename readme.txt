@@ -175,6 +175,7 @@ For example,
 `[bibtex file=mypub.bib format=britishmedicaljournal]`
 
 The following format are currently available: 
+
 * ieee (default)
 * apa 
 * britishmedicaljournal 
