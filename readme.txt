@@ -132,29 +132,35 @@ bibtex key in lowercase, where `:` and `/` have been replaced by `-`.
 
 = Bibliography mode =
 
-This is my whole list of publications: `[bibtex file=mypub.bib]`
+This is my whole list of publications: 
+
+`[bibtex file=mypub.bib]`
+
 If you want to filter the type of bibtex items, you can use one of the attributes allow, deny and key as follows:
 
 This is my latest conference paper:
+
 `[bibtex file=mypub.bib key=CGW2006]`
 
 You can also have a list of keys to display more than one paper:
+
 `[bibtex file=mypub.bib key=CGW2006, CGW2007]`
 
 This is my bibliography maintained at citeulike.org
+
 `[bibtex file=http://www.citeulike.org/bibtex/user/username]`
 
 This is my bibliography maintained at bibsonomy.org
+
 `[bibtex file=http://bibsonomy.org/bib/user/username?items=1000]`
 
 = Citation mode =
 
 The second way of using this plug-in (new to papercite), is to use bibcite and bibshow commands
 
-`[bibshow file=mybib.bib]`
-
-Here is one reference `[bibcite key=key1]`
-and another `[bibcite key=key2]`
+`[bibshow file=mybib.bib]
+Here is one reference [bibcite key=key1]
+and another [bibcite key=key2]`
 
 You end with the following to print the list of references:
 
@@ -165,6 +171,7 @@ You end with the following to print the list of references:
 You can modify the style of the citations by using the `format`
 parameter with the `bibshow` and `bibtex` commands.
 For example, 
+
 `[bibtex file=mypub.bib format=britishmedicaljournal]`
 
 The following format are currently available: 
