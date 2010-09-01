@@ -74,6 +74,9 @@ Just change it.
 
 == Changelog ==
 
+= 0.2.10 =
+  * papercite now looks in the pdf directory at two levels
+    (wp-content,  and wp-content/plugins)
 = 0.2.9 =
   * Small bug fix (removes a warning)
 = 0.2.8 =
