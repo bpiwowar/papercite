@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 1.5
 Tested up to: 3.0
-Stable tag: 0.2.9
+Stable tag: 0.2.11
 
 papercite (based on bib2html 0.9.3) format bibtex entries as HTML.
 
