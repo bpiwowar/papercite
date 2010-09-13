@@ -4,7 +4,7 @@
    Plugin Name: papercite
    Plugin URI: http://www.bpiwowar.net/papercite
    Description: papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-   Version: 0.2.10
+   Version: 0.2.11
    Author: Benjamin Piwowarski
    Author URI: http://www.bpiwowar.net
   */
@@ -381,11 +381,11 @@ function papercite_cb($myContent) {
 }
 
 
-function papercite_head()
-{
+function papercite_head() {
   if (!function_exists('wp_enqueue_script')) {
-    echo "\n" . '<script src="'.  get_bloginfo('wpurl') . '/wp-content/plugins/papercite/js/jquery.js"  type="text/javascript"></script>' . "\n";
-    echo '<script src="'.  get_bloginfo('wpurl') . '/wp-content/plugins/papercite/js/papercite.js"  type="text/javascript"></script>' . "\n";
+    // In case there is no wp_enqueue_script function (WP < 2.6), we load the javascript ourselves
+    //    echo "\n" . '<script src="'.  get_bloginfo('wpurl') . '/wp-content/plugins/papercite/js/jquery.js"  type="text/javascript"></script>' . "\n";
+    //echo '<script src="'.  get_bloginfo('wpurl') . '/wp-content/plugins/papercite/js/papercite.js"  type="text/javascript"></script>' . "\n";
   }
   echo "<style type=\"text/css\">
 div.bibtex {
@@ -395,11 +395,11 @@ div.bibtex {
 }
 
 function papercite_init() {
+  global $papercite;
   if (function_exists('wp_enqueue_script')) {
     wp_register_script('papercite', get_bloginfo('wpurl') . '/wp-content/plugins/papercite/js/papercite.js', array('jquery'), '0.7');
     wp_enqueue_script('papercite');
   } 
-  global $papercite;
   $papercite = new Papercite();
 }
 

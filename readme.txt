@@ -72,6 +72,9 @@ Just change it.
 
 == Changelog ==
 
+= 0.2.11 =
+  * bug fix: name clash was preventing insertion of medias using the
+  WP dialogs
 = 0.2.10 =
   * papercite now looks in the pdf directory at two levels
     (wp-content,  and wp-content/plugins)
