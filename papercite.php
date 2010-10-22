@@ -4,7 +4,7 @@
    Plugin Name: papercite
    Plugin URI: http://www.bpiwowar.net/papercite
    Description: papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-   Version: 0.2.11
+   Version: 0.2.12
    Author: Benjamin Piwowarski
    Author URI: http://www.bpiwowar.net
   */
@@ -12,20 +12,14 @@
 
   /*  Copyright 2010 Benjamin Piwowarski (email: benjamin in the domain bpiwowar <DOT> net)
 
+Sergio Andreozzi has written bib2html on which papercite is based
 
------------------
-Based on bib2html (version 0.9.3) of Sergio Andreozzi  (email : sergio <DOT> andreozzi <AT> gmail <DOT> com) 
-
-This plug-in has been improved thanks to the suggestons and contributions of
-- Cristiana Bolchini
--- cleaner bibtex presentation
-- Patrick Mau�
--- remote bibliographies managed by citeulike.org or bibsonomy.org
-- Nemo
--- more characters on key
-- Marco Loregian
--- inverting bibtex and html
------------------
+Contributors:
+- Cristiana Bolchini: cleaner bibtex presentation
+- Patrick Maué: remote bibliographies managed by citeulike.org or bibsonomy.org
+- Nemo: more characters on key
+- Marco Loregian: inverting bibtex and html
+- Łukasz Radliński: bug fixes & handling polish characters
 
 
 This program is free software; you can redistribute it and/or modify
@@ -171,9 +165,10 @@ class Papercite {
   function pdf($entry) {
     $id = strtolower(preg_replace("@[/:]@", "-", $entry["bibtexCitation"]));
 
-    foreach(array("../papercite-data/pdf", "data") as $subfolder) {
+    foreach(array("../../papercite-data/pdf","../papercite-data/pdf", "data") as $subfolder) {
+      print dirname(__FILE__) . "/$subfolder/" . $id . ".pdf" . "<br/>";
       if (file_exists(dirname(__FILE__) . "/$subfolder/" . $id . ".pdf")) {
-	return " <a href='" .  get_bloginfo('wpurl') . "/wp-content/plugins/$subfolder/" . $id . ".pdf" . "' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/pdf.png' width='10' height='10' alt='PDF' /></a>";
+	return " <a href='" .  get_bloginfo('wpurl') . "/wp-content/plugins/papercite/$subfolder/$id.pdf' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/pdf.png' width='10' height='10' alt='PDF' /></a>";
       }
     }
 

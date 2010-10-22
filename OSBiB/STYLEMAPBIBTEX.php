@@ -206,7 +206,7 @@ class STYLEMAPBIBTEX
 		$this->book['ISBN'] = 'ISBN';
 // BOOK ARTICLE/CHAPTER
 		$this->book_article = $this->book;
-		$this->book_article['bookitle'] = 'book';
+		$this->book_article['booktitle'] = 'book';
 		$this->book_article[] = 'shortBook';
 		$this->book_article['pages'] = 'pages';
 // JOURNAL ARTICLE
@@ -262,7 +262,7 @@ class STYLEMAPBIBTEX
 		$this->thesis[] = 'label'; // 'thesis', 'dissertation'
 // 'type' is special and used in BIBFORMAT.php
 		$this->thesis['type'] = 'type'; // 'Master's', 'PhD', 'Doctoral', 'Diploma' etc.
-		$this->thesis['institution'] = 'institution';
+		$this->thesis['school'] = 'institution';
 		$this->thesis['address'] = 'institutionLocation';
 		$this->thesis[] = 'department';
 		$this->thesis['journal'] = 'journal';

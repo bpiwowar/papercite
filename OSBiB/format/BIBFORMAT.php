@@ -1355,7 +1355,24 @@ class BIBFORMAT
 			      );
   }
 
-
+/*
+function unichr($c) {
+    if ($c <= 0x7F) {
+        return chr($c);
+    } else if ($c <= 0x7FF) {
+        return chr(0xC0 | $c >> 6) . chr(0x80 | $c & 0x3F);
+    } else if ($c <= 0xFFFF) {
+        return chr(0xE0 | $c >> 12) . chr(0x80 | $c >> 6 & 0x3F)
+                                    . chr(0x80 | $c & 0x3F);
+    } else if ($c <= 0x10FFFF) {
+        return chr(0xF0 | $c >> 18) . chr(0x80 | $c >> 12 & 0x3F)
+                                    . chr(0x80 | $c >> 6 & 0x3F)
+                                    . chr(0x80 | $c & 0x3F);
+    } else {
+        return false;
+    }
+}
+*/
 
 /*
  * convertEntry - convert any laTeX code and convert to UTF-8 ready 
@@ -1368,28 +1385,30 @@ class BIBFORMAT
  */
 function convertEntry($entry)
 {
+  
   $this->config = new BIBTEXCONFIG();
   $this->config->bibtex();
 
   // Construction of the transformation filter 
   foreach($this->config->bibtexSpCh as $key => $value)
-    {
-      $replaceBibtex[] = chr($key);
+    { 
+      //$replaceBibtex[] = ($key > 127) ? '&#' . $key . ';' : chr($key);
+      $replaceBibtex[] =  ($key > 127) ? '&#' . $key . ';' : chr($key);
       $matchBibtex[] = preg_quote("/$value/");
     }
   foreach($this->config->bibtexSpChOld as $key => $value)
     {
-      $replaceBibtex[] = chr($key);
+      $replaceBibtex[] =  ($key > 127) ? '&#' . $key . ';' : chr($key);
       $matchBibtex[] = preg_quote("/$value/");
     }
   foreach($this->config->bibtexSpChOld2 as $key => $value)
     {
-      $replaceBibtex[] = chr($key);
+      $replaceBibtex[] =  ($key > 127) ? '&#' . $key . ';' : chr($key);
       $matchBibtex[] = preg_quote("/$value/");
     }
   foreach($this->config->bibtexSpChLatex as $key => $value)
     {
-      $replaceBibtex[] =  chr($key);
+      $replaceBibtex[] =  ($key > 127) ? '&#' . $key . ';' : chr($key);
       $matchBibtex[] = preg_quote("/$value/");
     }
 
@@ -1468,7 +1487,6 @@ class BIBTEXCONFIG
 			      0x00E3	=>	"{\~a}",
 			      0x00E4	=>	'{\"a}',
 			      0x00E5	=>	"{\aa}",
-			      0x00E6	=>	"{\ae}",
 			      0x00E7	=>	"{\c{c}}",
 			      0x00E8	=>	"{\`e}",
 			      0x00E9	=>	"{\'e}",
@@ -1493,6 +1511,22 @@ class BIBTEXCONFIG
 			      0x00FF	=>	'{\"y}',
 			      0x00A1	=>	"{\!}",
 			      0x00BF	=>	"{\?}",
+    				0x0104	=>	"{\kA}",
+		    		0x0105	=>	"{\ka}",
+	    			0x0106	=>	"{\'C}",
+  		  		0x0107	=>	"{\'c}",
+    				0x0118	=>	"{\kE}",
+		    		0x0119	=>	"{\ke}",
+				    0x0141	=>	"{\L}",
+				    0x0142	=>	"{\l}",
+				    0x0143	=>	"{\'N}",
+				    0x0144	=>	"{\'n}",
+  			    0x015A	=>	"{\'S}",
+			      0x015B	=>	"{\'s}",
+				    0x0179	=>	"{\'Z}",
+				    0x017A	=>	"{\'z}",
+				    0x017B	=>	"{\.Z}",
+				    0x017C	=>	"{\.z}",
 			      );
     //Old style with extra {} - usually array_flipped
     $this->bibtexSpChOld = array(
@@ -1531,7 +1565,6 @@ class BIBTEXCONFIG
 				 0x00E3	=>	"{\~{a}}",
 				 0x00E4	=>	'{\"{a}}',
 				 0x00E5	=>	"{\a{a}}",
-				 0x00E6	=>	"{\a{e}}",
 				 0x00E7	=>	"{\c{c}}",
 				 0x00E8	=>	"{\`{e}}",
 				 0x00E9	=>	"{\'{e}}",
@@ -1556,6 +1589,22 @@ class BIBTEXCONFIG
 				 0x00FF	=>	'{\"{y}}',
 				 0x00A1	=>	"{\{!}}",
 				 0x00BF	=>	"{\{?}}",
+    		 0x0104	=>	"{\k{A}}",
+		     0x0105	=>	"{\k{a}}",
+				 0x0106	=>	"{\'{C}}",
+				 0x0107	=>	"{\'{c}}",
+  		 	 0x0118	=>	"{\k{E}}",
+		     0x0119	=>	"{\k{e}}",
+			   0x0141	=>	"{\{L}}",
+			   0x0142	=>	"{\{l}}",
+				 0x0143	=>	"{\'{N}}",
+				 0x0144	=>	"{\'{n}}",
+			   0x015A	=>	"{\'{S}}",
+				 0x015B	=>	"{\'{s}}",
+  		   0x0179	=>	"{\'{Z}}",
+				 0x017A	=>	"{\'{z}}",
+				 0x017B	=>	"{\.{Z}}",
+				 0x017C	=>	"{\.{z}}",
 				 );
     // And there's more?!?!?!?!? (This is not strict bibtex.....)
     $this->bibtexSpChOld2 = array(
@@ -1594,7 +1643,6 @@ class BIBTEXCONFIG
 				  0x00E3	=>	"\~{a}",
 				  0x00E4	=>	'\"{a}',
 				  0x00E5	=>	"\a{a}",
-				  0x00E6	=>	"\a{e}",
 				  0x00E7	=>	"\c{c}",
 				  0x00E8	=>	"\`{e}",
 				  0x00E9	=>	"\'{e}",
@@ -1619,6 +1667,22 @@ class BIBTEXCONFIG
 				  0x00FF	=>	'\"{y}',
 				  0x00A1	=>	"\{!}",
 				  0x00BF	=>	"\{?}",
+    			0x0104	=>	"\k{A}",
+		    	0x0105	=>	"\k{a}",
+				  0x0106	=>	"\'{C}",
+				  0x0107	=>	"\'{c}",
+    			0x0118	=>	"\k{E}",
+		    	0x0119	=>	"\k{e}",
+				  0x0141	=>	"\{L}",
+				  0x0142	=>	"\{l}",
+				  0x0143	=>	"\'{N}",
+				  0x0144	=>	"\'{n}",
+  			  0x015A	=>	"\'{S}",
+				  0x015B	=>	"\'{s}",
+				  0x0179	=>	"\'{Z}",
+				  0x017A	=>	"\'{z}",
+				  0x017B	=>	"\.{Z}",
+				  0x017C	=>	"\.{z}",
 				  );
     // Latex code that some bibtex users may be using
     $this->bibtexSpChLatex = array(
@@ -1657,7 +1721,6 @@ class BIBTEXCONFIG
 				   0x00E3	=>	"\~a",
 				   0x00E4	=>	'\"a',
 				   0x00E5	=>	"\aa",
-				   0x00E6	=>	"\ae",
 				   0x00E7	=>	"\cc",
 				   0x00E8	=>	"\`e",
 				   0x00E9       =>	"\'e",
@@ -1682,6 +1745,22 @@ class BIBTEXCONFIG
 				   0x00FF	=>	'\"y',
 				   0x00A1	=>	"\!",
 				   0x00BF	=>	"\?",
+    			 0x0104	=>	"\kA",
+		    	 0x0105	=>	"\ka",
+	   			 0x0106	=>	"\'C",
+  				 0x0107	=>	"\'c",
+    			 0x0118	=>	"\kE",
+		    	 0x0119	=>	"\ke",
+				   0x0141	=>	"\L",
+				   0x0142	=>	"\l",
+				   0x0143	=>	"\'N",
+				   0x0144	=>	"\'n",
+				   0x015A	=>	"\'S",
+				   0x015B	=>	"\'s",
+			     0x0179	=>	"\'Z",
+				   0x017A	=>	"\'z",
+				   0x017B	=>	"\.Z",
+				   0x017C	=>	"\.z",
 				   );
     $this->bibtexSpChPlain = array(
 				   0x00C0	=>	"A",
@@ -1719,7 +1798,6 @@ class BIBTEXCONFIG
 				   0x00E3	=>	"a",
 				   0x00E4	=>	'a',
 				   0x00E5	=>	"aa",
-				   0x00E6	=>	"ae",
 				   0x00E7	=>	"c",
 				   0x00E8	=>	"e",
 				   0x00E9	=>	"e",
@@ -1744,6 +1822,22 @@ class BIBTEXCONFIG
 				   0x00FF	=>	'u',
 				   0x00A1	=>	"u",
 				   0x00BF	=>	"u",
+    			 0x0104	=>	"A",
+		    	 0x0105	=>	"a",
+  				 0x0106	=>	"C",
+	   			 0x0107	=>	"c",
+    			 0x0118	=>	"E",
+		    	 0x0119	=>	"e",
+				   0x0141	=>	"L",
+				   0x0142	=>	"l",
+				   0x0143	=>	"N",
+				   0x0144	=>	"n",
+				   0x015A	=>	"S",
+				   0x015B	=>	"s",
+				   0x0179	=>	"Z",
+				   0x017A	=>	"z",
+				   0x017B	=>	"Z",
+				   0x017C	=>	"z",
 				   );
   }
 }
