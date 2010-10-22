@@ -166,7 +166,6 @@ class Papercite {
     $id = strtolower(preg_replace("@[/:]@", "-", $entry["bibtexCitation"]));
 
     foreach(array("../../papercite-data/pdf","../papercite-data/pdf", "data") as $subfolder) {
-      print dirname(__FILE__) . "/$subfolder/" . $id . ".pdf" . "<br/>";
       if (file_exists(dirname(__FILE__) . "/$subfolder/" . $id . ".pdf")) {
 	return " <a href='" .  get_bloginfo('wpurl') . "/wp-content/plugins/papercite/$subfolder/$id.pdf' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/pdf.png' width='10' height='10' alt='PDF' /></a>";
       }
