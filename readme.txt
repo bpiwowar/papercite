@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 2.0
 Tested up to: 3.0.1
-Stable tag: 0.2.12
+Stable tag: 0.2.13
 
 papercite helps to format bibtex entries to display a bibliography or
 cite papers
@@ -73,7 +73,7 @@ Just change it.
 
 == Changelog ==
 
-= 0.2.12 = 
+= 0.2.13 = 
   * bug fix: wrong mappings from bibtex fields to arrays have been corrected, link to pdf is now working properly, polish characters
   are almost properly handled (thanks to Łukasz Radliński)
 = 0.2.11 =
