@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 2.0
 Tested up to: 3.0.1
-Stable tag: 0.2.13
+Stable tag: 0.2.14
 
 papercite helps to format bibtex entries to display a bibliography or
 cite papers
@@ -29,6 +29,7 @@ Features compared to bib2html (0.9.3):
 * it checks if a PDF file whose name match the key exists and link to it if this is so
 * it uses the DOI information to create an external link
 * object oriented redesign of the plugin, so that further extensions are easy to make
+* publications can be grouped by year
 
 The papercite plugin has been developed and tested under Wordpress 3.0. It is based on bib2html version 0.9.3.
 
@@ -73,6 +74,9 @@ Just change it.
 
 == Changelog ==
 
+= 0.2.14 = 
+  * Grouped by year option (patch due to S. Aiche)
+  * Handles the / in bibtex keys
 = 0.2.13 = 
   * bug fix: wrong mappings from bibtex fields to arrays have been corrected, link to pdf is now working properly, polish characters
   are almost properly handled (thanks to Łukasz Radliński)
@@ -142,6 +146,7 @@ into the `pdf` folder. To match a bibtex entry with a PDF file, the
 PDF file should have be named **KEY**`.pdf` where **KEY** is the
 bibtex key in lowercase, where `:` and `/` have been replaced by `-`.
 
+
 = Bibliography mode =
 
 This is my whole list of publications: 
@@ -156,7 +161,7 @@ This is my latest conference paper:
 
 You can also have a list of keys to display more than one paper:
 
-`[bibtex file=mypub.bib key=CGW2006, CGW2007]`
+`[bibtex file=mypub.bib key=CGW2006,CGW2007]`
 
 This is my bibliography maintained at citeulike.org
 
@@ -178,7 +183,13 @@ You end with the following to print the list of references:
 
 `[/bibshow]`
 
+
 = Formatting the entries =
+
+You can modify how publications are displayed using several options:
+
+* format 
+* groupByYear
 
 You can modify the style of the citations by using the `format`
 parameter with the `bibshow` and `bibtex` commands.
@@ -195,4 +206,8 @@ The following format are currently available:
 * harvard 
 * mla
 * turabian
+
+You can group the citations by year using the groupByYear
+
+`[bibtex file=mypub.bib groupByYear=TRUE]`
 

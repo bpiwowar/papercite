@@ -4,7 +4,7 @@
    Plugin Name: papercite
    Plugin URI: http://www.bpiwowar.net/papercite
    Description: papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-   Version: 0.2.13
+   Version: 0.2.14
    Author: Benjamin Piwowarski
    Author URI: http://www.bpiwowar.net
   */
@@ -12,9 +12,12 @@
 
   /*  Copyright 2010 Benjamin Piwowarski (email: benjamin in the domain bpiwowar <DOT> net)
 
-Sergio Andreozzi has written bib2html on which papercite is based
-
 Contributors:
+ - S. Aifat: group by year option
+
+
+Sergio Andreozzi has written bib2html on which papercite is based
+Contributors (bib2html):
 - Cristiana Bolchini: cleaner bibtex presentation
 - Patrick Maué: remote bibliographies managed by citeulike.org or bibsonomy.org
 - Nemo: more characters on key
@@ -36,6 +39,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   */
+
+// Uncomment when options are debugged
+// include("papercite_options.php");
 
 
 
@@ -208,9 +214,10 @@ class Papercite {
     }
 
     $format = array_key_exists("format", $options) ? $options["format"] : "IEEE";
-
+    $groupByYear = array_key_exists("groupByYear", $options) ? (strtoupper($options["groupByYear"]) == "TRUE") : False;
+    $data = null;
+    
     switch($command) {
-      // Outputs some bibtex entries (to remain compatible with bib2html)
     case "bibtex":
       $data = $this->getData($options["file"]);
       if (!$data) return;
@@ -257,7 +264,7 @@ class Papercite {
 	$refs[$ref["bibtexCitation"]] = $ref;
       }
 
-      return  $this->showEntries($refs, $format);
+      return  $this->showEntries($refs, $format,$groupByYear );
 
       // Output bibtex for cited references
     case "bibshow":
@@ -297,7 +304,10 @@ class Papercite {
 	if ($num) $refs[$num] = $entry;
       }
       ksort($refs);
-      return $this->showEntries($refs, $format);
+      // grouping of bibentries by year is switched of by default
+      // for this case, to allow the entries to show up in the 
+      // order of usage
+      return $this->showEntries($refs, $format,False);
 
     default:
       return "[error in papercite: unhandled]";
@@ -311,7 +321,14 @@ class Papercite {
 
     if ($f1 == $f2) return 0;
 
-    return ($f1 < $f2) ? -1 : 1;
+    // entries without a year need to show at the beginning
+    if(trim($f1) == '') {
+      return 1;
+    } else if (trim($f2) == '') {
+      return -1;
+    } else {    
+      return ($f1 < $f2) ? -1 : 1;
+    }
   }
 
   function toDownload($entry) {
@@ -328,16 +345,35 @@ class Papercite {
   /**
    * Show a set of entries
    */
-  function showEntries(&$refs, $format) {
+  function showEntries(&$refs, $format, $groupByYear ) {
     static $counter = 0;
-
-    $counter++;
 
     $tpl = new TemplatePower(dirname(__FILE__) . '/bibentry-html.tpl');
     $bibformat = $this->getFormat($format);
 
     $tpl->prepare();
+    $currentYear = "unknown";
+    
+    if(!$groupByYear) {
+      $tpl->newBlock("year_separator");  
+      $tpl->assign("year", "");
+      $tpl->assign("display-year-header", "none");    
+    }
+    
     foreach($refs as $key => &$entry) {
+    
+      // Grouping by year?
+      if ($groupByYear) {
+        // check if we need a new year block
+        if(trim($entry['year']) != $currentYear) {
+          $currentYear = trim($entry['year']);
+          $tpl->newBlock("year_separator");  
+          $tpl->assign("year", $currentYear);
+
+          // handle unknown years in bibtex by switching of the heading
+          $tpl->assign("display-year-header", ($currentYear != '' ? "block" : "none"));
+        }
+      }
       $bibkey = $entry["bibtexCitation"];
 
       // Get the resource type ('book', 'article', 'inbook' etc.)
@@ -350,13 +386,18 @@ class Papercite {
       // the str_replace is used to remove the { } parentheses possibly present in title 
       // to enforce uppercase, TODO: check if it can be done only on title 
       $tpl->newBlock("bibtex_entry");
-      $tpl->assign("pkey", "[" . $key  . "]");
+      
+      // Display key
+      $tpl->assign("pkey", "[" . $key . "]");
       $tpl->assign("year", $entry['year']);
 	
       $tpl->assign("type", $entry['bibtexEntryType']);
       $tpl->assign("url", $this->toDownload($entry));
       $tpl->assign("pdf", $this->pdf($entry));
-      $tpl->assign("key", $counter . "-" . strtr($bibkey, ":", "-"));
+      
+      // Key used for javascript
+      $counter++;
+      $tpl->assign("jskey", "papercite_$counter");
 
       $tpl->assign("entry", str_replace(array('{', '}'), '', $bibformat->map()));
       $tpl->assign("bibtex", $this->formatBibtex($entry['bibtexEntry']));
@@ -364,7 +405,7 @@ class Papercite {
      
     return $tpl->getOutputContent();     
   }
-				 }
+}
 
 
 // -------------------- Interface with WordPress
