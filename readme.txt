@@ -76,7 +76,7 @@ Just change it.
 
 = 0.2.14 = 
   * Grouped by year option (patch due to S. Aiche)
-  * Handles the / in bibtex keys
+  * Now generates an id which does not depend on the key (fix javascript related bugs)
 = 0.2.13 = 
   * bug fix: wrong mappings from bibtex fields to arrays have been corrected, link to pdf is now working properly, polish characters
   are almost properly handled (thanks to Łukasz Radliński)
