@@ -13,7 +13,7 @@
   /*  Copyright 2010 Benjamin Piwowarski (email: benjamin in the domain bpiwowar <DOT> net)
 
 Contributors:
- - S. Aifat: group by year option
+ - Stefan Aiche: group by year option
 
 
 Sergio Andreozzi has written bib2html on which papercite is based
