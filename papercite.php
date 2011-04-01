@@ -49,16 +49,22 @@ class Papercite {
 
   var $parse = false;
 
-  var $cites = array();
 
   // List of publications for those citations
   var $bibshows = array();
 
   // Our caches (bibtex files and formats)
   var $cache = array();
-  var $formats = array();
-    
-    
+
+  // List of current citations
+  var $cites = array();
+
+  var $keys = array();
+  var $keyValues = array();
+
+  // Global counter for unique references of each
+  // displayed citation
+  var $citesCounter = 0;
     
   /** Returns filename of cached version of given url  
    * @param url The URL
@@ -94,6 +100,12 @@ class Papercite {
     }
 	
     return $file;
+  }
+
+  /**
+   * Init is called before the first callback
+   */
+  function init() {
   }
 
   /**
@@ -226,7 +238,7 @@ class Papercite {
     case "bibtex":
       // --- Filter the data
       $entries = $this->getData($options["file"]);
-      if (!$entries) return;
+      if (!$entries) return "<span style='color: red'>[Could not find the bibliography file(s)]</span>";
  
       if (array_key_exists('key', $options)) {
 	// Select only specified entries
@@ -282,34 +294,52 @@ class Papercite {
 
       // Just cite
     case "bibcite":
-      if (sizeof($this->bibshows) == 0) return "[?]";
+      if (sizeof($this->bibshows) == 0)  
+	return "[<span title=\"Unkown reference: $key\">?</span>]";
 
       $key = $options["key"];
       $refs = &$this->bibshows[sizeof($this->bibshows)-1];
+
+      // First, get the corresponding entry
       if (array_key_exists($key, $refs)) {
-	if (!($num = $this->cites[$key])) {
-	  $num = sizeof($this->cites) + 1;
-	  $this->cites[$key] = $num;
+	$num = $this->cites[$key];
+
+	// Did we already cite this?
+	if (!$num) {
+	  // no, register this
+	  $id = "BIBCITE%%%" . $this->citesCounter;
+	  $this->citesCounter++;
+	  $num = sizeof($this->cites);
+	  $this->cites[$key] = array($num, $id);
 	}
-	return "[" . $num . "]";
+	return "[$id]";
       }
+
       return "[<span title=\"Unkown reference: $key\">?</span>]";
 
     case "/bibshow":
       // select from cites
       if (sizeof($this->bibshows) == 0) return "";
+      // Remove the array from the stack
       $data = &array_pop($this->bibshows);
       $refs = array();
+
+      // Order the citations according to citation order
+      // (might be re-ordered latter)
       foreach($data as $key => &$entry) {
 	$num = $this->cites[$key];
-	if ($num) $refs[$num] = $entry;
+	if ($num) {
+	  $refs[$num[0]] = $entry;
+	  // Set the numeric key (might be changed)
+	  $refs[$num[0]]["key"] = $num[0] + 1;
+	  $refs[$num[0]]["pKey"] = $num[1];
+	}
       }
-      ksort($refs);
       // grouping of bibentries by year is switched of by default
       // for this case, to allow the entries to show up in the 
       // order of usage
-      return $this->showEntries($refs, $tplOptions);
-
+      return $this->showEntries($refs, $tplOptions, true);
+      
     default:
       return "[error in papercite: unhandled]";
     }
@@ -329,56 +359,21 @@ class Papercite {
 
   /**
    * Show a set of entries
+   * @param refs An array of references
+   * @param options The options to pass to bib2tpl
+   * @param getKeys Keep track of the keys for a final substitution
    */
-  function showEntries(&$refs, &$options) {
-    static $counter = 0;
+  function showEntries(&$refs, &$options, $getKeys) {
     $bib2tpl = new BibtexConverter($options);
-    return $bib2tpl->display($refs, file_get_contents(dirname(__FILE__) . "/test.tpl"));
- 
-    foreach($refs as $key => &$entry) {
-    
-      // Grouping by year?
-      if ($groupByYear) {
-        // check if we need a new year block
-        if(trim($entry['year']) != $currentYear) {
-          $currentYear = trim($entry['year']);
-          $tpl->newBlock("year_separator");  
-          $tpl->assign("year", $currentYear);
-
-          // handle unknown years in bibtex by switching of the heading
-          $tpl->assign("display-year-header", ($currentYear != '' ? "block" : "none"));
-        }
-      }
-      $bibkey = $entry["bibtexCitation"];
-
-      // Get the resource type ('book', 'article', 'inbook' etc.)
-      $resourceType = $entry['bibtexEntryType'];
-	
-      //  adds all the resource elements automatically to the BBFORMAT::item array
-      $bibformat->preProcess($resourceType, $entry);
-	
-      // get the formatted resource string ready for printing to the web browser
-      // the str_replace is used to remove the { } parentheses possibly present in title 
-      // to enforce uppercase, TODO: check if it can be done only on title 
-      $tpl->newBlock("bibtex_entry");
-      
-      // Display key
-      $tpl->assign("pkey", "[" . $key . "]");
-      $tpl->assign("year", $entry['year']);
-	
-      $tpl->assign("type", $entry['bibtexEntryType']);
-      $tpl->assign("url", $this->toDownload($entry));
-      $tpl->assign("pdf", $this->pdf($entry));
-      
-      // Key used for javascript
-      $counter++;
-      $tpl->assign("jskey", "papercite_$counter");
-
-      $tpl->assign("entry", str_replace(array('{', '}'), '', $bibformat->map()));
-      $tpl->assign("bibtex", $this->formatBibtex($entry['bibtexEntry']));
-    }        
-     
-    return $tpl->getOutputContent();     
+    $r =  $bib2tpl->display($refs, file_get_contents(dirname(__FILE__) . "/tpl/default.tpl"));
+    if ($getKeys) {
+      foreach($refs as &$group)
+	foreach($group as &$ref) {
+	  $this->keys[] = $ref["pKey"];
+	  $this->keyValues[] = $ref["key"];
+	}
+    }
+    return $r["text"];
   }
 }
 
@@ -412,8 +407,22 @@ function papercite_init() {
 
 // --- Callback function ----
 function papercite_cb($myContent) {
-  return preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/",
-			       array($GLOBALS["papercite"], "process"), $myContent);
+  // Init
+  $papercite = &$GLOBALS["papercite"];
+  $papercite->init();
+  
+  // Process all at once
+  $text = preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/",
+				array($papercite, "process"), $myContent);
+  // Handles key 
+  if (false) {
+    print "<div><b>keys:</b> ";
+    print_r($papercite->keys);
+    print "</div><div><b>values:</b> ";
+    print_r($papercite->keyValues);
+    print "</div>";
+  }
+  return str_replace($papercite->keys, $papercite->keyValues, $text);
 }
 
 // --- Add the different handlers to WordPress ---

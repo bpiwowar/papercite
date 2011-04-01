@@ -169,9 +169,10 @@ class BibtexConverter
   {
     $data = $this->_group($data);
     $data = $this->_sort($data);
-    return $this->_translate($data, $template);
-  }
 
+    $text = $this->_translate($data, $template);
+    return array("text" => &$text, "data" => &$data);
+  }
 
   /**
    * This function filters data from the specified array that should
