@@ -63,9 +63,13 @@ class Papercite {
   var $keyValues = array();
 
   // Global counter for unique references of each
-  // displayed citation
+  // displayed citation (used by bibshow)
   var $citesCounter = 0;
     
+  // Global counter for unique reference of each
+  // displayed citation
+  var $counter = 0;
+
   /** Returns filename of cached version of given url  
    * @param url The URL
    * @param timeout The timeout of the cache
@@ -226,7 +230,7 @@ class Papercite {
     else if (array_key_exists("group", $options))
       $group = $options["group"];
 
-    $tplOptions = array("group" => $group);
+    $tplOptions = array("group" => $group, "order" => "desc");
     $data = null;
     
     // --- Process the commands ---
@@ -274,7 +278,7 @@ class Papercite {
 	    
       } 
 
-      return  $this->showEntries($entries, $tplOptions);
+      return  $this->showEntries($entries, $tplOptions, false);
 
       /*
 	bibshow / bibcite commands
@@ -365,6 +369,10 @@ class Papercite {
    */
   function showEntries(&$refs, &$options, $getKeys) {
     $bib2tpl = new BibtexConverter($options);
+
+    foreach($refs as &$ref)
+      $ref["entryid"] = $this->counter++;
+
     $r =  $bib2tpl->display($refs, file_get_contents(dirname(__FILE__) . "/tpl/default.tpl"));
     if ($getKeys) {
       foreach($refs as &$group)
@@ -389,7 +397,7 @@ function papercite_head() {
     //echo '<script src="'.  get_bloginfo('wpurl') . '/wp-content/plugins/papercite/js/papercite.js"  type="text/javascript"></script>' . "\n";
   }
   echo "<style type=\"text/css\">
-div.bibtex {
+div.papercite_bibtex {
     display: none;
 }</style>";
 
@@ -414,14 +422,7 @@ function papercite_cb($myContent) {
   // Process all at once
   $text = preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/",
 				array($papercite, "process"), $myContent);
-  // Handles key 
-  if (false) {
-    print "<div><b>keys:</b> ";
-    print_r($papercite->keys);
-    print "</div><div><b>values:</b> ";
-    print_r($papercite->keyValues);
-    print "</div>";
-  }
+  // Handles custom keys in bibshow
   return str_replace($papercite->keys, $papercite->keyValues, $text);
 }
 
