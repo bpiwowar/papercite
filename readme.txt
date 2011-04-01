@@ -1,8 +1,8 @@
 === Plugin Name ===
 Contributors: bpiwowar
 Tags: formatting, bibtex
-Requires at least: 2.0
-Tested up to: 3.0.1
+Requires at least: 2.7
+Tested up to: 3.1
 Stable tag: 0.2.14
 
 papercite helps to format bibtex entries to display a bibliography or
@@ -75,7 +75,9 @@ Just change it.
 == Changelog ==
 
 = 0.3.0 = 
-  * Complete code overhaul - switched to a new bibtex / template system
+  * Complete code overhaul - switched to a new bibtex / template
+  system
+  * Preference system to set defaults
 = 0.2.14 = 
   * Grouped by year option (patch due to S. Aiche)
   * Now generates an id which does not depend on the key (fix javascript related bugs)
@@ -151,6 +153,16 @@ PDF file should have be named **KEY**`.pdf` where **KEY** is the
 bibtex key in lowercase, where `:` and `/` have been replaced by `-`.
 
 
+= Options =
+
+You can set default parameters through the options or using 
+page/post custom fields (use the prefix `papercite_` for
+custom fields):
+1. `file`: The default bibtex file (can be a URL)
+2. `timeout`: The default time-out before reloading an
+external resource
+2. `format`: The default format
+
 = Bibliography mode =
 
 This is my whole list of publications: 
@@ -192,26 +204,43 @@ You end with the following to print the list of references:
 
 You can modify how publications are displayed using several options:
 
-* format 
-* groupByYear
+* `key-format` How to format the citing key of the publication
+* `format` How to format the publication
+* `group` How to group publications
+* `order` How to order publications
+
+Each of these options are described next. Finally, the template
+language used to format entries is described at the following URL:
+http://lmazy.verrech.net/bib2tpl/templates/
+
+= Format = 
 
 You can modify the style of the citations by using the `format`
 parameter with the `bibshow` and `bibtex` commands.
 For example, 
 
-`[bibtex file=mypub.bib format=britishmedicaljournal]`
+`[bibtex file=mypub.bib format=ieee]`
 
 The following format are currently available: 
 
 * ieee (default)
-* apa 
-* britishmedicaljournal 
-* chicago
-* harvard 
-* mla
-* turabian
 
-You can group the citations by year using the groupByYear
+= Group =
 
-`[bibtex file=mypub.bib groupByYear=TRUE]`
+You can group the citations using the `group` option with values
+`none` (by default), `year`, `firstauthor`, or `entrytype`.
+You can order the groups using the `group-order` option which can take
+values among `asc`, `desc` or `none` (none by default).
+
+Example:
+`[bibtex file=mypub.bib group=year group-order=desc]`
+
+= Sort =
+
+You can sort the citations using the `sort` option together
+by a description of the sorting key. Note that the sort
+
+`[bibtex file=mypub.bib sort=year:desc]`
+
+
 

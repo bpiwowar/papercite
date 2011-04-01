@@ -40,12 +40,13 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-// Uncomment when options are debugged
-// include("papercite_options.php");
+// Options
 
-
+include("papercite_options.php");
 
 class Papercite {
+
+  static $option_names = array("format", "timeout", "file");
 
   var $parse = false;
 
@@ -56,9 +57,10 @@ class Papercite {
   // Our caches (bibtex files and formats)
   var $cache = array();
 
-  // List of current citations
+  // Array of arrays of current citations
   var $cites = array();
 
+  // Global replacements for cited keys
   var $keys = array();
   var $keyValues = array();
 
@@ -205,6 +207,7 @@ class Papercite {
     // Includes once
     include_once("bib2tpl/bibtex_converter.php");
 
+
     // Get the options   
     $command = $matches[1];
 
@@ -213,25 +216,36 @@ class Papercite {
     $options_pairs = array();
     preg_match_all("/\s*(?:(\w+)=(\S+))(\s+|$)/", $matches[2], $options_pairs, PREG_SET_ORDER);
 
-    $options = array();
-    foreach($options_pairs as $x) {
-      $options[$x[1]] = $x[2];     
+    // Set preferences, by order of increasing priority
+    // (0) Set in
+    // (1) From the preferences
+    // (2) From the custom fields
+    // (3) From the general options
+    $options = array("format" => "IEEE", "group" => "none");
+
+    // Get general preferences
+    if (!$this->pOptions)
+      $this->pOptions = &get_option('papercite_options');
+
+    foreach(self::$option_names as &$name) {
+      if (array_key_exists($name, $this->pOptions))
+	$options[$name] = $this->pOptions[$name];
+      $custom_field = get_post_custom_values("papercite_$name");
+      if (sizeof($custom_field) > 0)
+	$options[$name] = $custom_field[0];
     }
 
-    // Set values if not given
-    $format = array_key_exists("format", $options) ? $options["format"] : "IEEE";
+    foreach($options_pairs as $x) {
+      $options[$x[1]] = $x[2];
+    }
 
-    // Handle grouping
-
-    $group = "none";
-    // For compatibility
+    // --- Compatibility issues
     if (array_key_exists("groupByYear", $options) && (strtoupper($options["groupByYear"]) == "TRUE"))
-	$group = "year";
-    else if (array_key_exists("group", $options))
-      $group = $options["group"];
+	$options["group"] = "year";
 
-    $tplOptions = array("group" => $group, "order" => "desc");
+    $tplOptions = array("group" => $options["group"], "order" => $options["order"]);
     $data = null;
+
     
     // --- Process the commands ---
     switch($command) {
@@ -413,7 +427,8 @@ function papercite_init() {
     wp_enqueue_script('papercite');
   } 
 
-  wp_register_style( 'papercite_css', WP_PLUGIN_URL . '/papercite/papercite.css' );
+  // Register and enqueue the stylesheet
+  wp_register_style('papercite_css', WP_PLUGIN_URL . '/papercite/papercite.css' );
   wp_enqueue_style('papercite_css');
 
   $papercite = new Papercite();
