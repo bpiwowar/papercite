@@ -252,6 +252,7 @@ class Papercite {
 	foreach($entries as $entry) {
 	  if (in_array($entry["cite"], $keys)) {
 	    $a[] = $entry;
+	    $a["key"] = $entry;
 	    $n = $n + 1;
 
 	    // We found everything, early break
