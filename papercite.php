@@ -252,7 +252,6 @@ class Papercite {
 	foreach($entries as $entry) {
 	  if (in_array($entry["cite"], $keys)) {
 	    $a[] = $entry;
-	    $a[sizeof($a)-1]["key"] = $entry["cite"];
 	    $n = $n + 1;
 
 	    // We found everything, early break
@@ -272,13 +271,16 @@ class Papercite {
 	  $entries = array();
 	  foreach($entries2 as &$entry) {
 	    $t = $entry["entrytype"];
-	    if ((!$allow || in_array($t, $allow)) && (!$deny || !in_array($t, $deny)))
+	    if ((!$allow || in_array($t, $allow)) && (!$deny || !in_array($t, $deny))) {
 	      $entries[] = $entry;
+	    }
 	  }
 	}
 	    
       } 
-
+      
+      foreach($entries as &$entry)
+	$entry["key"] = $entry["cite"];
       return  $this->showEntries($entries, $tplOptions, false);
 
       /*
@@ -397,23 +399,23 @@ class Papercite {
 function papercite_head() {
   if (!function_exists('wp_enqueue_script')) {
     // In case there is no wp_enqueue_script function (WP < 2.6), we load the javascript ourselves
-    //    echo "\n" . '<script src="'.  get_bloginfo('wpurl') . '/wp-content/plugins/papercite/js/jquery.js"  type="text/javascript"></script>' . "\n";
-    //echo '<script src="'.  get_bloginfo('wpurl') . '/wp-content/plugins/papercite/js/papercite.js"  type="text/javascript"></script>' . "\n";
+    echo "\n" . '<script src="'.  get_bloginfo('wpurl') . '/wp-content/plugins/papercite/js/jquery.js"  type="text/javascript"></script>' . "\n";
+    echo '<script src="'.  get_bloginfo('wpurl') . '/wp-content/plugins/papercite/js/papercite.js"  type="text/javascript"></script>' . "\n";
   }
-  echo "<style type=\"text/css\">
-div.papercite_bibtex {
-    display: none;
-}</style>";
-
 }
 
 // --- Initialise papercite ---
 function papercite_init() {
   global $papercite;
+
   if (function_exists('wp_enqueue_script')) {
     wp_register_script('papercite', get_bloginfo('wpurl') . '/wp-content/plugins/papercite/js/papercite.js', array('jquery'), '0.7');
     wp_enqueue_script('papercite');
   } 
+
+  wp_register_style( 'papercite_css', WP_PLUGIN_URL . '/papercite/papercite.css' );
+  wp_enqueue_style('papercite_css');
+
   $papercite = new Papercite();
 }
 
