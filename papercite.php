@@ -294,6 +294,7 @@ class Papercite {
       }
 
       array_push($this->bibshows, &$refs);
+      $this->cites[] = array();
       break;
 
       // Just cite
@@ -303,18 +304,19 @@ class Papercite {
 
       $key = $options["key"];
       $refs = &$this->bibshows[sizeof($this->bibshows)-1];
+      $cites = &$this->cites[sizeof($this->cites)-1];
 
       // First, get the corresponding entry
       if (array_key_exists($key, $refs)) {
-	$num = $this->cites[$key];
+	$num = $cites[$key];
 
 	// Did we already cite this?
 	if (!$num) {
 	  // no, register this
 	  $id = "BIBCITE%%%" . $this->citesCounter;
 	  $this->citesCounter++;
-	  $num = sizeof($this->cites);
-	  $this->cites[$key] = array($num, $id);
+	  $num = sizeof($cites);
+	  $cites[$key] = array($num, $id);
 	}
 	return "[$id]";
       }
@@ -326,12 +328,13 @@ class Papercite {
       if (sizeof($this->bibshows) == 0) return "";
       // Remove the array from the stack
       $data = &array_pop($this->bibshows);
+      $cites = &array_pop($this->cites);
       $refs = array();
 
       // Order the citations according to citation order
       // (might be re-ordered latter)
       foreach($data as $key => &$entry) {
-	$num = $this->cites[$key];
+	$num = $cites[$key];
 	if ($num) {
 	  $refs[$num[0]] = $entry;
 	  // Set the numeric key (might be changed)
@@ -422,6 +425,7 @@ function papercite_cb($myContent) {
   // Process all at once
   $text = preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/",
 				array($papercite, "process"), $myContent);
+  
   // Handles custom keys in bibshow
   return str_replace($papercite->keys, $papercite->keyValues, $text);
 }
