@@ -74,6 +74,8 @@ Just change it.
 
 == Changelog ==
 
+= 0.3.0 = 
+  * Complete code overhaul - switched to a new bibtex / template system
 = 0.2.14 = 
   * Grouped by year option (patch due to S. Aiche)
   * Now generates an id which does not depend on the key (fix javascript related bugs)
@@ -114,6 +116,8 @@ Just change it.
 
 == Upgrade Notice ==
 
+= 0.3.0 = 
+  * Complete overhaul of the bibtex/template system
 = 0.2.9 = 
 Removed a PHP warning with bibshow
 = 0.2.8 =

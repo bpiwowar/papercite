@@ -1,44 +1,44 @@
 <?php
 
-  /*
-   Plugin Name: papercite
-   Plugin URI: http://www.bpiwowar.net/papercite
-   Description: papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-   Version: 0.2.14
-   Author: Benjamin Piwowarski
-   Author URI: http://www.bpiwowar.net
-  */
+/*
+  Plugin Name: papercite
+  Plugin URI: http://www.bpiwowar.net/papercite
+  Description: papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
+  Version: 0.3.0
+  Author: Benjamin Piwowarski
+  Author URI: http://www.bpiwowar.net
+*/
 
 
-  /*  Copyright 2010 Benjamin Piwowarski (email: benjamin in the domain bpiwowar <DOT> net)
+/*  Copyright 2010 Benjamin Piwowarski (email: benjamin in the domain bpiwowar <DOT> net)
 
-Contributors:
- - Stefan Aiche: group by year option
-
-
-Sergio Andreozzi has written bib2html on which papercite is based
-Contributors (bib2html):
-- Cristiana Bolchini: cleaner bibtex presentation
-- Patrick Maué: remote bibliographies managed by citeulike.org or bibsonomy.org
-- Nemo: more characters on key
-- Marco Loregian: inverting bibtex and html
-- Łukasz Radliński: bug fixes & handling polish characters
+    Contributors:
+    - Stefan Aiche: group by year option
 
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+    Sergio Andreozzi has written bib2html on which papercite is based
+    Contributors (bib2html):
+    - Cristiana Bolchini: cleaner bibtex presentation
+    - Patrick Maué: remote bibliographies managed by citeulike.org or bibsonomy.org
+    - Nemo: more characters on key
+    - Marco Loregian: inverting bibtex and html
+    - Łukasz Radliński: bug fixes & handling polish characters
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-  */
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
 
 // Uncomment when options are debugged
 // include("papercite_options.php");
@@ -57,45 +57,14 @@ class Papercite {
   // Our caches (bibtex files and formats)
   var $cache = array();
   var $formats = array();
-
-  /** Initialise the bibtex parser */
-  function init() {
-    $OSBiBPath = dirname(__FILE__) . '/OSBiB/';
-    include_once($OSBiBPath.'format/bibtexParse/PARSEENTRIES.php');
-    include_once($OSBiBPath.'format/BIBFORMAT.php');
-    include_once(dirname(__FILE__) . '/class.TemplatePower.inc.php');
-    $this->parse = NEW PARSEENTRIES();
-    $this->parse->expandMacro = TRUE;
-    $this->parse->fieldExtract = TRUE;
-    $this->parse->removeDelimit = TRUE;
-  }
-
-
-
-  function getCiteFormat($type) {
-    $OSBiBPath = dirname(__FILE__) . '/OSBiB/';
-    include_once($OSBiBPath.'format/CITEFORMAT.php');
-    $citeformat = new CITEFORMAT();
-    list($info, $citation, $styleCommon, $styleTypes) = $citeformat->loadStyle("styles/bibliography/", "APA");
-    $citeformat->getStyle($styleCommon, $styleTypes);
-    return $citeformat;
-  }
-
-  function getFormat($type) {
-    if (!$this->formats[$type]) {
-      $OSBiBPath = dirname(__FILE__) . '/OSBiB/';
-      $bibformat = NEW BIBFORMAT($OSBiBPath, TRUE); // TRUE implies that the input data is in bibtex format
-      $bibformat->cleanEntry=TRUE; // convert BibTeX (and LaTeX) special characters to UTF-8
-      list($info, $citation, $styleCommon, $styleTypes) = $bibformat->loadStyle($OSBiBPath."styles/bibliography/", $type);
-      $bibformat->getStyle($styleCommon, $styleTypes);
-      $this->formats[$type] = $bibformat;
-    }
-    return $this->formats[$type];
-  }
     
-  /* Returns filename of cached version of given url  */
-  function getCached($url) {
-
+    
+    
+  /** Returns filename of cached version of given url  
+   * @param url The URL
+   * @param timeout The timeout of the cache
+   */
+  function getCached($url, $timeout = 3600) {
     // check if cached file exists
     $name = strtolower(preg_replace("@[/:]@","_",$url));
     $dir = dirname(__FILE__) . "/cache";
@@ -103,31 +72,34 @@ class Papercite {
 
 
     // check if file date exceeds 60 minutes   
-    if (! (file_exists($file) && (filemtime($file) + 3600 > time())))  {
+    if (! (file_exists($file) && (filemtime($file) + $timeout > time())))  {
       // not returned yet, grab new version
-	// since wordpress 2.7, we can use the wp_remote_get function
-	if (function_exists("wp_remote_get")) {
-	  $body = wp_remote_retrieve_body(wp_remote_get($url));
-	  if ($body) {
-	    $f=fopen($file,"wb");
-	    fwrite($f,$body);
-	    fclose($f);
-	  } else return NULL;
-	}
-	else {
+      // since wordpress 2.7, we can use the wp_remote_get function
+      if (function_exists("wp_remote_get")) {
+	$body = wp_remote_retrieve_body(wp_remote_get($url));
+	if ($body) {
 	  $f=fopen($file,"wb");
-	  fwrite($f,file_get_contents($url));
+	  fwrite($f,$body);
 	  fclose($f);
-	}
-
-
-	if (!$f) echo "Failed to write file " . $file . " - check directory permission according to your Web server privileges.";
+	} else return NULL;
+      }
+      else {
+	$f=fopen($file,"wb");
+	fwrite($f,file_get_contents($url));
+	fclose($f);
+      }
+	
+	
+      if (!$f) echo "Failed to write file " . $file . " - check directory permission according to your Web server privileges.";
     }
-
+	
     return $file;
   }
 
-
+  /**
+   * Check the different paths where papercite data can be stored
+   * and return the first match, starting by the preferred ones
+   */
   function getDataFile($uri) {
     foreach(array("../../papercite-data","../papercite-data", "data") as $path) {
       $path = dirname(__FILE__) . "/$path/$uri";
@@ -137,9 +109,10 @@ class Papercite {
   }
 
   /**
-   Get the bibtex data from an URI
-  */
+   * Get the bibtex data from an URI
+   */
   function getData($biburi) {
+    // (1) get the context
     if (!$this->cache[$biburi]) {
       if (strpos($biburi, "http://") === 0) 
 	$bibFile = $this->getCached($biburi);
@@ -150,15 +123,20 @@ class Papercite {
       if (!$bibFile || !file_exists($bibFile)) {
 	return NULL;
       }
-      
+
+      // (2) Parse the BibTeX
       if (file_exists($bibFile)) {
 	$data = file_get_contents($bibFile);
 	if (!empty($data)) {
-	  $this->init();
-	  $this->parse->loadBibtexString($data);
-	  $this->parse->extractEntries();
+ 
+	  $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true));
+	  $this->_parser->loadString($data);
+	  $stat = $this->_parser->parse();
+	  if ( !$stat ) {
+	    return $stat;
+	  }
 	
-	  $this->cache[$biburi] = $this->parse->returnArrays();
+	  $this->cache[$biburi] = $this->_parser->data;
 	}
       }
 
@@ -168,6 +146,9 @@ class Papercite {
     return $this->cache[$biburi];
   }
     
+  /** 
+   * Returns the path to the pdf given a bibtex key
+   */
   function pdf($entry) {
     $id = strtolower(preg_replace("@[/:]@", "-", $entry["bibtexCitation"]));
 
@@ -198,13 +179,21 @@ class Papercite {
  
 
   /**
-   * Handles a match in the post
+   * Main entry point: Handles a match in the post
    */
   function process(&$matches) {
-    // Get the options
+    $debug = false;
+
+    // --- Initialisation ---
     
+    // Includes once
+    include_once("bib2tpl/bibtex_converter.php");
+
+    // Get the options   
     $command = $matches[1];
 
+    // Get all the options pairs and store them
+    // in the $options array
     $options_pairs = array();
     preg_match_all("/\s*(?:(\w+)=(\S+))(\s+|$)/", $matches[2], $options_pairs, PREG_SET_ORDER);
 
@@ -213,30 +202,49 @@ class Papercite {
       $options[$x[1]] = $x[2];     
     }
 
+    // Set values if not given
     $format = array_key_exists("format", $options) ? $options["format"] : "IEEE";
-    $groupByYear = array_key_exists("groupByYear", $options) ? (strtoupper($options["groupByYear"]) == "TRUE") : False;
+
+    // Handle grouping
+
+    $group = "none";
+    // For compatibility
+    if (array_key_exists("groupByYear", $options) && (strtoupper($options["groupByYear"]) == "TRUE"))
+	$group = "year";
+    else if (array_key_exists("group", $options))
+      $group = $options["group"];
+
+    $tplOptions = array("group" => $group);
     $data = null;
     
+    // --- Process the commands ---
     switch($command) {
-    case "bibtex":
-      $data = $this->getData($options["file"]);
-      if (!$data) return;
-      $entries = &$data[2];
 
+      /*
+	"bibtext" command
+       */
+    case "bibtex":
+      // --- Filter the data
+      $entries = $this->getData($options["file"]);
+      if (!$entries) return;
+ 
       if (array_key_exists('key', $options)) {
+	// Select only specified entries
 	$keys = split(",", $options["key"]);
 	$a = array();
 	$n = 0;
 	foreach($entries as $entry) {
-	  if (in_array($entry["bibtexCitation"], $keys)) {
-	    $a[$entry["bibtexCitation"]] = $entry;
+	  if (in_array($entry["cite"], $keys)) {
+	    $a[] = $entry;
 	    $n = $n + 1;
+
+	    // We found everything, early break
 	    if ($n == sizeof($keys)) break;
 	  }
 	}
 	$entries = $a;
       } else {
-	// First filter if needed
+	// Based on the entry types
 	$allow = $options["allow"];
 	$deny = $options["deny"];
 	if ($allow || $deny) {
@@ -246,36 +254,29 @@ class Papercite {
 	  $entries2 = $entries;
 	  $entries = array();
 	  foreach($entries2 as &$entry) {
-	    $t = $entry["bibtexEntryType"];
+	    $t = $entry["entrytype"];
 	    if ((!$allow || in_array($t, $allow)) && (!$deny || !in_array($t, $deny)))
-	      $entries[$entry["bibtexCitation"]] = $entry;
+	      $entries[] = $entry;
 	  }
 	}
 	    
-	// Show everyting
-	usort($entries, array($this, "sortByYear"));
-	$reverse=true;
-	if ($reverse) {
-	  $entries = array_reverse($entries);
-	}
       } 
-      $refs = array();
-      foreach($entries as &$ref) {
-	$refs[$ref["bibtexCitation"]] = $ref;
-      }
 
-      return  $this->showEntries($refs, $format,$groupByYear );
+      return  $this->showEntries($entries, $tplOptions);
 
-      // Output bibtex for cited references
+      /*
+	bibshow / bibcite commands
+       */
     case "bibshow":
       $data = $this->getData($options["file"]);
       if (!$data) return "<span style='color: red'>[Could not find the bibliography file(s)]</span>";
 
       $refs = array();
-      foreach($data[2] as &$entry) {
-	$key = $entry["bibtexCitation"];
+      foreach($data as &$entry) {
+	$key = $entry["cite"];
 	$refs[$key] = &$entry;
       }
+
       array_push($this->bibshows, &$refs);
       break;
 
@@ -307,29 +308,13 @@ class Papercite {
       // grouping of bibentries by year is switched of by default
       // for this case, to allow the entries to show up in the 
       // order of usage
-      return $this->showEntries($refs, $format,False);
+      return $this->showEntries($refs, $tplOptions);
 
     default:
       return "[error in papercite: unhandled]";
     }
   }
 
-
-  function sortByYear($a, $b) {
-    $f1 = $a['year']; 
-    $f2 = $b['year']; 
-
-    if ($f1 == $f2) return 0;
-
-    // entries without a year need to show at the beginning
-    if(trim($f1) == '') {
-      return 1;
-    } else if (trim($f2) == '') {
-      return -1;
-    } else {    
-      return ($f1 < $f2) ? -1 : 1;
-    }
-  }
 
   function toDownload($entry) {
     if (array_key_exists('url',$entry)){
@@ -345,21 +330,11 @@ class Papercite {
   /**
    * Show a set of entries
    */
-  function showEntries(&$refs, $format, $groupByYear ) {
+  function showEntries(&$refs, &$options) {
     static $counter = 0;
-
-    $tpl = new TemplatePower(dirname(__FILE__) . '/bibentry-html.tpl');
-    $bibformat = $this->getFormat($format);
-
-    $tpl->prepare();
-    $currentYear = "unknown";
-    
-    if(!$groupByYear) {
-      $tpl->newBlock("year_separator");  
-      $tpl->assign("year", "");
-      $tpl->assign("display-year-header", "none");    
-    }
-    
+    $bib2tpl = new BibtexConverter($options);
+    return $bib2tpl->display($refs, file_get_contents(dirname(__FILE__) . "/test.tpl"));
+ 
     foreach($refs as $key => &$entry) {
     
       // Grouping by year?
@@ -411,11 +386,7 @@ class Papercite {
 // -------------------- Interface with WordPress
 
 
-function papercite_cb($myContent) {
-  return preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/", array($GLOBALS["papercite"], "process"), $myContent);
-}
-
-
+// --- Head of the HTML ----
 function papercite_head() {
   if (!function_exists('wp_enqueue_script')) {
     // In case there is no wp_enqueue_script function (WP < 2.6), we load the javascript ourselves
@@ -429,6 +400,7 @@ div.bibtex {
 
 }
 
+// --- Initialise papercite ---
 function papercite_init() {
   global $papercite;
   if (function_exists('wp_enqueue_script')) {
@@ -438,6 +410,13 @@ function papercite_init() {
   $papercite = new Papercite();
 }
 
+// --- Callback function ----
+function papercite_cb($myContent) {
+  return preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/",
+			       array($GLOBALS["papercite"], "process"), $myContent);
+}
+
+// --- Add the different handlers to WordPress ---
 add_action('init', 'papercite_init');	
 add_action('wp_head', 'papercite_head');
 add_filter('the_content', 'papercite_cb',1);
