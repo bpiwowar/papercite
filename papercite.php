@@ -46,7 +46,7 @@ include("papercite_options.php");
 
 class Papercite {
 
-  static $option_names = array("format", "timeout", "file");
+  static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template");
 
   var $parse = false;
 
@@ -221,7 +221,7 @@ class Papercite {
     // (1) From the preferences
     // (2) From the custom fields
     // (3) From the general options
-    $options = array("format" => "IEEE", "group" => "none");
+    $options = array("format" => "ieee", "group" => "none", "bibtex_template" => "default", "bibshow_template" => "default");
 
     // Get general preferences
     if (!$this->pOptions)
@@ -246,7 +246,6 @@ class Papercite {
     $tplOptions = array("group" => $options["group"], "order" => $options["order"]);
     $data = null;
 
-    
     // --- Process the commands ---
     switch($command) {
 
@@ -295,7 +294,7 @@ class Papercite {
       
       foreach($entries as &$entry)
 	$entry["key"] = $entry["cite"];
-      return  $this->showEntries($entries, $tplOptions, false);
+      return  $this->showEntries($entries, $tplOptions, false,  $this->getTemplate($options["bibtex_template"], $options["format"]));
 
       /*
 	bibshow / bibcite commands
@@ -359,16 +358,20 @@ class Papercite {
 	  $refs[$num[0]]["pKey"] = $num[1];
 	}
       }
-      // grouping of bibentries by year is switched of by default
-      // for this case, to allow the entries to show up in the 
-      // order of usage
-      return $this->showEntries($refs, $tplOptions, true);
+
+      return $this->showEntries($refs, $tplOptions, true, $this->getTemplate($options["bibshow_template"], $options["format"]));
       
     default:
       return "[error in papercite: unhandled]";
     }
   }
 
+  function &getTemplate($mainTpl, $formatTpl) {
+    $main = file_get_contents(dirname(__FILE__) . "/tpl/" . $mainTpl . ".tpl");
+    $format = file_get_contents(dirname(__FILE__) . "/format/" . $formatTpl . ".tpl");
+    $template = str_replace("@#entry@", $format, $main);
+    return $template;
+  }
 
   function toDownload($entry) {
     if (array_key_exists('url',$entry)){
@@ -387,13 +390,13 @@ class Papercite {
    * @param options The options to pass to bib2tpl
    * @param getKeys Keep track of the keys for a final substitution
    */
-  function showEntries(&$refs, &$options, $getKeys) {
+  function showEntries(&$refs, &$options, $getKeys, &$template) {
     $bib2tpl = new BibtexConverter($options);
 
     foreach($refs as &$ref)
       $ref["entryid"] = $this->counter++;
-
-    $r =  $bib2tpl->display($refs, file_get_contents(dirname(__FILE__) . "/tpl/default.tpl"));
+    
+    $r =  $bib2tpl->display($refs, $template);
     if ($getKeys) {
       foreach($refs as &$group)
 	foreach($group as &$ref) {
