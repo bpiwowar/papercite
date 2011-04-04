@@ -186,13 +186,13 @@ class Helper
    * @return string Either a string if an array was passed or input value
    *                otherwise.
    */
-  function niceAuthors($authors)
+  function niceAuthors($authors, $options = array())
   {
     if ( is_array($authors) )
     {
       foreach ( $authors as $key => $author )
       {
-        $authors[$key] = $this->niceAuthor($author);
+        $authors[$key] = $this->niceAuthor($author, $options);
       }
 
       $authors = join(', ', $authors);
@@ -210,8 +210,15 @@ class Helper
    * @return string Either a string if an array was passed or input value
    *               otherwise.
    */
-  function niceAuthor($author)
+  function niceAuthor($author, $options = array())
   {
+    if ($options == "initials") {
+      $firsts = preg_split("#[- ]#",$author["first"]);
+      foreach($firsts as $first) 
+	$initials .= "$first[0].";
+      $author["first"] = $initials;
+    }
+
     if ( is_array($author) )
     {
       // Remove empty name parts

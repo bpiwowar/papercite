@@ -119,7 +119,7 @@ class Papercite {
    * and return the first match, starting by the preferred ones
    */
   static function getDataFile($uri, $ext, $full = true) {
-    foreach(array("../../papercite-data","../papercite-data", "data") as $path) {
+    foreach(array("../../papercite-data","../papercite-data", "data", ".") as $path) {
       $fullpath = dirname(__FILE__) . "/$path/$uri$ext";
       if (file_exists($fullpath)) 
 	return $full ? $fullpath : "$path/$uri$ext";
@@ -231,13 +231,14 @@ class Papercite {
     // (1) From the preferences
     // (2) From the custom fields
     // (3) From the general options
-    $options = array("format" => "ieee", "group" => "none", "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibcite");
+    $options = array("format" => "ieee", "group" => "none", "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow");
 
     // Get general preferences
     if (!$this->pOptions)
       $this->pOptions = &get_option('papercite_options');
 
     foreach(self::$option_names as &$name) {
+      if ($this->pOptions) 
       if (array_key_exists($name, $this->pOptions) && sizeof($this->pOptions[$name]) > 0) {
 	$options[$name] = $this->pOptions[$name];
       }
@@ -254,7 +255,7 @@ class Papercite {
     if (array_key_exists("groupByYear", $options) && (strtoupper($options["groupByYear"]) == "TRUE")) 
 	$options["group"] = "year";
 
-    $tplOptions = array("group" => $options["group"], "order" => $options["order"], "group-order" => $options["group_order"], "sort" => $options["sort"]);
+    $tplOptions = array("anonymous-whole" => true, "group" => $options["group"], "order" => $options["order"], "group-order" => $options["group_order"], "sort" => $options["sort"]);
     $data = null;
     
     // --- Process the commands ---
@@ -378,8 +379,8 @@ class Papercite {
   }
 
   function &getTemplate($mainTpl, $formatTpl) {
-    $main = file_get_contents(dirname(__FILE__) . "/tpl/" . $mainTpl . ".tpl");
-    $format = file_get_contents(dirname(__FILE__) . "/format/" . $formatTpl . ".tpl");
+    $main = file_get_contents(papercite::getDataFile("/tpl/" . $mainTpl, ".tpl"));
+    $format = file_get_contents(papercite::getDataFile("/format/" . $formatTpl, ".tpl"));
     $template = str_replace("@#entry@", $format, $main);
     return $template;
   }

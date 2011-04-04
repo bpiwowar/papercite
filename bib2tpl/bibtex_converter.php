@@ -109,6 +109,8 @@ class BibtexConverter
     $this->_options = array(
       'only'  => array(),
 
+      'anonymous-whole' => false,
+
       'group' => 'year',
       'group-order' => 'desc',
 
@@ -254,7 +256,7 @@ class BibtexConverter
       foreach ( $data as $entry )
       {
         $target =   $this->_options['group'] === 'firstauthor'
-                  ? $this->_helper->niceAuthor($entry['firstauthor'])
+	  ? $this->_helper->niceAuthor($entry['firstauthor'])
                   : $entry[$this->_options['group']];
 
         if ( empty($result[$target]) )
@@ -267,7 +269,10 @@ class BibtexConverter
     }
     else
     {
-      $result[$this->_options['lang']['all']] = $data;
+      if ($this->_options["anonymous-whole"]) 
+	$result[""] = $data;
+      else
+	$result[$this->_options['lang']['all']] = $data;
     }
 
     return $result;
@@ -393,13 +398,13 @@ class BibtexConverter
 
     // Global variables
     $this->currentEntry = &$entry;
-    return preg_replace_callback('/@([^@]+)@/', array($this, "_translate_variables"), $result);
+    return preg_replace_callback('/@([^:@]+)(?::([^@]+))?@/', array($this, "_translate_variables"), $result);
   }
 
   function _translate_variables($input) {
     // Special case: author
     if ($input[1] == "author") {
-      return $this->_helper->niceAuthors($this->currentEntry["author"]);
+      return $this->_helper->niceAuthors($this->currentEntry["author"], $input[2]);
     }
 
     // Entry variable

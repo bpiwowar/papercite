@@ -706,8 +706,8 @@ class Structures_BibTex
             $jr       = '';
             if (strpos($author, ',') === false) {
                 $tmparray = array();
-                //$tmparray = explode(' ', $author);
-                $tmparray = explode(' |~', $author);
+                $tmparray = explode(' ', $author);
+                //$tmparray = explode(' |~', $author);
                 $size     = sizeof($tmparray);
                 if (1 == $size) { //There is only a last
                     $last = $tmparray[0];
