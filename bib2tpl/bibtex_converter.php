@@ -82,6 +82,12 @@ class BibtexConverter
    */
   var $_helper;
 
+
+  /**
+   * Global variables that can be accessed in the template
+   */
+  var $_globals;
+
   /**
    * Constructor.
    *
@@ -125,6 +131,14 @@ class BibtexConverter
     $this->_options['lang'] = $translations;
 
     $this->_helper = new Helper($this->_options);
+  }
+
+
+  /**
+   * Set a global variable
+   */
+  function setGlobal($name, $value) {
+    $this->_globals[$name] = $value;
   }
 
   /**
@@ -369,18 +383,27 @@ class BibtexConverter
     // Resolve all conditions
     $result = $this->_resolve_conditions($entry, $result);
 
-    // Replace all possible unconditional fields
-    foreach ( $entry as $key => $value )
-    {
-      if ( is_array($value) )
-      {
-        $value = $this->_helper->niceAuthors($value);
-      }
+    // Global variables
+    $this->currentEntry = &$entry;
+    return preg_replace_callback('/@([^@]+)@/', array($this, "_translate_variables"), $result);
+  }
 
-      $result = preg_replace('/@'.$key.'@/', $value, $result);
+  function _translate_variables($input) {
+    // Special case: author
+    if ($input[1] == "author") {
+      return $this->_helper->niceAuthors($this->currentEntry["author"]);
     }
 
-    return $result;
+    // Entry variable
+    if (array_key_exists($input[1], $this->currentEntry)) 
+      return $this->currentEntry[$input[1]];
+
+    // Global variable
+    if (array_key_exists($input[1], $this->_globals)) {
+      return $this->_globals[$input[1]];
+    }
+
+    return $input[0];
   }
 
   /**

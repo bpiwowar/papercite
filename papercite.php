@@ -118,12 +118,27 @@ class Papercite {
    * Check the different paths where papercite data can be stored
    * and return the first match, starting by the preferred ones
    */
-  function getDataFile($uri) {
+  static function getDataFile($uri, $ext, $full = true) {
     foreach(array("../../papercite-data","../papercite-data", "data") as $path) {
-      $path = dirname(__FILE__) . "/$path/$uri";
-      if (file_exists($path)) return $path;
+      $fullpath = dirname(__FILE__) . "/$path/$uri$ext";
+      if (file_exists($fullpath)) 
+	return $full ? $fullpath : "$path/$uri$ext";
     }
-    
+  }
+
+  /** 
+   * Check if a matching file exists, and add it to the bibtex if so
+   * @param The key
+   * @param 
+   */
+  function checkFiles(&$entry, $types) {
+    $id = strtolower(preg_replace("@[/:]@", "-", $entry["cite"]));
+    foreach($types as &$type) {
+      $file = papercite::getDataFile("$type[0]/" . $id, ".$type[1]", false);
+      if ($file) {
+	$entry[$type[0]] =  get_bloginfo('wpurl') . "/wp-content/plugins/papercite/$file";
+      }
+    }
   }
 
   /**
@@ -135,7 +150,7 @@ class Papercite {
       if (strpos($biburi, "http://") === 0) 
 	$bibFile = $this->getCached($biburi);
       else {
-	$bibFile = $this->getDataFile("bib/$biburi");
+	$bibFile = $this->getDataFile("bib/$biburi","",true);
       }
       
       if (!$bibFile || !file_exists($bibFile)) {
@@ -158,26 +173,18 @@ class Papercite {
 	}
       }
 
+      // Add file data
+      foreach($this->cache[$biburi] as &$entry) {
+	$this->checkFiles($entry, array(array("pdf", "pdf")));
+      }
+
     }
 
 
     return $this->cache[$biburi];
   }
     
-  /** 
-   * Returns the path to the pdf given a bibtex key
-   */
-  function pdf($entry) {
-    $id = strtolower(preg_replace("@[/:]@", "-", $entry["bibtexCitation"]));
 
-    foreach(array("../../papercite-data/pdf","../papercite-data/pdf", "data") as $subfolder) {
-      if (file_exists(dirname(__FILE__) . "/$subfolder/" . $id . ".pdf")) {
-	return " <a href='" .  get_bloginfo('wpurl') . "/wp-content/plugins/papercite/$subfolder/$id.pdf' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/pdf.png' width='10' height='10' alt='PDF' /></a>";
-      }
-    }
-
-    return '';
-  }
   
   // this function formats a bibtex code in order to be readable
   // when appearing in the modal window
@@ -392,6 +399,7 @@ class Papercite {
    */
   function showEntries(&$refs, &$options, $getKeys, &$template) {
     $bib2tpl = new BibtexConverter($options);
+    $bib2tpl->setGlobal("WP_PLUGIN_URL", WP_PLUGIN_URL);
 
     foreach($refs as &$ref)
       $ref["entryid"] = $this->counter++;
@@ -404,7 +412,9 @@ class Papercite {
 	  $this->keyValues[] = $ref["key"];
 	}
     }
-    return $r["text"];
+
+    // Return, removing newlines 
+    return str_replace("\n", " ", $r["text"]);
   }
 }
 

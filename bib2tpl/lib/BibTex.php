@@ -345,12 +345,52 @@ class Structures_BibTex
                 $this->_generateWarning('WARNING_MULTIPLE_ENTRIES', implode(',',$notuniques));
             }
         }
+
+	// Post-process accents 
+	// (B. Piwowarski, Apr 2011)
+	foreach($this->data as &$entry) 
+	  foreach($entry as $fieldname => &$field) 
+	  if ($fieldname != "bibtex")
+	    if ($fieldname == "author") {
+	      foreach($field as &$text)
+		$text = preg_replace_callback("#\\\\['\"^¨`H~]\w|\\\\[LlcC]#", "Structures_BibTex::_accents_cb", $text);
+	    } else {
+	      $entry[$fieldname] = preg_replace_callback("#\\\\['~\"^¨`H]\w|\\\\[LlcC]#", "Structures_BibTex::_accents_cb", $field);
+	    }
+
+
         if ($valid) {
             $this->content = '';
             return true;
         } else {
             return PEAR::raiseError('Unbalanced parenthesis');
         }
+    }
+
+    static $accents = array(
+      "\'a" => "á", "\`a" => "à", "\^a" => "â", "\¨a" => "ä",
+      "\'A" => "Á", "\`A" => "À", "\^A" => "Â", "\¨A" => "Ä",
+      "\cc" => "ç",
+      "\cC" => "Ç",
+      "\'e" => "é", "\`e" => "è", "\^e" => "ê", "\¨e" => "ë", 
+      "\'E" => "é", "\`E" => "È", "\^E" => "Ê", "\¨E" => "Ë",
+      "\'i" => "í", "\`i" => "ì", "\^i" => "î", "\¨i" => "ï",
+      "\'I" => "Í", "\`I" => "Ì", "\^I" => "Î", "\¨I" => "Ï",
+      "\l" => "ł", 
+      "\L" => "Ł",
+      "\~n" => "ñ",
+      "\~N" => "Ñ",
+      "\'o" => "ó", "\`o" => "ò", "\^o" => "ô", "\¨o" => "ö", "\Ho" => "ő", "\"o" => "ő",
+      "\'O" => "Ó", "\`o" => "Ò", "\^O" => "Ô", "\¨O" => "Ö", "\HO" => "Ő", "\"O" => "Ő",
+      "\'u" => "ú", "\`u" => "ù", "\^u" => "û", "\¨u" => "ü",
+      "\'U" => "Ú", "\`U" => "Ù", "\^U" => "Û", "\¨U" => "Ü",
+      "\'z" => "ź", 
+    ); 
+
+    static function _accents_cb($input) {
+      if (!array_key_exists($input[0], Structures_BibTex::$accents))
+	return "<b>$input[0]</b>";
+      return  Structures_BibTex::$accents[$input[0]];
     }
 
     /**
