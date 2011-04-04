@@ -111,7 +111,7 @@ class Helper
    */
   function group_cmp($k1, $k2)
   {
-    return  $this->_options['order'] !== 'desc'
+    return  $this->_options['group-order'] !== 'desc'
           ? strcmp($k1, $k2)
           : -strcmp($k1, $k2);
   }
@@ -127,17 +127,22 @@ class Helper
    */
   function entry_cmp($e1, $e2)
   {
+    // Get the values
+    $name = $this->_options['sort'];
+
     // Sort always descending by date inside the group
-    $order = -strcmp($e1['year'].$this->_e2mn($e1),
-                     $e2['year'].$this->_e2mn($e2));
+    if ($name == "year") {
+      $order = -strcmp($e1['year'].$this->_e2mn($e1),
+		       $e2['year'].$this->_e2mn($e2));
+    } else if ($name == "firstauthor") {
+      $order = -strcmp($e1["author"]["last"], $e2["author"]["last"]);
+    } else 
+      $order = -strcmp($e1[$name], $e2[$name]);
 
-    if (   in_array($this->_options['group'], array('year', 'none')) 
-        && $this->_options['order'] === 'asc' )
-    {
-      $order = -$order;
-    }
 
-    return $order;
+    return $this->_options['order'] === 'desc' 
+      ? $order
+      : -$order;
   }
 
   /**

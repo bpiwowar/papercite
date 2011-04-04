@@ -31,7 +31,11 @@ Features compared to bib2html (0.9.3):
 * object oriented redesign of the plugin, so that further extensions are easy to make
 * publications can be grouped by year
 
-The papercite plugin has been developed and tested under Wordpress 3.0. It is based on bib2html version 0.9.3.
+The papercite plugin has been developed and tested under Wordpress
+3.1. It is based on bib2html version 0.9.3.
+
+Documentation can be found from within WordPress plugin list (click on
+the documentation link).
 
 == Installation ==
 
@@ -139,108 +143,4 @@ All users should upgrade - plugin was broken until now
 All bib2html users should at least use this version so they don't break their installation
 = 0.1 =
 First version
-
-== A brief Markdown Example ==
-
-= Data structure =
-
-1. Create a folder in `wp-content/papercite-data`, with two
-subfolders: `bib` (this will contain the bibtex files) and `pdf` (this
-will contain the PDF file).
-2. Copy your bibtex files into the `bib` folder, and your pdf files
-into the `pdf` folder. To match a bibtex entry with a PDF file, the
-PDF file should have be named **KEY**`.pdf` where **KEY** is the
-bibtex key in lowercase, where `:` and `/` have been replaced by `-`.
-
-
-= Options =
-
-You can set default parameters through the options or using 
-page/post custom fields (use the prefix `papercite_` for
-custom fields):
-1. `file`: The default bibtex file (can be a URL)
-2. `timeout`: The default time-out before reloading an
-external resource
-2. `format`: The default format
-
-= Bibliography mode =
-
-This is my whole list of publications: 
-
-`[bibtex file=mypub.bib]`
-
-If you want to filter the type of bibtex items, you can use one of the attributes allow, deny and key as follows:
-
-This is my latest conference paper:
-
-`[bibtex file=mypub.bib key=CGW2006]`
-
-You can also have a list of keys to display more than one paper:
-
-`[bibtex file=mypub.bib key=CGW2006,CGW2007]`
-
-This is my bibliography maintained at citeulike.org
-
-`[bibtex file=http://www.citeulike.org/bibtex/user/username]`
-
-This is my bibliography maintained at bibsonomy.org
-
-`[bibtex file=http://bibsonomy.org/bib/user/username?items=1000]`
-
-= Citation mode =
-
-The second way of using this plug-in (new to papercite), is to use bibcite and bibshow commands
-
-`[bibshow file=mybib.bib]
-Here is one reference [bibcite key=key1]
-and another [bibcite key=key2]`
-
-You end with the following to print the list of references:
-
-`[/bibshow]`
-
-
-= Formatting the entries =
-
-You can modify how publications are displayed using several options:
-
-* `key-format` How to format the citing key of the publication
-* `format` How to format the publication
-* `group` How to group publications
-* `order` How to order publications
-
-Each of these options are described next. Finally, the template
-language used to format entries is described at the following URL:
-http://lmazy.verrech.net/bib2tpl/templates/
-
-= Format = 
-
-You can modify the style of the citations by using the `format`
-parameter with the `bibshow` and `bibtex` commands.
-For example, 
-
-`[bibtex file=mypub.bib format=ieee]`
-
-The following format are currently available: 
-
-* ieee (default)
-
-= Group =
-
-You can group the citations using the `group` option with values
-`none` (by default), `year`, `firstauthor`, or `entrytype`.
-You can order the groups using the `group-order` option which can take
-values among `asc`, `desc` or `none` (none by default).
-
-Example:
-`[bibtex file=mypub.bib group=year group-order=desc]`
-
-= Sort =
-
-You can sort the citations using the `sort` option together
-by a description of the sorting key. Note that the sort
-
-`[bibtex file=mypub.bib sort=year:desc]`
-
-
 

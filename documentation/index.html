@@ -1,0 +1,226 @@
+<html>
+<head>
+<title>Papercite documentation</title>
+<style>
+div.code {
+border: 1px solid black;
+padding: 1em;
+background: #eef;
+margin: 1em;
+font-family: monospace;
+}
+
+h2 {
+border: 1px solid black;
+padding: .2em;
+}
+
+.goptions {
+color: red;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Papercite documentation</h1>
+
+
+<h2>Data structure</h2>
+
+<ol>
+  <li>Create a folder in <code>wp-content/papercite-data</code>, with
+  the following subfolders (none is mandatory):
+  <ul>
+    <li><code>bib</code> contains your bibtex files</li>
+    <li><code>pdf</code> contains your pdf files</li>
+    <li><code>tpl</code> contains your custom templates</li>
+    <li><code>format</code> contains your custom entry formats</li>
+    </ul>
+  </li>
+ <li>Copy your bibtex files into the <code>bib</code> folder, and your pdf files
+  into the <code>pdf</code> folder. To match a bibtex entry with a PDF file, the
+  PDF file should have be named <b>KEY</b><code>.pdf</code> where <b>KEY</b> is the
+  bibtex key in lowercase, where <code>:</code> and <code>/</code> have been replaced by <code>-</code>.</li>
+</ol>
+
+
+<h2>Usages</h2>
+
+
+<h3>Bibliography mode</h3>
+
+This is my whole list of publications: 
+
+<div class="code">[bibtex file=mypub.bib]</div>
+
+If you want to filter the type of bibtex items, you can use one of the attributes allow, deny and key as follows:
+
+This is my latest conference paper:
+
+<div class="code">[bibtex file=mypub.bib key=CGW2006]</div>
+
+You can also have a list of keys to display more than one paper:
+
+<div class="code">[bibtex file=mypub.bib key=CGW2006,CGW2007]</div>
+
+This is my bibliography maintained at citeulike.org
+
+<div class="code">[bibtex file=http://www.citeulike.org/bibtex/user/username]</div>
+
+This is my bibliography maintained at bibsonomy.org
+
+<div class="code">[bibtex file=http://bibsonomy.org/bib/user/username?items=1000]</div>
+
+<h3>Citation mode</h3>
+
+The second way of using this plug-in (new to papercite), is to use bibcite and bibshow commands
+
+<div class="code">[bibshow file=mybib.bib]
+  Here is one reference [bibcite key=key1]
+  and another [bibcite key=key2]</div>
+
+  <p>  You end with the following to print the list of references:</p>
+
+  <div class="code">[/bibshow]</div>
+
+  <h2><code>bibshow</code> and <code>bibtex</code> options</h2>
+
+<p>  Here are the list of options that can be given to papercite.</p>
+
+<p>  Some of
+  these options can be set at a global level (through ) and page/post
+  level (using custom fields with a prefix
+  <code>papercite_</code>). These options are shown <span
+  class="goptions">like this</span>.
+</p>
+
+  <p>
+  First, some options are necessary to tell which bibtex file should
+  be used:</p>
+  <ul>
+    <li><code class="goptions">file</code>: The default bibtex file (can be a URL)</li>
+    <li><code class="goptions">timeout</code>: The default time-out before reloading an
+    external resource</li>
+ </ul>
+
+
+
+  <p>You can modify how publications are displayed using several options:</p>
+  <ul>
+    <li><code class="goptions">key_format</code>: How to format the citing key of the publication</li>
+    <li><code>template</code>: How to format the publication. At a
+  global level, <code class="goptions">bibshow_template</code> and <code
+  class="goptions">bibcite_template</code> are used to distinguish
+  between the template used respectively for <code>bibshow</code> and <code>bibcite</code></li>
+    <li><code class="goptions">format</code>: Template used to
+  format one BibTeX entry</li>
+  </ul>
+
+  <p>Grouping and order options</p>
+  <ul>
+    <li><code>group</code>: How to group publications</li>
+    <li><code>group-order</code>: Group sort order</li>
+    <li><code>sort</code>: How to order publications within groups</li>
+    <li><code>order</code>: Sort order within groups</li>
+  </ul>
+  
+  <p>Each of these options are described next. Finally, the template
+  language used to format entries is described on the
+  <a href="http://lmazy.verrech.net/bib2tpl/templates/">bib2tpl site</a>.
+  </p>
+
+  <h3>Formatting</h3>
+
+  You can modify the style of the citations by using the <code>format</code>
+  For example, 
+
+<div class='code'>[bibtex file=mypub.bib format=ieee
+  template=default-bibtex key_format=number]</div>
+
+ <p>The <code>key_format</code> controls how a key is associated to a
+ BibTeX entry. The following values are accepted:
+  <ul>
+    <li><code>number</code> (default) gives a unique increasing number
+ to each entry (1, 2, ...)</li>
+  </ul>
+
+  </p>
+
+  <p> The format described how an entry is displayed.
+  The following format are currently available: 
+  <ul>
+    <li><code>ieee</code> (default)</li>
+  </ul>
+ </p>
+
+  <p>
+  Eventually, the <code>template</code> option controls which template
+  is used to format the entries. It is based on the  <code>tpl</code>
+  code. For the moment, the following templates are defined:
+  <ul>
+    <li><code>default-bibtex</code> is the default template used for the
+  <code>bibtex</code> command</li>
+    <li><code>default-bibshow</code> is he default template used for the
+  <code>bibshow</code> command</li>
+    </ul>
+    
+  </p>
+
+    <p>From a pratical point of view, the final format follows <a
+    href="http://lmazy.verrech.net/bib2tpl/templates/">bib2tpl</a>. In order
+    to create a bib2tpl template, templates and formats are merged:
+    in the template, <code>@#entry@</code> is replaced by the content
+    of the format file. This allows to decouple the formatting of
+    entries with the formatting of the full bibliography.
+    </p>
+
+    <p>
+    With the <em>bib2tpl</em> code, some extra variables are defined:
+    <ul>
+      <li><code>@papercite_id@</code> is a unique id within the page/post</li>
+      <li><code>@key@</code> is a the key as formatted with <code>key_format</code>.</li>
+      <li><code>@WP_PLUGIN_URL@</code> will be replaced by the plugin URL.</li>
+      </ul>
+    </p>
+  
+<h3>Grouping</h3>
+
+You can group the citations using the `group` option with values
+`none` (by default), `year`, `firstauthor`, or `entrytype`.
+You can order the groups using the `group-order` option which can take
+values among `asc`, `desc` or `none` (none by default).
+
+Example:
+<div class='code'>[bibtex file=mypub.bib group=year
+  group_order=desc]</div>
+
+  <p>The grouping is defined by the <code>group</code>
+  value (<code>year</code>, <code>firstauthor</code>,
+  <code>entrytype</code> or <code>none</code>). Group are sorted
+  depending on the <code>group_order</code> value:
+  <ul>
+    <li><code>none</code>: No order</li> 
+    <li><code>asc</code>: Ascendant order</li> 
+    <li><code>desc</code>: Descendant order</li> 
+  </ul>
+    
+  </p>
+
+<h3> Sorting </h3>
+
+You can sort the citations using the <code>sort</code> option together
+by a description of the sorting key. Note that the sort
+
+<div class='code'>[bibtex file=mypub.bib sort=year order=esc]</div>
+
+<p> Entries (within groups) are sorted
+  depending on the <code>sort</code> key  (<code>year</code>, <code>firstauthor</code>,
+  <code>entrytype</code> or <code>none</code>). The ordering is also influenced by the <code>order</code> value.
+  <ul>
+    <li><code>none</code>: No order</li> 
+    <li><code>asc</code>: Ascendant order</li> 
+    <li><code>desc</code>: Descendant order</li> 
+  </ul></p>
+</body>
+</html>

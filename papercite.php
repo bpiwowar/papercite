@@ -3,7 +3,7 @@
 /*
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
-  Description: papercite enables to add bibtex entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
+  Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
   Version: 0.3.0
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
@@ -14,6 +14,7 @@
 
     Contributors:
     - Stefan Aiche: group by year option
+    - Łukasz Radliński: bug fixes & handling polish characters
 
 
     Sergio Andreozzi has written bib2html on which papercite is based
@@ -22,7 +23,6 @@
     - Patrick Maué: remote bibliographies managed by citeulike.org or bibsonomy.org
     - Nemo: more characters on key
     - Marco Loregian: inverting bibtex and html
-    - Łukasz Radliński: bug fixes & handling polish characters
 
 
     This program is free software; you can redistribute it and/or modify
@@ -162,7 +162,7 @@ class Papercite {
 	$data = file_get_contents($bibFile);
 	if (!empty($data)) {
  
-	  $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true));
+	  $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true));
 	  $this->_parser->loadString($data);
 	  $stat = $this->_parser->parse();
 	  if ( !$stat ) {
@@ -173,10 +173,13 @@ class Papercite {
 	}
       }
 
-      // Add file data
+      // --- Add custom fields
       foreach($this->cache[$biburi] as &$entry) {
 	$this->checkFiles($entry, array(array("pdf", "pdf")));
+	$entry['firstauthor'] = $entry['author'][0];
       }
+
+      //      print_r($this->cache[$biburi]);
 
     }
 
@@ -221,22 +224,23 @@ class Papercite {
     // Get all the options pairs and store them
     // in the $options array
     $options_pairs = array();
-    preg_match_all("/\s*(?:(\w+)=(\S+))(\s+|$)/", $matches[2], $options_pairs, PREG_SET_ORDER);
+    preg_match_all("/\s*(?:([\w-_]+)=(\S+))(\s+|$)/", $matches[2], $options_pairs, PREG_SET_ORDER);
 
     // Set preferences, by order of increasing priority
     // (0) Set in
     // (1) From the preferences
     // (2) From the custom fields
     // (3) From the general options
-    $options = array("format" => "ieee", "group" => "none", "bibtex_template" => "default", "bibshow_template" => "default");
+    $options = array("format" => "ieee", "group" => "none", "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibcite");
 
     // Get general preferences
     if (!$this->pOptions)
       $this->pOptions = &get_option('papercite_options');
 
     foreach(self::$option_names as &$name) {
-      if (array_key_exists($name, $this->pOptions))
+      if (array_key_exists($name, $this->pOptions) && sizeof($this->pOptions[$name]) > 0) {
 	$options[$name] = $this->pOptions[$name];
+      }
       $custom_field = get_post_custom_values("papercite_$name");
       if (sizeof($custom_field) > 0)
 	$options[$name] = $custom_field[0];
@@ -247,12 +251,12 @@ class Papercite {
     }
 
     // --- Compatibility issues
-    if (array_key_exists("groupByYear", $options) && (strtoupper($options["groupByYear"]) == "TRUE"))
+    if (array_key_exists("groupByYear", $options) && (strtoupper($options["groupByYear"]) == "TRUE")) 
 	$options["group"] = "year";
 
-    $tplOptions = array("group" => $options["group"], "order" => $options["order"]);
+    $tplOptions = array("group" => $options["group"], "order" => $options["order"], "group-order" => $options["group_order"], "sort" => $options["sort"]);
     $data = null;
-
+    
     // --- Process the commands ---
     switch($command) {
 
@@ -380,17 +384,6 @@ class Papercite {
     return $template;
   }
 
-  function toDownload($entry) {
-    if (array_key_exists('url',$entry)){
-      $string = " <a href='" . $entry['url'] . "' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/external.png' width='10' height='10' alt='Go to document' /></a>";
-      return $string;
-    } else if (array_key_exists('doi', $entry)) {
-      $string = " <a href='http://dx.doi.org/" . $entry['doi'] . "' title='Go to document'><img src='" . get_bloginfo('wpurl') . "/wp-content/plugins/papercite/external.png' width='10' height='10' alt='Go to document' /></a>";
-      return $string;
-    }
-    return '';
-  } 
-
   /**
    * Show a set of entries
    * @param refs An array of references
@@ -401,9 +394,9 @@ class Papercite {
     $bib2tpl = new BibtexConverter($options);
     $bib2tpl->setGlobal("WP_PLUGIN_URL", WP_PLUGIN_URL);
 
-    foreach($refs as &$ref)
-      $ref["entryid"] = $this->counter++;
-    
+    foreach($refs as &$entry)
+      $entry["papercite_id"] = $this->counter++;
+
     $r =  $bib2tpl->display($refs, $template);
     if ($getKeys) {
       foreach($refs as &$group)
@@ -414,6 +407,7 @@ class Papercite {
     }
 
     // Return, removing newlines 
+    //        return "<div style='color: blue'>". print_r($options, true) . "</div>" .  str_replace("\n", " ", $r["text"]);
     return str_replace("\n", " ", $r["text"]);
   }
 }
@@ -453,18 +447,25 @@ function papercite_cb($myContent) {
   $papercite = &$GLOBALS["papercite"];
   $papercite->init();
   
-  // Process all at once
+  // (1) First phase - handles everything but bibcite keys
   $text = preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/",
 				array($papercite, "process"), $myContent);
   
-  // Handles custom keys in bibshow
+  // (2) Handles custom keys in bibshow and return
   return str_replace($papercite->keys, $papercite->keyValues, $text);
+}
+
+function papercite_row_cb($data, $file) {
+  if ($file == "papercite/papercite.php") {
+    $data[] = "<a href='" . WP_PLUGIN_URL . "/papercite/documentation/index.html'>Documentation</a>";
+  }
+  return $data;
 }
 
 // --- Add the different handlers to WordPress ---
 add_action('init', 'papercite_init');	
 add_action('wp_head', 'papercite_head');
 add_filter('the_content', 'papercite_cb',1);
-
+add_filter('plugin_row_meta', 'papercite_row_cb',1,2);
 
 ?>

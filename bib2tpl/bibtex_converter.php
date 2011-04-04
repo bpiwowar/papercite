@@ -94,8 +94,10 @@ class BibtexConverter
    * @access public
    * @param array options Options array. May contain the following pairs:
    *   only  => array(['author' => 'regexp'],['entrytype' => 'regexp'])
-   *   group => (none|year|firstauthor|entrytype)
-   *   order => (asc|desc)
+   *   group => (none|year|firstauthor|entrytype)  
+   *   group-order => (asc|desc|none)
+   *   sort => (none|year|firstauthor|entrytype)
+   *   order => (asc|desc|none)
    *   lang  => any string $s as long as proper lang/$s.php exists
    * @return void
    */
@@ -106,8 +108,13 @@ class BibtexConverter
     // Default options
     $this->_options = array(
       'only'  => array(),
+
       'group' => 'year',
-      'order' => 'desc',
+      'group-order' => 'desc',
+
+      'sort' => 'none',
+      'order' => 'none',
+
       'lang' => 'en'
     );
 
@@ -277,16 +284,17 @@ class BibtexConverter
   function _sort(&$data)
   {
     // Sort groups if there are any
-    if ( $this->_options['group'] !== 'none' )
+    if ( $this->_options['group-order'] !== 'none' )
     {
       uksort($data, array($this->_helper, 'group_cmp'));
     }
 
     // Sort individual groups
-    foreach ( $data as &$group )
-    {
-      uasort($group, array($this->_helper, 'entry_cmp'));
-    }
+    if ( $this->_options["sort"] != "none" ) 
+      foreach ( $data as &$group )
+	{
+	  uasort($group, array($this->_helper, 'entry_cmp'));
+	}
 
     return $data;
   }
