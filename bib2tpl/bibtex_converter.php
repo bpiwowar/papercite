@@ -3,6 +3,10 @@
  * By Raphael Reitzig, 2010
  * code@verrech.net
  * http://lmazy.verrech.net
+ * 
+ * Modified by B. Piwowarski for inclusion in the papercite
+ * WordPress plug-in
+ *
  *
  * This work is subject to Creative Commons
  * Attribution-NonCommercial-ShareAlike 3.0 Unported.
@@ -189,9 +193,10 @@ class BibtexConverter
    */
   function display(&$data, $template)
   {
+    $this->_pre_process($data);
     $data = $this->_group($data);
     $data = $this->_sort($data);
-    $text = $this->_post_process($data);
+    $this->_post_process($data);
 
     $text = $this->_translate($data, $template);
     return array("text" => &$text, "data" => &$data);
@@ -225,8 +230,6 @@ class BibtexConverter
                || preg_match('/'.$this->_options['only']['entrytype'].'/i',
                              $entry['entrytype'])) )
       {
-        $entry['firstauthor'] = $entry['author'][0];
-        $entry['entryid'] = $id++;
         $entry['year'] = empty($entry['year']) ? '0000' : $entry['year'];
         if ( empty($this->_options['lang']['entrytypes'][$entry['entrytype']]) )
         {
@@ -238,6 +241,18 @@ class BibtexConverter
 
     return $result;
   }
+
+ /**
+   * This function do some pre-processing on the entries
+   */
+  function _pre_process(&$data) {
+    foreach ( $data as &$entry ) {
+      $entry['firstauthor'] = $entry['author'][0];
+      $entry['entryid'] = $id++;
+    }
+  }
+
+
 
   /**
    * This function do some post-processing on the grouped & ordered list of publications.
@@ -279,7 +294,7 @@ class BibtexConverter
     {
       foreach ( $data as $entry )
       {
-        $target =   $this->_options['group'] === 'firstauthor'
+        $target =  $this->_options['group'] === 'firstauthor'
 	  ? $this->_helper->niceAuthor($entry['firstauthor'])
                   : $entry[$this->_options['group']];
 
@@ -313,7 +328,7 @@ class BibtexConverter
   function _sort(&$data)
   {
     // Sort groups if there are any
-    if ( $this->_options['group-order'] !== 'none' )
+    if ( $this->_options['group_order'] !== 'none' )
     {
       uksort($data, array($this->_helper, 'group_cmp'));
     }
@@ -449,7 +464,17 @@ class BibtexConverter
       $groups = "";
       foreach ( $this->_data as $groupkey => &$group )
 	{
+	  
+	  if ( is_array($groupkey) )
+	    // authors
+	    $groupkey = $this->_helper->niceAuthor($key);
+	  elseif ( $this->_options['group'] === 'entrytype' )
+	    $groupkey = $this->_options['lang']['entrytypes'][$groupkey];
+	  
+	  // Set the different global variables and parse
 	  $this->_globals["groupkey"] = $groupkey;
+	  $this->_globals["groupid"] = md5($groupkey);
+	  $this->_globals["groupcount"] = count($group);
 	  $this->_group = &$group;
 	  $groups .= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $this->group_tpl);
 	}
@@ -500,130 +525,9 @@ class BibtexConverter
   }
 
 
-  /**
-   * This function translates one entry group
-   *
-   * @access private
-   * @param string key The rendered group's key
-   * @param array data Array of entries in this group
-   * @param string template The group part of the template
-   * @return string String representing the passed group wrt template
-   */
-  function _translate_group($key, $data, $template)
-  {
-    $result = $template;
+  
 
-    // Replace group values
-    if ( is_array($key) )
-    {
-      $key = $this->_helper->niceAuthor($key);
-    }
-    elseif ( $this->_options['group'] === 'entrytype' )
-    {
-      $key = $this->_options['lang']['entrytypes'][$key];
-    }
-    $result = preg_replace('/@groupkey@/', $key, $result);
-    $result = preg_replace('/@groupid@/', md5($key), $result);
-    $result = preg_replace('/@groupcount@/', count($data), $result);
 
-    $pattern = '/@\{entry@(.*?)@\}entry@/s';
-
-    // Extract entry template
-    $entry_tpl = array();
-    preg_match($pattern, $template, $entry_tpl);
-    $entry_tpl = $entry_tpl[1];
-
-    // Translate all entries
-    $entries = '';
-    foreach ( $data as $entry )
-    {
-      $entries .= $this->_translate_entry($entry, $entry_tpl);
-    }
-
-    return preg_replace($pattern, $entries, $result);
-  }
-
-  /**
-   * This function translates one entry
-   *
-   * @access private
-   * @param array entry Array of fields
-   * @param string template The entry part of the template
-   * @return string String representing the passed entry wrt template
-   */
-  function _translate_entry($entry, $template)
-  {
-    $result = $template;
-
-    // Resolve all conditions
-    $result = $this->_resolve_conditions($entry, $result);
-
-    // Global variables
-    $this->currentEntry = &$entry;
-    return preg_replace_callback('/@([^:@]+)(?::([^@]+))?@/', array($this, "_translate_variables"), $result);
-  }
-
-  function _translate_variables($input) {
-    // Special case: author
-    if ($input[1] == "author") {
-      return $this->_helper->niceAuthors($this->currentEntry["author"], $input[2]);
-    }
-
-    // Entry variable
-    if (array_key_exists($input[1], $this->currentEntry)) 
-      return $this->currentEntry[$input[1]];
-
-    // Global variable
-    if (array_key_exists($input[1], $this->_globals)) {
-      return $this->_globals[$input[1]];
-    }
-
-    return $input[0];
-  }
-
-  /**
-   * This function eliminates conditions in template parts.
-   *
-   * @access private
-   * @param array entry Entry with respect to which conditions are to be
-   *                    solved.
-   * @param string template The entry part of the template.
-   * @return string Template string without conditions.
-   */
-  function _resolve_conditions($entry, $string) {
-    $pattern = '/@\?(\w+?)@(.*?)(@:\1@(.*?)){0,1}@;\1@/s';
-    /* Group 1: field
-     * Group 2: then
-     *[Group 4: else]
-     */
-
-    $match = array();
-
-    /* Would like to do
-     *    preg_match_all($pattern, $string, $matches);
-     * to get all matches at once but that results in Segmentation
-     * fault. Therefore iteratively:
-     */
-    while ( preg_match($pattern, $string, $match) )
-    {
-      $resolved = '';
-      if ( !empty($entry[$match[1]]) )
-      {
-        $resolved = $match[2];
-      }
-      elseif ( !empty($match[4]) )
-      {
-        $resolved = $match[4];
-      }
-
-      // Recurse to cope with nested conditions
-      $resolved = $this->_resolve_conditions($entry, $resolved);
-
-      $string = str_replace($match[0], $resolved, $string);
-    }
-
-    return $string;
-  }
 }
 
 ?>

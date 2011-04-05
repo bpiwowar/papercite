@@ -353,9 +353,9 @@ class Structures_BibTex
 	  if ($fieldname != "bibtex")
 	    if ($fieldname == "author") {
 	      foreach($field as &$text)
-		$text = preg_replace_callback("#\\\\['\"^¨`H~]\w|\\\\[LlcC]#", "Structures_BibTex::_accents_cb", $text);
+		Structures_BibTex::process_accents($text);
 	    } else {
-	      $entry[$fieldname] = preg_replace_callback("#\\\\['~\"^¨`H]\w|\\\\[LlcC]#", "Structures_BibTex::_accents_cb", $field);
+	      Structures_BibTex::process_accents($entry[$fieldname]);
 	    }
 
 
@@ -365,6 +365,10 @@ class Structures_BibTex
         } else {
             return PEAR::raiseError('Unbalanced parenthesis');
         }
+    }
+
+    static function process_accents(&$text) {
+      $text = preg_replace_callback("#\\\\['\"^¨`H~]\w|\\\\[LlcC]#", "Structures_BibTex::_accents_cb", $text);
     }
 
     static $accents = array(

@@ -66,6 +66,7 @@ class Papercite {
 
   // bibshow options stack
   var $bibshow_options = array();
+  var $bibshow_tpl_options = array();
 
   // Global counter for unique references of each
   // displayed citation (used by bibshow)
@@ -233,9 +234,12 @@ class Papercite {
     // (1) From the preferences
     // (2) From the custom fields
     // (3) From the general options
-    $options = array("format" => "ieee", "group" => "none", "order" => "year", "sort" => "desc", "key_format" => "numeric",
+    $options = array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
 		     "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow");
+    if ($command == "bibtex") 
+      $options["sort"] = "year";
 
+    
     // Get general preferences
     if (!$this->pOptions)
       $this->pOptions = &get_option('papercite_options');
@@ -252,10 +256,10 @@ class Papercite {
 
     // Gets the options from the command
     foreach($options_pairs as $x) {
-      if ($x[1] == "template") 
+      if ($x[1] == "template") {
 	// Special case of template: should overwrite the corresponding command template
-	$options["$command_$x[1]"] = $x[2];
-      else
+	$options["${command}_$x[1]"] = $x[2];
+      } else
 	$options[$x[1]] = $x[2];
     }
 
@@ -265,7 +269,9 @@ class Papercite {
 	$options["group_order"] = "desc";
     }
 
-    $tplOptions = array("anonymous-whole" => true, "group" => $options["group"], "group-order" => $options["group_order"], 
+    $tplOptions = array(
+			"anonymous-whole" => true, // for compatibility in the output
+			"group" => $options["group"], "group-order" => $options["group_order"], 
 			"sort" => $options["sort"], "order" => $options["order"],
 			"key_format" => $options["key_format"]);
     $data = null;
@@ -331,6 +337,8 @@ class Papercite {
 	$refs[$key] = &$entry;
       }
 
+      $this->bibshow_tpl_options[] = $tplOptions;
+      $this->bibshow_options[] = $options;
       array_push($this->bibshows, &$refs);
       $this->cites[] = array();
       break;
@@ -343,8 +351,6 @@ class Papercite {
       $key = $options["key"];
       $refs = &$this->bibshows[sizeof($this->bibshows)-1];
       $cites = &$this->cites[sizeof($this->cites)-1];
-      $this->bibshow_options[] = $tplOptions;
-
 
       // First, get the corresponding entry
       if (array_key_exists($key, $refs)) {
@@ -369,7 +375,8 @@ class Papercite {
       // Remove the array from the stack
       $data = &array_pop($this->bibshows);
       $cites = &array_pop($this->cites);
-      $tplOptions = &array_pop($this->bibshow_options);
+      $tplOptions = &array_pop($this->bibshow_tpl_options);
+      $options = &array_pop($this->bibshow_options);
       $refs = array();
 
       // Order the citations according to citation order
@@ -381,7 +388,6 @@ class Papercite {
 	  $refs[$num[0]]["pKey"] = $num[1];
 	}
       }
-
       return $this->showEntries($refs, $tplOptions, true, $this->getTemplate($options["bibshow_template"], $options["format"]));
       
     default:

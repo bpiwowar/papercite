@@ -111,7 +111,7 @@ class Helper
    */
   function group_cmp($k1, $k2)
   {
-    return  $this->_options['group-order'] !== 'desc'
+    return  $this->_options['group_order'] !== 'desc'
           ? strcmp($k1, $k2)
           : -strcmp($k1, $k2);
   }
@@ -135,7 +135,14 @@ class Helper
       $order = -strcmp($e1['year'].$this->_e2mn($e1),
 		       $e2['year'].$this->_e2mn($e2));
     } else if ($name == "firstauthor") {
-      $order = -strcmp($e1["author"]["last"], $e2["author"]["last"]);
+      $order = -strcmp($e1["author"][0]["last"], $e2["author"][0]["last"]);
+    } else if ($name == "author") {
+      $n = min(sizeof($e1["author"]), sizeof($e2["author"]));
+      for($i = 0; $i < $n; $i++) {
+	$order = -strcmp($e1["author"][$i]["last"], $e2["author"][$i]["last"]);
+	if ($order != 0) 
+	  break;
+      }
     } else 
       $order = -strcmp($e1[$name], $e2[$name]);
 

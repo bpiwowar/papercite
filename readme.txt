@@ -6,41 +6,42 @@ Tested up to: 3.1
 Stable tag: 0.3.0
 
 papercite helps to format bibtex entries to display a bibliography or
-cite papers
+cite papers.
 
 == Description ==
 
-papercite (based on bib2html 0.9.3) format bibtex entries as HTML so they can be inserted in WordPress pages and posts. The input data is a bibtex file (either local or remote) and entries can be formatted by default using various predefined styles. Bibtex source file and a link to the publication are also available from the HTML. 
+papercite format bibtex entries as HTML so they can be inserted in
+WordPress pages and posts. The input data is a bibtex file (either
+local or remote) and entries can be formatted by default using various 
+predefined styles. Bibtex source file and a link to the publication
+are also available from the HTML. 
 
 Features:
 
-* input data directly from the bibtex text file
-* source files can be URL (e.g., from citeulike.org and bibsonomy.org)
-* automatic HTML generation
-* easy inclusion in wordpress pages/posts by means of dedicated tags
-* possibility of filtering the bibtex entries based on their type (allow, deny)
-* possibility to access the single bibtex entry source code to enable copy&paste (toggle-enabled visualization)
-* expose URL of each document (if network-reachable)
-* possibility of editing the bibtex file directly from the wordpress administration page
-
-Features compared to bib2html (0.9.3):
-
-* adds the possibility of writing a text with reference to a bibtex file, and to print the bibliography at the end.
-* it checks if a PDF file whose name match the key exists and link to it if this is so
-* it uses the DOI information to create an external link
-* object oriented redesign of the plugin, so that further extensions are easy to make
-* publications can be grouped by year
+* Input data directly from the bibtex text file
+* Source files can be URL (e.g., from citeulike.org and bibsonomy.org)
+* Template based HTML generation
+* Possibility of filtering the bibtex entries based on their type (allow, deny)
+* Possibility to access the single bibtex entry source code to enable copy&paste (toggle-enabled visualization)
+* Possibility of editing the bibtex file directly from the wordpress administration page
+* Adds the possibility of writing a text with references to a bibtex entries, and to print the bibliography at the end.
+* Auto-detection of PDF files based on the BibTeX key
+* Publications can be grouped and sorted in various ways
 
 The papercite plugin has been developed and tested under Wordpress
 3.1. It is based on bib2html version 0.9.3.
 
-*Documentation can be found from within WordPress plugin list (click on
-the documentation link)*.
+**Documentation can be found from within WordPress plugin list (click on
+the documentation link)**. 
+
+To report bugs or request features, please navigate to 
+http://trac.bpiwowar.net/papercite
 
 == Installation ==
 
 Follow these step or use the plugin installer from WordPress to
 install papercite:
+
 1. download the zip file and extract the content of the zip file into a local folder
 2. upload the folder papercite into your wp-content/plugins/ directory
 3. log in the wordpress administration page and access the Plugins
@@ -55,8 +56,10 @@ list (click on the documentation link).
 = How can I edit my bibtex files? =
 
 If your file is local to the blog installation, you have two options:
+
 - via FTP client with text editor
 - via Wordpress Admin interface: Manage->Files->Other Files
+
 -- use wp-content/papercite-data/bib/mybibfile.bib as a path
 
 Alternatively, you can maintain your updated biblilography by using systems such as citeulike.org and bibsonomy.org; 
@@ -73,17 +76,22 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Screenshots ==
 
-1. Cite mode
-2. bibtex mode
+1. With the bibshow & bibcite commands
+2. With the bibtex command
 
 == Changelog ==
 
+= 0.3.1 =
+  * Fixed bug 9: template option does nothing for bibshow
+  * Bug fix on sort options
+  * Sort by author now working
 = 0.3.0 = 
   * Complete code overhaul - switched to a new bibtex / template
   system
   * New options to sort & group entries
   * Preference system to set defaults
   * New template based system for entry customisation
+  * Multi-site support
 = 0.2.14 = 
   * Grouped by year option (patch due to S. Aiche)
   * Now generates an id which does not depend on the key (fix javascript related bugs)
