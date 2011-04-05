@@ -50,6 +50,62 @@ require('lib/BibTex.php');
 // Some stupid functions
 require('helper.inc.php');
 
+
+/**
+ * This class is an entry format
+ */
+class BibtexEntryFormat {
+  var $_formats = array();
+
+  function BibtexEntryFormat(&$file_content) {
+    $parser = xml_parser_create(); 
+    if (!$parser) 
+      return false;
+    xml_set_element_handler($parser, array($this, "start_element"), array($this, "end_element"));
+    xml_set_character_data_handler ($parser,  array($this, "characters"));
+    xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, false);
+    xml_parse($parser, $file_content);
+    xml_parser_free($parser);
+
+    $this->format = null;
+  }
+
+  function get($name) {
+    if (array_key_exists($name, $this->formats))
+      return $this->formats[$name];
+    return $this->formats["#"];
+  }
+
+  function start_element($parser, $name, $att) {
+    if ($name == "format") {
+      $this->format = "";
+      foreach(preg_split("#\\s+#",$att["types"]) as $type) {
+	$this->formats[$type] = &$this->format;
+      }
+    } else if (!is_null($this->format)) {
+      $this->format .= "<$name";
+      foreach($att as $name => $value) {
+	$this->format .= " $name='".  htmlspecialchars($value) ."'";
+      }
+      $this->format .= ">";
+    }
+  }
+
+  function end_element(&$parser, $name) {
+    if ($name == "format") {
+      unset($this->format);
+    } else if (!is_null($this->format)) {
+      $this->format .= "</$name>";
+    }
+  }
+
+  function characters(&$parser, &$data) {
+    if (!is_null($this->format))
+      $this->format .= $data;
+  }
+
+}
+
 /**
  * This class provides a method that parses bibtex files to
  * other text formats based on a template language. See
@@ -158,6 +214,7 @@ class BibtexConverter
     $this->_globals[$name] = $value;
   }
 
+
   /**
    * Converts the given string in bibtex format to a string whose format
    * is defined by the passed template string.
@@ -167,7 +224,7 @@ class BibtexConverter
    * @param string template template code
    * @return mixed Result string or PEAR_Error on failure
    */
-  function convert($bibtex, $template)
+  function convert($bibtex, &$template, &$entry_template)
   {
     // TODO Eliminate LaTeX syntax
 
@@ -178,7 +235,7 @@ class BibtexConverter
       return $stat;
     }
 
-    return $this->display($this->_parser->data, $template);
+    return $this->display($this->_parser->data, $template, $entry_template);
   }
 
   /**
@@ -191,14 +248,14 @@ class BibtexConverter
    * @param string template template code
    * @return mixed Result string or PEAR_Error on failure
    */
-  function display(&$data, $template)
+  function display(&$data, &$template, &$entry_template)
   {
     $this->_pre_process($data);
     $data = $this->_group($data);
     $data = $this->_sort($data);
     $this->_post_process($data);
 
-    $text = $this->_translate($data, $template);
+    $text = $this->_translate($data, $template, $entry_template);
     return array("text" => &$text, "data" => &$data);
   }
 
@@ -352,7 +409,7 @@ class BibtexConverter
    * @param string template The used template
    * @return string The data represented in terms of the template
    */
-  function _translate($data, $template)
+  function _translate($data, $template, &$entry_template)
   {
     $result = $template;
 
@@ -360,14 +417,17 @@ class BibtexConverter
     $result = preg_replace('/@globalcount@/', $this->_helper->lcount($data, 2), $result);
     $result = preg_replace('/@globalgroupcount@/', count($data), $result);
 
-
     $match = array();
+
+    // Extract entry template
+    unset($this->entry_tpl);
+    $this->entry_tpl = $entry_template;
 
     // Extract entry template
     $pattern = '/@\{entry@(.*?)@\}entry@/s';
     preg_match($pattern, $template, $match);
-    $this->entry_tpl = $match[1];
-    $result = preg_replace($pattern, "@#entry@", $result);
+    $this->full_entry_tpl = $match[1];
+    $result = preg_replace($pattern, "@#fullentry@", $result);
 
     // Extract group template
     $pattern = '/@\{group@(.*?)@\}group@/s';
@@ -375,12 +435,6 @@ class BibtexConverter
     $this->group_tpl = $match[1];
     $result = preg_replace($pattern, "@#group@", $result);
 
-    /*
-    print "<div>GROUP</div>";
-    print_r(htmlentities($this->group_tpl));
-    print "<div>ENTRY</div>";
-    print_r(htmlentities($this->entry_tpl));
-    */
 
     // The data to be processed
     $this->_data = &$data;
@@ -434,7 +488,6 @@ class BibtexConverter
 	  break;
 	case "~":
 	  $condition = preg_match("/$matches[3]/",$value);
-	  print "[Match $matches[3] of $value: $condition]";
 	  break;
 	default:
 	  $condition = false;
@@ -485,15 +538,22 @@ class BibtexConverter
       return $groups . $match[2];
     }
 
-    // --- Entry loop
-    if ($match[1] == "#entry") {
+    // --- Full entry loop
+    if ($match[1] == "#fullentry") {
       $entries = "";
       foreach($this->_group as &$entry) {
-	$this->_entry = $entry;
-	$entries .= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $this->entry_tpl);
+        $this->_entry = $entry;
+        $entries .= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $this->full_entry_tpl);
       }
-      $this->_entry = null;
+      unset($this->_entry);
       return $entries . $match[2];
+    }
+
+    // --- Entry 
+    if ($match[1] == "#entry") {
+      $entryTpl = &$this->entry_tpl->get($this->_entry["type"]);
+      $t= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $entryTpl) . $match[2];
+      return $t;
     }
 
     // --- Normal processing

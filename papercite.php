@@ -4,7 +4,7 @@
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
   Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-  Version: 0.3.1
+  Version: 0.3.2
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
 */
@@ -322,7 +322,7 @@ class Papercite {
 	    
       } 
       
-      return  $this->showEntries($entries, $tplOptions, false,  $this->getTemplate($options["bibtex_template"], $options["format"]));
+      return  $this->showEntries($entries, $tplOptions, false, $options["bibtex_template"], $options["format"]);
 
       /*
 	bibshow / bibcite commands
@@ -388,22 +388,13 @@ class Papercite {
 	  $refs[$num[0]]["pKey"] = $num[1];
 	}
       }
-      return $this->showEntries($refs, $tplOptions, true, $this->getTemplate($options["bibshow_template"], $options["format"]));
+      return $this->showEntries($refs, $tplOptions, true, $options["bibshow_template"], $options["format"]);
       
     default:
       return "[error in papercite: unhandled]";
     }
   }
 
-  function &getTemplate($mainTpl, $formatTpl) {
-    $mainFile = papercite::getDataFile("/tpl/$mainTpl.tpl");
-    $formatFile = papercite::getDataFile("/format/$formatTpl.tpl");
-
-    $main = file_get_contents($mainFile[0]);
-    $format = file_get_contents($formatFile[0]);
-    $template = str_replace("@#entry@", $format, $main);
-    return $template;
-  }
 
   /**
    * Show a set of entries
@@ -411,15 +402,23 @@ class Papercite {
    * @param options The options to pass to bib2tpl
    * @param getKeys Keep track of the keys for a final substitution
    */
-  function showEntries(&$refs, &$options, $getKeys, &$template) {
+  function showEntries(&$refs, &$options, $getKeys, $mainTpl, $formatTpl) {
     $bib2tpl = new BibtexConverter($options);
+
+    $mainFile = papercite::getDataFile("/tpl/$mainTpl.tpl");
+    $formatFile = papercite::getDataFile("/format/$formatTpl.tpl");
+
+    $main = file_get_contents($mainFile[0]);
+    $format = file_get_contents($formatFile[0]);
+    $bibtexEntryTemplate = new BibtexEntryFormat($format);
 
     $bib2tpl->setGlobal("WP_PLUGIN_URL", WP_PLUGIN_URL);
 
     foreach($refs as &$entry)
       $entry["papercite_id"] = $this->counter++;
 
-    $r =  $bib2tpl->display($refs, $template);
+    $r =  $bib2tpl->display($refs, $main, $bibtexEntryTemplate);
+
     if ($getKeys) {
       foreach($refs as &$group)
 	foreach($group as &$ref) {

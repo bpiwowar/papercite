@@ -81,6 +81,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.3.2 =
+  * Entry format is now in XML to ease the edition
 = 0.3.1 =
   * Fixed bug 7: umlaut not handled
   * Fixed bug 9: template option does nothing for bibshow

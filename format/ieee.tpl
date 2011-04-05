@@ -1,8 +1,9 @@
-@author:initials@.
-<span style="font-style: italic;">@title@</span>. 
- @?journal@<span class="publist_rest">@journal@@?volume@ @volume@@?number@ (@number@)@;number@@;volume@</span>, @;journal@      
-      @?publisher@<span class="publist_rest">@publisher@</span>, @;publisher@             
- @?address@<span class="publist_rest">@address@</span>,@;address@ 			  
- <span class="publist_date">@?year@@?month@@month@ @;month@@year@@;year@</span>.	   
-
- 
+<formats>
+  <format types="# article">
+    @author:initials@. <span style="font-style: italic;">@title@</span>. 
+    @?journal@@journal@@?volume@ @volume@@?number@ (@number@)@;number@@;volume@, @;journal@      
+    @?publisher@<span class="publist_rest">@publisher@</span>, @;publisher@             
+    @?address@@address@,@;address@ 			  
+    @?year@@?month@@month@ @;month@@year@@;year@
+  </format>
+</formats>
