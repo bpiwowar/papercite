@@ -8,4 +8,3 @@
         </div>
      @}entry@
     @}group@
-  </body>

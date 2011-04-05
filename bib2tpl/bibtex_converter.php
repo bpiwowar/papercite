@@ -98,11 +98,13 @@ class BibtexConverter
    *   group-order => (asc|desc|none)
    *   sort => (none|year|firstauthor|entrytype)
    *   order => (asc|desc|none)
+   *   key_format => (numeric)
    *   lang  => any string $s as long as proper lang/$s.php exists
    * @return void
    */
   function BibtexConverter($options=array())
   {
+
     $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true));
 
     // Default options
@@ -117,7 +119,9 @@ class BibtexConverter
       'sort' => 'none',
       'order' => 'none',
 
-      'lang' => 'en'
+      'lang' => 'en',
+
+      'key_format' => 'numeric'
     );
 
     // Overwrite specified options
@@ -170,12 +174,7 @@ class BibtexConverter
       return $stat;
     }
 
-    $data = $this->_parser->data;
-    $data = $this->_filter($data);
-    $data = $this->_group($data);
-    $data = $this->_sort($data);
-
-    return $this->_translate($data, $template);
+    return $this->display($this->_parser->data, $template);
   }
 
   /**
@@ -192,6 +191,7 @@ class BibtexConverter
   {
     $data = $this->_group($data);
     $data = $this->_sort($data);
+    $text = $this->_post_process($data);
 
     $text = $this->_translate($data, $template);
     return array("text" => &$text, "data" => &$data);
@@ -237,6 +237,30 @@ class BibtexConverter
     }
 
     return $result;
+  }
+
+  /**
+   * This function do some post-processing on the grouped & ordered list of publications.
+   * In particular, it sets the key.
+   */
+  function _post_process(&$data) {
+    $count = 0;
+    foreach ( $data as &$group ) {
+      foreach ( $group as &$entry) {
+	$count++;
+      
+	switch($this->_options["key_format"]) {
+	case "numeric":
+	  $entry["key"] = $count;
+	  break;
+	case "cite":
+	  $entry["key"] = $entry["cite"];
+	  break;
+	default: 
+	  $entry["key"] = "?";
+	}
+      }
+    }
   }
 
   /**
@@ -321,22 +345,160 @@ class BibtexConverter
     $result = preg_replace('/@globalcount@/', $this->_helper->lcount($data, 2), $result);
     $result = preg_replace('/@globalgroupcount@/', count($data), $result);
 
-    $pattern = '/@\{group@(.*?)@\}group@/s';
+
+    $match = array();
+
+    // Extract entry template
+    $pattern = '/@\{entry@(.*?)@\}entry@/s';
+    preg_match($pattern, $template, $match);
+    $this->entry_tpl = $match[1];
+    $result = preg_replace($pattern, "@#entry@", $result);
 
     // Extract group template
-    $group_tpl = array();
-    preg_match($pattern, $template, $group_tpl);
-    $group_tpl = $group_tpl[1];
+    $pattern = '/@\{group@(.*?)@\}group@/s';
+    preg_match($pattern, $result, $match);
+    $this->group_tpl = $match[1];
+    $result = preg_replace($pattern, "@#group@", $result);
 
-    // Translate all groups
-    $groups = '';
-    foreach ( $data as $groupkey => $group )
-    {
-      $groups .= $this->_translate_group($groupkey, $group, $group_tpl);
+    /*
+    print "<div>GROUP</div>";
+    print_r(htmlentities($this->group_tpl));
+    print "<div>ENTRY</div>";
+    print_r(htmlentities($this->entry_tpl));
+    */
+
+    // The data to be processed
+    $this->_data = &$data;
+
+    // "If-then-else" stack
+    $this->_ifs = array(true);
+
+    // Now, replace
+    return preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $result);
+  }
+
+  static $mainPattern = "/@([^@]+)@([^@]*)/s";
+
+  /**
+   * Main callback function
+   */
+  function _callback($match) {
+
+    $condition = $this->_ifs[sizeof($this->_ifs)-1];
+    //    print "<div><b>IF: $condition</b> - <b>[1]</b>:". htmlentities($match[1]) .", <b>[2]</b>:". htmlentities($match[2]) ."</div>";
+
+    // --- [ENDIF]
+    if ($match[1][0] == ';') {
+      // Remove last IF expression value
+      array_pop($this->_ifs);
+      $condition = $this->_ifs[sizeof($this->_ifs)-1];
+      if ($condition) 
+	return $match[2];
+      return "";
     }
 
-    return preg_replace($pattern, $groups, $result);
+    // --- [IF]
+    if ($match[1][0] == '?') {
+      if (!$condition) {
+	// Don't evaluate if not needed
+	// -1 implies to evaluate to false the alternative (ELSE)
+	$this->_ifs[] = -1;
+	return "";
+      }
+      
+      $matches = array();
+      preg_match("/^\?(\w+)(?:([~=><])([^@]+))?$/", $match[1], $matches);
+      $value = $this->_get_value($matches[1]);
+      switch($matches[2])
+	{
+	case "":
+	  $condition = $value ? true : false;
+	  break;
+	case "=":
+	  $condition = $value == $matches[3];
+	  break;
+	case "~":
+	  $condition = preg_match("/$matches[3]/",$value);
+	  print "[Match $matches[3] of $value: $condition]";
+	  break;
+	default:
+	  $condition = false;
+	}
+      
+      $this->_ifs[] = $condition;
+      if ($condition) 
+	return $match[2];
+      return "";
+    }
+
+    // --- [ELSE]
+    if ($match[1][0] == ':') {
+      // Invert the expression (if within an evaluated condition)
+      $condition = $condition < 0 ? -1 : !$condition;
+      $this->_ifs[sizeof($this->_ifs)-1] = $condition;
+      if ($condition)
+	return $match[2];
+      return "";
+    }
+
+    // Get the current condition status
+    if (!$condition) return "";
+
+    // --- Group loop
+    if ($match[1] == "#group") {
+      $groups = "";
+      foreach ( $this->_data as $groupkey => &$group )
+	{
+	  $this->_globals["groupkey"] = $groupkey;
+	  $this->_group = &$group;
+	  $groups .= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $this->group_tpl);
+	}
+
+      $this->_globals["groupkey"] = null;
+      $this->_group = null;
+
+      return $groups . $match[2];
+    }
+
+    // --- Entry loop
+    if ($match[1] == "#entry") {
+      $entries = "";
+      foreach($this->_group as &$entry) {
+	$this->_entry = $entry;
+	$entries .= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $this->entry_tpl);
+      }
+      $this->_entry = null;
+      return $entries . $match[2];
+    }
+
+    // --- Normal processing
+    return $this->_get_value($match[1]).$match[2];
   }
+
+  function _get_value($name) {
+    $pos = strpos($name, ":");
+    if ($pos > 0) {
+      $modifier = substr($name, $pos+1);
+      $name = substr($name, 0, $pos);
+    }
+
+    if ($this->_entry) {
+      // Special case: author
+      if ($name == "author") {
+	return $this->_helper->niceAuthors($this->_entry["author"], $modifier);
+      }
+      
+      // Entry variable
+      if (array_key_exists($name, $this->_entry)) 
+	return $this->_entry[$name];
+    }
+
+    // Global variable
+    if (array_key_exists($name, $this->_globals)) {
+      return $this->_globals[$name];
+    }
+  }
+
 
   /**
    * This function translates one entry group

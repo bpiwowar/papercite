@@ -82,6 +82,7 @@ Just change it.
   * Complete code overhaul - switched to a new bibtex / template
   system
   * Preference system to set defaults
+  * New template based system for entry customisation
 = 0.2.14 = 
   * Grouped by year option (patch due to S. Aiche)
   * Now generates an id which does not depend on the key (fix javascript related bugs)
@@ -123,7 +124,11 @@ Just change it.
 == Upgrade Notice ==
 
 = 0.3.0 = 
-  * Complete overhaul of the bibtex/template system
+Complete overhaul of the bibtex/template system, with a lot of new
+options. Please wait until version
+0.3.1 if you want to be sure of a bug free papercite (it should not
+break WordPress though). Please note that there is
+only one citation format (IEEE) and that is only a partial implementation.
 = 0.2.9 = 
 Removed a PHP warning with bibshow
 = 0.2.8 =

@@ -29,7 +29,9 @@ color: red;
 <h2>Data structure</h2>
 
 <ol>
-  <li>Create a folder in <code>wp-content/papercite-data</code>, with
+  <li>Create a folder in <code>wp-content/papercite-data</code> or
+  <code>wp-content/blogs.dir/<b>XXX</b>/files/papercite-data</code>
+  (in case of multiple sites hosted on WordPress), with
   the following subfolders (none is mandatory):
   <ul>
     <li><code>bib</code> contains your bibtex files</li>
@@ -139,10 +141,13 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
   template=default-bibtex key_format=number]</div>
 
  <p>The <code>key_format</code> controls how a key is associated to a
- BibTeX entry. The following values are accepted:
+ BibTeX entry. From within a entry template, the value of the key is
+ given by <code>@key@</code>.
+  The following values are accepted:
   <ul>
-    <li><code>number</code> (default) gives a unique increasing number
+    <li><code>numeric</code> (default) gives a unique increasing number
  to each entry (1, 2, ...)</li>
+     <li><code>cite</code> uses the bibtex key</li>
   </ul>
 
   </p>
@@ -150,8 +155,10 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
   <p> The format described how an entry is displayed.
   The following format are currently available: 
   <ul>
-    <li><code>ieee</code> (default)</li>
+    <li><code>ieee</code> (default) is the default format loosely
+  based on IEEE</li>
   </ul>
+  Feel free to contribute new formats.
  </p>
 
   <p>
@@ -178,10 +185,12 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
     <p>
     With the <em>bib2tpl</em> code, some extra variables are defined:
     <ul>
+      <li><code>@WP_PLUGIN_URL@</code> will be replaced by the plugin URL.</li>
       <li><code>@papercite_id@</code> is a unique id within the page/post</li>
       <li><code>@key@</code> is a the key as formatted with <code>key_format</code>.</li>
-      <li><code>@WP_PLUGIN_URL@</code> will be replaced by the plugin URL.</li>
-      </ul>
+      <li><code>@pdf@</code> is the URL to the auto-detected PDF (or
+    to the URL specified in the PDF field).</li>
+     </ul>
     </p>
   
 <h3>Grouping</h3>

@@ -1,5 +1,5 @@
     @{group@
-    <h3>@groupkey@</h3>
+    @?groupkey@<h3>@groupkey@</h3>@;groupkey@
     <ul>
      @{entry@ <li>
      	@?pdf@ <a href="@pdf@"><img src='@WP_PLUGIN_URL@/papercite/img/pdf.png' alt="[PDF]"/></a>@;pdf@
