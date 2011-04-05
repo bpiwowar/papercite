@@ -34,8 +34,8 @@ Features compared to bib2html (0.9.3):
 The papercite plugin has been developed and tested under Wordpress
 3.1. It is based on bib2html version 0.9.3.
 
-Documentation can be found from within WordPress plugin list (click on
-the documentation link).
+*Documentation can be found from within WordPress plugin list (click on
+the documentation link)*.
 
 == Installation ==
 
@@ -47,7 +47,8 @@ install papercite:
 menu
 
 Then, you should activate papercite, and follow the instructions
-given in *other notes*.
+given in the *documentation* that you can access through the plugin
+list (click on the documentation link).
 
 == Frequently Asked Questions ==
 
@@ -56,31 +57,31 @@ given in *other notes*.
 If your file is local to the blog installation, you have two options:
 - via FTP client with text editor
 - via Wordpress Admin interface: Manage->Files->Other Files
--- use wp-content/plugins/papercite/data/mybibfile.bib as a path
+-- use wp-content/papercite-data/bib/mybibfile.bib as a path
 
 Alternatively, you can maintain your updated biblilography by using systems such as citeulike.org and bibsonomy.org; 
 specify the bib file using as a URL (e.g., in citeulike, you should use http://www.citeulike.org/bibtex/user/username)
 
 = How are the entries sorted? =
 
-Since version 0.1, the entries are sorted by year starting from the most
-recent; in future revision, I plan to make this configurable by the user
+Entries are sorted by year by default.
 
-= How can I personlize the HTML rendering? =
+= How can I personalize the HTML rendering? =
 
-The HTML rendering is isolated in a template file called bibentry-html.tpl.
-Just change it.
+The HTML rendering is isolated in two template files, located in the
+subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Screenshots ==
 
 1. Cite mode
-2. bib2html mode
+2. bibtex mode
 
 == Changelog ==
 
 = 0.3.0 = 
   * Complete code overhaul - switched to a new bibtex / template
   system
+  * New options to sort & group entries
   * Preference system to set defaults
   * New template based system for entry customisation
 = 0.2.14 = 

@@ -206,23 +206,6 @@ class Papercite {
     return $this->cache[$biburi];
   }
     
-
-  
-  // this function formats a bibtex code in order to be readable
-  // when appearing in the modal window
-  function formatBibtex($entry){
-    $order = array("},");
-    $replace = "}, <br />\n &nbsp;";
-    
-    $entry = preg_replace('/\s\s+/', ' ', trim($entry));
-    $new_entry = str_replace($order, $replace, $entry);
-    $new_entry = str_replace(", author", ", <br />\n &nbsp;&nbsp;author", $new_entry);
-    $new_entry = str_replace(", Author", ", <br />\n &nbsp;&nbsp;author", $new_entry);
-    $new_entry = str_replace(", AUTHOR", ", <br />\n &nbsp;&nbsp;author", $new_entry);
-    $new_entry = preg_replace('/\},?\s*\}$/', "}\n}", $new_entry); 
-    return $new_entry;
-  }
-
  
 
   /**
@@ -250,7 +233,7 @@ class Papercite {
     // (1) From the preferences
     // (2) From the custom fields
     // (3) From the general options
-    $options = array("format" => "ieee", "group" => "none", "key_format" => "numeric",
+    $options = array("format" => "ieee", "group" => "none", "order" => "year", "sort" => "desc", "key_format" => "numeric",
 		     "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow");
 
     // Get general preferences
@@ -277,8 +260,10 @@ class Papercite {
     }
 
     // --- Compatibility issues
-    if (array_key_exists("groupByYear", $options) && (strtoupper($options["groupByYear"]) == "TRUE")) 
+    if (array_key_exists("groupByYear", $options) && (strtoupper($options["groupByYear"]) == "TRUE")) {
 	$options["group"] = "year";
+	$options["group_order"] = "desc";
+    }
 
     $tplOptions = array("anonymous-whole" => true, "group" => $options["group"], "group-order" => $options["group_order"], 
 			"sort" => $options["sort"], "order" => $options["order"],
