@@ -368,7 +368,7 @@ class Structures_BibTex
     }
 
     static function process_accents(&$text) {
-      $text = preg_replace_callback("#\\\\['\"^¨`H~]\w|\\\\[LlcC]#", "Structures_BibTex::_accents_cb", $text);
+      $text = preg_replace_callback("#\\\\(?:['\"^`H~]|¨)\w|\\\\[LlcC]#", "Structures_BibTex::_accents_cb", $text);
     }
 
     static $accents = array(

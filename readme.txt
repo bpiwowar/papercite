@@ -82,6 +82,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 == Changelog ==
 
 = 0.3.1 =
+  * Fixed bug 7: umlaut not handled
   * Fixed bug 9: template option does nothing for bibshow
   * Bug fix on sort options
   * Sort by author now working
