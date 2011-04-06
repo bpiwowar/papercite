@@ -83,9 +83,8 @@ class Papercite {
   function getCached($url, $timeout = 3600) {
     // check if cached file exists
     $name = strtolower(preg_replace("@[/:]@","_",$url));
-    $dir = dirname(__FILE__) . "/cache";
+    $dir = WP_PLUGIN_DIR . "/papercite/cache";
     $file = "$dir/$name.bib";
-
 
     // check if file date exceeds 60 minutes   
     if (! (file_exists($file) && (filemtime($file) + $timeout > time())))  {
@@ -106,10 +105,13 @@ class Papercite {
       }
 	
 	
-      if (!$f) echo "Failed to write file " . $file . " - check directory permission according to your Web server privileges.";
+      if (!$f) {
+	echo "Failed to write file " . $file . " - check directory permission according to your Web server privileges.";
+	return false;
+      }
     }
 	
-    return $file;
+    return array($file, WP_PLUGIN_URL."/papercite/cache/$name.bib");
   }
 
   /**

@@ -24,7 +24,7 @@
  * With the understanding that:
  *     * Waiver — Any of the above conditions can be waived if you get
  *       permission from the copyright holder.
- *     * Public Domain — Where the work or any of its elements is in the
+ *     * Public Domain —Where the work or any of its elements is in the
  *       public domain under applicable law, that status is in no way
  *       affected by the license.
  *     * Other Rights — In no way are any of the following rights affected
@@ -55,7 +55,7 @@ require('helper.inc.php');
  * This class is an entry format
  */
 class BibtexEntryFormat {
-  var $_formats = array();
+  var $formats = array();
 
   function BibtexEntryFormat(&$file_content) {
     $parser = xml_parser_create(); 
@@ -66,7 +66,6 @@ class BibtexEntryFormat {
     xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, false);
     xml_parse($parser, $file_content);
     xml_parser_free($parser);
-
     $this->format = null;
   }
 
@@ -551,7 +550,9 @@ class BibtexConverter
 
     // --- Entry 
     if ($match[1] == "#entry") {
-      $entryTpl = &$this->entry_tpl->get($this->_entry["type"]);
+      $type = $this->_entry["entrytype"];
+      $entryTpl = &$this->entry_tpl->get($type);
+      //print "<div><b>$type</b>: ". htmlentities($entryTpl). "</div>";
       $t= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $entryTpl) . $match[2];
       return $t;
     }
