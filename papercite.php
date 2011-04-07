@@ -383,7 +383,8 @@ class Papercite {
 	  $refs[$num[0]]["pKey"] = $num[1];
 	}
       }
-      return $this->showEntries($refs, $tplOptions, true, $options["bibshow_template"], $options["format"]);
+      ksort($refs);
+      return $this->showEntries(array_values($refs), $tplOptions, true, $options["bibshow_template"], $options["format"]);
       
     default:
       return "[error in papercite: unhandled]";
