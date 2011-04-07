@@ -5,8 +5,10 @@
  * http://lmazy.verrech.net
  * 
  * Modified by B. Piwowarski for inclusion in the papercite
- * WordPress plug-in
- *
+ * WordPress plug-in:
+ * - New template engine based on progressive parsing
+ * - Two templates mode (one for the entries, one for the list)
+ * - New macros
  *
  * This work is subject to Creative Commons
  * Attribution-NonCommercial-ShareAlike 3.0 Unported.
@@ -475,8 +477,9 @@ class BibtexConverter
       }
       
       $matches = array();
-      preg_match("/^\?(\w+)(?:([~=><])([^@]+))?$/", $match[1], $matches);
+      preg_match("/^\?(#?[\w]+)(?:([~=><])([^@]+))?$/", $match[1], $matches);
       $value = $this->_get_value($matches[1]);
+      //print "<div>Compares $value ($matches[1]) [$matches[2]] $matches[3]</div>";
       switch($matches[2])
 	{
 	case "":
@@ -487,6 +490,12 @@ class BibtexConverter
 	  break;
 	case "~":
 	  $condition = preg_match("/$matches[3]/",$value);
+	  break;
+	case ">":
+	  $condition =  (float)$value > (float)$match[3];
+	  break;
+	case "<":
+	  $condition =  (float)$value < (float)$match[3];
 	  break;
 	default:
 	  $condition = false;
@@ -562,27 +571,44 @@ class BibtexConverter
   }
 
   function _get_value($name) {
+    // --- Get the options
+    $v = null;
+    $count = false;
+
+    if ($name[0] == "#") {
+      $name = substr($name,1);
+      $count = true;
+    }
+
     $pos = strpos($name, ":");
     if ($pos > 0) {
       $modifier = substr($name, $pos+1);
       $name = substr($name, 0, $pos);
     }
 
-    if ($this->_entry) {
-      // Special case: author
-      if ($name == "author") {
-	return $this->_helper->niceAuthors($this->_entry["author"], $modifier);
-      }
-      
-      // Entry variable
-      if (array_key_exists($name, $this->_entry)) 
-	return $this->_entry[$name];
-    }
+    // --- If we have an entry
+    if ($this->_entry && array_key_exists($name, $this->_entry))
+	$v = $this->_entry[$name];
+    
 
     // Global variable
-    if (array_key_exists($name, $this->_globals)) {
-      return $this->_globals[$name];
+    else if (array_key_exists($name, $this->_globals)) {
+      $v = $this->_globals[$name];
     }
+
+    // --- post processing
+
+    if ($count)
+      if (is_array($v)) 
+	return sizeof($v);
+      else
+	return $v ? 0 : 1;
+
+    if (is_array($v)) {
+      return $this->_helper->niceAuthors($v, $modifier);
+    }
+
+    return "$v";
   }
 
 

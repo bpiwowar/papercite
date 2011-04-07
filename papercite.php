@@ -4,7 +4,7 @@
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
   Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-  Version: 0.3.3
+  Version: 0.3.4
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
 */
@@ -16,14 +16,8 @@
     - Stefan Aiche: group by year option
     - Łukasz Radliński: bug fixes & handling polish characters
 
-
-    Sergio Andreozzi has written bib2html on which papercite is based
-    Contributors (bib2html):
-    - Cristiana Bolchini: cleaner bibtex presentation
-    - Patrick Maué: remote bibliographies managed by citeulike.org or bibsonomy.org
-    - Nemo: more characters on key
-    - Marco Loregian: inverting bibtex and html
-
+    Some parts of the code come from bib2html (version 0.9.3) written by
+    Sergio Andreozzi.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -478,17 +472,18 @@ function papercite_cb($myContent) {
   return str_replace($papercite->keys, $papercite->keyValues, $text);
 }
 
+// --- Add the documentation link in the plugin list
 function papercite_row_cb($data, $file) {
   if ($file == "papercite/papercite.php") {
     $data[] = "<a href='" . WP_PLUGIN_URL . "/papercite/documentation/index.html'>Documentation</a>";
   }
   return $data;
 }
+add_filter('plugin_row_meta', 'papercite_row_cb',1,2);
 
 // --- Add the different handlers to WordPress ---
 add_action('init', 'papercite_init');	
 add_action('wp_head', 'papercite_head');
-add_filter('the_content', 'papercite_cb',1);
-add_filter('plugin_row_meta', 'papercite_row_cb',1,2);
+add_filter('the_content', 'papercite_cb');
 
 ?>

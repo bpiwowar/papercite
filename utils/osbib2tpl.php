@@ -59,6 +59,7 @@ function readResource(&$formats, $xml, $bibtexMap) {
   $bibtexType = $bibtexMap->types[$type];
 
   $depth = $xml->depth;
+  $data = array();
   while ($xml->levelRead($depth)) {
   
     // Got an element
@@ -73,35 +74,66 @@ function readResource(&$formats, $xml, $bibtexMap) {
       }
 	
       if ($xml->name == "ultimate") {
-	$data .= $xml->readString();
-      }
-
-      if (!array_key_exists($xml->name, $bibtexMap->$type))
+	$data[] = array("", $xml->readString());
+      } 
+      else if ($xml->name == "independent") {
 	$xml->skipToEnd();
-      else {
+      } else if (!array_key_exists($xml->name, $bibtexMap->$type)) {
+	msg("Cannot translate $xml->name in $type\n");
+	$data[] = array("","");
+	$xml->skipToEnd();
+      } else {
 	$types = &$bibtexMap->$type;
 	$name = $types[$xml->name];
 	$fieldDepth = $xml->depth;
 	$pre = "";
 	$post = "";
+	$values = array();
 	while ($xml->levelRead($fieldDepth))  {
 	  if ($xml->nodeType == XMLReader::ELEMENT) {
-	    switch($xml->name) {
-	    case "pre": $pre = processShortcodes($xml->readString()); break;
-	    case "post": $post = processShortcodes($xml->readString()); break;
-	    }
+	    $values[$xml->name] = processShortcodes($xml->readString());
 	    $xml->skiptoEnd();
 	  }
 	}
-	$data .= "$pre@$name@$post";
+	$data[] = array($name, $values);
       }
     } // end (element)
   }
 
+  // Deals with the special OSBib fields
+  // and concatenate the bib2tpl string
+  $text = "";
+  for($i = 0; $i < sizeof($data); $i++) {
+    $row = &$data[$i];
+    $name = $row[0];
+    if ($name) {
+      $options = &$row[1];
+      $field = "@?$name@$options[pre]@$name@$options[post]@;$name@";
+      $field = preg_replace("/__SINGULAR_PLURAL__/", "@?#$name>1@$options[plural]@:$name@$options[singular]@;$name@", $field);
+      
+      $next = $i+1 < sizeof($data) ?  $data[$i+1][0] : false;
+      if ($next) {
+	$field = preg_replace("/__DEPENDENT_ON_NEXT_FIELD__/", "@?$next@$options[dependentPost]@:@$options[dependentPostAlternative]@;$next@", $field);
+      } else 	
+	$field = preg_replace("/__DEPENDENT_ON_NEXT_FIELD__/", "$options[dependentPostAlternative]", $field);
+
+      $previous = $i > 0 ?  $data[$i-1][0] : false;
+      if ($previous) {
+	$field = preg_replace("/__DEPENDENT_ON_PREVIOUS_FIELD__/", "@?$next@$options[dependentPre]@:@$options[dependentPreAlternative]@;$next@", $field);
+      } else 	
+	$previous = preg_replace("/__DEPENDENT_ON_PREVIOUS_FIELD__/", "$options[dependentPreAlternative]", $field);
+
+
+      $text .= $field;
+    } else 
+      $text .= $row[1];
+  }
+
+  // Finish by filling up the structure
   assert(!array_key_exists($type, $formats));
   $types = array();
   if ($bibtexType) $types[] = $bibtexType;
-  $formats[$type] = array($types, $data);
+  $formats[$type] = array($types, $text);
   if ($bibtexType == "article")
     $formats[$type][0][] = "#";
 }

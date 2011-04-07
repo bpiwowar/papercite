@@ -351,7 +351,7 @@ class Structures_BibTex
 	foreach($this->data as &$entry) 
 	  foreach($entry as $fieldname => &$field) 
 	  if ($fieldname != "bibtex")
-	    if ($fieldname == "author") {
+	    if ($fieldname == "author" || $fieldname == "editor") {
 	      foreach($field as &$text)
 		Structures_BibTex::process_accents($text);
 	    } else {
@@ -368,12 +368,13 @@ class Structures_BibTex
     }
 
     static function process_accents(&$text) {
-      $text = preg_replace_callback("#\\\\(?:['\"^`H~]|¨)\w|\\\\[LlcC]#", "Structures_BibTex::_accents_cb", $text);
+      $text = preg_replace_callback("#\\\\(?:['\"^`H~\.]|¨)\w|\\\\([LlcCoO]|ss|aa|AA|[ao]e|[OA]E)#", "Structures_BibTex::_accents_cb", $text);
     }
 
     static $accents = array(
       "\'a" => "á", "\`a" => "à", "\^a" => "â", "\¨a" => "ä", '\"a' => "ä",
       "\'A" => "Á", "\`A" => "À", "\^A" => "Â", "\¨A" => "Ä", '\"A' => "Ä",
+      "\aa" => "å", "\AA" => "Å", "\ae" => "æ", "\AE" => "Æ",
       "\cc" => "ç",
       "\cC" => "Ç",
       "\'e" => "é", "\`e" => "è", "\^e" => "ê", "\¨e" => "ë", '\"e' => "ë",
@@ -384,11 +385,15 @@ class Structures_BibTex
       "\L" => "Ł",
       "\~n" => "ñ",
       "\~N" => "Ñ",
-      "\'o" => "ó", "\`o" => "ò", "\^o" => "ô", "\¨o" => "ö", '\"o' => "ö","\Ho" => "ő",
-      "\'O" => "Ó", "\`o" => "Ò", "\^O" => "Ô", "\¨O" => "Ö", '\"O' => "Ö",  "\HO" => "Ő",
+      "\o" => "ø", "\oe" => "œ",
+      "\O" => "Ø", "\OE" => "Œ",
+      "\'o" => "ó", "\`o" => "ò", "\^o" => "ô", "\¨o" => "ö", '\"o' => "ö", "\~o" => "õ", "\Ho" => "ő",
+      "\'O" => "Ó", "\`o" => "Ò", "\^O" => "Ô", "\¨O" => "Ö", '\"O' => "Ö", "\~O" => "Õ", "\HO" => "Ő",
+      '\ss' => "ß",
       "\'u" => "ú", "\`u" => "ù", "\^u" => "û", "\¨u" => "ü", '\"u' => "ü",
       "\'U" => "Ú", "\`U" => "Ù", "\^U" => "Û", "\¨U" => "Ü", '\"U' => "Ü", 
-      "\'z" => "ź", 
+      "\'z" => "ź", "\.z" => "ż",
+      "\'Z" => "Ź", "\.Z" => "Ż",
     ); 
 
     static function _accents_cb($input) {
@@ -504,6 +509,11 @@ class Structures_BibTex
             //Handling the authors
             if (in_array('author', array_keys($ret)) && $this->_options['extractAuthors']) {
                 $ret['author'] = $this->_extractAuthors($ret['author']);
+
+            }
+            //Handling the editors
+            if (in_array('editor', array_keys($ret)) && $this->_options['extractAuthors']) {
+                $ret['editor'] = $this->_extractAuthors($ret['editor']);
             }
         }
         return $ret;
