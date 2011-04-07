@@ -68,6 +68,8 @@ class BibtexEntryFormat {
    */
   function niceAuthors($authors)
   {
+    // OSBib glue
+    $delimitTwo = "primaryTwoCreatorsSep";
     $delimitFirstBetween = 'primaryCreatorSepFirstBetween';
     $delimitNextBetween = 'primaryCreatorSepNextBetween';
     $delimitLast = 'primaryCreatorSepNextLast';
