@@ -145,6 +145,10 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Upgrade Notice ==
 
+= 0.3.5 =
+Compatibility with version prior to 0.3.0 is now almost completed. Users who
+want to use the new grouping, sorting or template functionalities are advised
+to upgrade to this version.
 = 0.3.0 = 
 Complete overhaul of the bibtex/template system, with a lot of new
 options. Please wait until version
