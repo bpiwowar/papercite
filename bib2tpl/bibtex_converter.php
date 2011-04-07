@@ -410,14 +410,14 @@ class BibtexConverter
       // Remove last IF expression value
       array_pop($this->_ifs);
       $condition = $this->_ifs[sizeof($this->_ifs)-1];
-      if ($condition) 
+      if ($condition == 1) 
 	return $match[2];
       return "";
     }
 
     // --- [IF]
     if ($match[1][0] == '?') {
-      if (!$condition) {
+      if ($condition != 1) {
 	// Don't evaluate if not needed
 	// -1 implies to evaluate to false the alternative (ELSE)
 	$this->_ifs[] = -1;
@@ -449,7 +449,7 @@ class BibtexConverter
 	  $condition = false;
 	}
       
-      $this->_ifs[] = $condition;
+      $this->_ifs[] = $condition ? 1 : 0;
       if ($condition) 
 	return $match[2];
       return "";
@@ -458,15 +458,15 @@ class BibtexConverter
     // --- [ELSE]
     if ($match[1][0] == ':') {
       // Invert the expression (if within an evaluated condition)
-      $condition = $condition < 0 ? -1 : !$condition;
+      $condition = $condition < 0 ? -1 : 1 - $condition;
       $this->_ifs[sizeof($this->_ifs)-1] = $condition;
-      if ($condition)
+      if ($condition == 1)
 	return $match[2];
       return "";
     }
 
     // Get the current condition status
-    if (!$condition) return "";
+    if ($condition != 1) return "";
 
     // --- Group loop
     if ($match[1] == "#group") {

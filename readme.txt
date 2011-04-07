@@ -81,6 +81,9 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.3.6 =
+  * Bug fix when there are only two authors in the entry
+  * Bug fix on nested conditions in templates
 = 0.3.5 =
   * Author are formatted according to the entry template converted
   from OSBib
