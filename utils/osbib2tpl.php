@@ -8,7 +8,7 @@
 $xmlfile = $argv[1];
 
 function msg($message) {
- fputs(STDERR, $message);
+  fputs(STDERR, $message);
 }
 
 msg("Processing $xmlfile\n");
@@ -55,7 +55,7 @@ function processShortcodes($string) {
 }
 
 function xmlspecialchars($text) {
-   return str_replace('&#039;', '&apos;', htmlspecialchars($text, ENT_QUOTES));
+  return str_replace('&#039;', '&apos;', htmlspecialchars($text, ENT_QUOTES));
 }
 
 function readCommon($xml) {
@@ -71,7 +71,9 @@ function readCommon($xml) {
 
 function readResource(&$formats, $xml, $bibtexMap) {
   $type = $xml->getAttribute("name");
-  $bibtexType = $bibtexMap->types[$type];
+  $bibtexTypes = $bibtexMap->types[$type];
+  if (!is_array($bibtexTypes))
+    $bibtexTypes = $bibtexTypes ? array($bibtexTypes) : array();
 
   $depth = $xml->depth;
   $data = array();
@@ -82,17 +84,24 @@ function readResource(&$formats, $xml, $bibtexMap) {
       if ($xml->name == "fallbackstyle") {
 	$otherType = $xml->readString();
 	assert(array_key_exists($otherType, $formats));
-	if ($bibtexType) $formats[$otherType][0][] = $bibtexType;
+	foreach($bibtexTypes as $bibtexType)
+	  $formats[$otherType][0][] = $bibtexType;
 	$xml->skipToEnd();
 	while ($xml->levelRead($depth)) {}
 	return;
       }
 	
       if ($xml->name == "ultimate") {
-	$data[] = array("", $xml->readString());
+	$data[] = array("", array("indPost" => $xml->readString()));
       } 
       else if ($xml->name == "independent") {
-	$xml->skipToEnd();
+	$cDepth = $xml->depth;
+	$matches = array();
+	while ($xml->levelRead($cDepth)) {
+	  if ($xml->nodeType == XMLReader::ELEMENT && preg_match("/^independent_(\d)+$/",$xml->name,$matches)) {
+	    $independent[$matches[1]] = $xml->readString();
+	  }
+	}
       } else if (!array_key_exists($xml->name, $bibtexMap->$type)) {
 	msg("Cannot translate $xml->name in $type\n");
 	$data[] = array("","");
@@ -115,14 +124,82 @@ function readResource(&$formats, $xml, $bibtexMap) {
     } // end (element)
   }
 
+  // $data contains the different fields, we have to post-process this
+  // following OSBib formatting strategy
+
+  /**
+   * Check for independent characters.  These (should) come in pairs.
+   * (adapted from OSBib - format/BIBFORMAT.php)
+   */		
+  if(isset($independent))
+    {
+      $independentKeys = array_keys($independent);
+      while($independent)
+	{
+	  $preAlternative = $postAlternative = FALSE;
+	  $startFound = $endFound = FALSE;
+	  $pre = array_shift($independent);
+	  $post = array_shift($independent);
+	  if(preg_match("/%(.*)%(.*)%|%(.*)%/U", $pre, $dependent))
+	    {
+	      if(sizeof($dependent) == 4)
+		$pre = $dependent[3];
+	      else
+		{
+		  $pre = $dependent[1];
+		  $preAlternative = $dependent[2];
+		}
+	    }
+	  if(preg_match("/%(.*)%(.*)%|%(.*)%/U", $post, $dependent))
+	    {
+	      if(sizeof($dependent) == 4)
+		$post = $dependent[3];
+	      else
+		{
+		  $post = $dependent[1];
+		  $postAlternative = $dependent[2];
+		}
+	    }
+	  /**
+	   * Strip backticks used in template
+	   */
+	  $preAlternative = str_replace("`", '', $preAlternative);
+	  $postAlternative = str_replace("`", '', $postAlternative);
+	  $firstKey = array_shift($independentKeys);
+	  $secondKey = array_shift($independentKeys);
+	  
+	  $condition = "";
+	  $min = $secondKey + 1;
+	  $max = $firstKey;
+	  for($index = $firstKey; $index <= $secondKey; $index++) {
+	    $name = $data[$index][0];
+	    if ($name) {
+	      $min = min($min, $index);
+	      $max = max($max, $index);
+	      $condition .= ($condition?"||":"") . $name;
+	    }
+	  }
+
+	  if ($min > $secondKey) {
+	    msg("Could not handle independent $firstKey to $secondKey for type $type"); 
+	    continue;
+	  }
+
+	  msg("Independent ($firstKey, $lastKey): @?$condition@$pre@:@$preAlternative@; AND @?$condition@$post@:@$postAlternative@;@\n");
+	  $data[$firstKey][1]["indPre"] =  "@?${condition}@${pre}@:@${preAlternative}@;@";
+	  $data[$secondKey][1]["indPost"] = "@?${condition}@${post}@:@${postAlternative}@;@";
+	}
+    }
+
   // Deals with the special OSBib fields
   // and concatenate the bib2tpl string
   $text = "";
   for($i = 0; $i < sizeof($data); $i++) {
     $row = &$data[$i];
     $name = $row[0];
+    $options = &$row[1];
+    $text .= $options["indPre"];
     if ($name) {
-      $options = &$row[1];
       $field = "@?$name@$options[pre]@$name@$options[post]@;$name@";
       $field = preg_replace("/__SINGULAR_PLURAL__/", "@?#$name>1@$options[plural]@:$name@$options[singular]@;$name@", $field);
       
@@ -140,39 +217,39 @@ function readResource(&$formats, $xml, $bibtexMap) {
 
 
       $text .= $field;
-    } else 
-      $text .= $row[1];
+    }   
+
+    $text .= $options["indPost"];
+
   }
 
+
+
   // Finish by filling up the structure
-  assert(!array_key_exists($type, $formats));
-  $types = array();
-  if ($bibtexType) $types[] = $bibtexType;
-  $formats[$type] = array($types, $text);
-  if ($bibtexType == "article")
-    $formats[$type][0][] = "#";
+  if (in_array("article", $bibtexTypes))
+    $bibtexTypes[] = "#";
+  $formats[$type] = array($bibtexTypes, htmlentities($text));
 }
 
 $formats = array();
 while ($xml->read()) {
   if ($xml->nodeType == XMLReader::ELEMENT)
-  switch($xml->name) {
+    switch($xml->name) {
     case "osbibVersion":
-	$v = $xml->readString();
-	if ($v != "2.0") throw new Exception("Cannot read OSBib version ${version}");
-	break;
-  case "common":
-    $commonXML = readCommon($xml);
-    break;
+      $v = $xml->readString();
+      if ($v != "2.0") throw new Exception("Cannot read OSBib version ${version}");
+      break;
+    case "common":
+      $commonXML = readCommon($xml);
+      break;
     case "resource":
       readResource($formats, $xml, $bibtexMap);
       break;
     default:
       //msg("Skip [$xml->name]\n");
-  }
+    }
 };
 
-// Print
 
 
 print "<formats>\n";

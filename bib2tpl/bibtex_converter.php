@@ -424,31 +424,38 @@ class BibtexConverter
 	return "";
       }
       
-      $matches = array();
-      preg_match("/^\?(#?[\w]+)(?:([~=><])([^@]+))?$/", $match[1], $matches);
-      $value = $this->_get_value($matches[1]);
-      //print "<div>Compares $value ($matches[1]) [$matches[2]] $matches[3]</div>";
-      switch($matches[2])
-	{
-	case "":
-	  $condition = $value ? true : false;
-	  break;
-	case "=":
-	  $condition = $value == $matches[3];
-	  break;
-	case "~":
-	  $condition = preg_match("/$matches[3]/",$value);
-	  break;
-	case ">":
-	  $condition =  (float)$value > (float)$match[3];
-	  break;
-	case "<":
-	  $condition =  (float)$value < (float)$match[3];
-	  break;
-	default:
-	  $condition = false;
-	}
-      
+      $tests = preg_split("/\|\|/", substr($match[1], 1));
+    
+      $condition = true;
+      foreach($tests as $test) {
+	$matches = array();
+	preg_match("/^(#?[\w]+)(?:([~=><])([^@]+))?$/", $test, $matches);
+	$value = $this->_get_value($matches[1]);
+	//print "<div>Compares $value ($matches[1]) [$matches[2]] $matches[3]</div>";
+	switch($matches[2])
+	  {
+	  case "":
+	    $condition = $value ? true : false;
+	    break;
+	  case "=":
+	    $condition = $value == $matches[3];
+	    break;
+	  case "~":
+	    $condition = preg_match("/$matches[3]/",$value);
+	    break;
+	  case ">":
+	    $condition =  (float)$value > (float)$match[3];
+	    break;
+	  case "<":
+	    $condition =  (float)$value < (float)$match[3];
+	    break;
+	  default:
+	    $condition = false;
+	  }
+
+	// And
+	if ($condition) break;
+      }
       $this->_ifs[] = $condition ? 1 : 0;
       if ($condition) 
 	return $match[2];
