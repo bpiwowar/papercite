@@ -266,7 +266,7 @@ class Papercite {
 
     $tplOptions = array(
 			"anonymous-whole" => true, // for compatibility in the output
-			"group" => $options["group"], "group-order" => $options["group_order"], 
+			"group" => $options["group"], "group_order" => $options["group_order"], 
 			"sort" => $options["sort"], "order" => $options["order"],
 			"key_format" => $options["key_format"]);
     $data = null;
