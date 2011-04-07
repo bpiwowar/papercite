@@ -4,7 +4,7 @@
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
   Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-  Version: 0.3.4
+  Version: 0.3.5
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
 */
@@ -214,8 +214,7 @@ class Papercite {
     // --- Initialisation ---
     
     // Includes once
-    include_once("bib2tpl/bibtex_converter.php");
-
+    require_once("bib2tpl/bibtex_converter.php");
 
     // Get the options   
     $command = $matches[1];
@@ -399,7 +398,6 @@ class Papercite {
    * @param getKeys Keep track of the keys for a final substitution
    */
   function showEntries(&$refs, &$options, $getKeys, $mainTpl, $formatTpl) {
-    $bib2tpl = new BibtexConverter($options);
 
     $mainFile = papercite::getDataFile("/tpl/$mainTpl.tpl");
     $formatFile = papercite::getDataFile("/format/$formatTpl.tpl");
@@ -408,12 +406,14 @@ class Papercite {
     $format = file_get_contents($formatFile[0]);
     $bibtexEntryTemplate = new BibtexEntryFormat($format);
 
-    $bib2tpl->setGlobal("WP_PLUGIN_URL", WP_PLUGIN_URL);
 
     foreach($refs as &$entry)
       $entry["papercite_id"] = $this->counter++;
 
-    $r =  $bib2tpl->display($refs, $main, $bibtexEntryTemplate);
+    // Convert
+    $bib2tpl = new BibtexConverter($options, $main, $bibtexEntryTemplate);
+    $bib2tpl->setGlobal("WP_PLUGIN_URL", WP_PLUGIN_URL);
+    $r =  $bib2tpl->display($refs);
 
     if ($getKeys) {
       foreach($refs as &$group)

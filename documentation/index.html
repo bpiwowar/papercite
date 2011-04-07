@@ -129,7 +129,15 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
   
   <p>Each of these options are described next. Finally, the template
   language used to format entries is described on the
-  <a href="http://lmazy.verrech.net/bib2tpl/templates/">bib2tpl site</a>.
+  <a href="http://lmazy.verrech.net/bib2tpl/templates/">bib2tpl
+  site</a>, with the following modifications:
+  <ul>
+    <li>@#<b>field</b>@ gives the number of entries in a field (author
+  or editor)</li>
+  <li>Conditions can be more expressive,
+  e.g. <code>@?<b>field</b>=abc@</code> is true if the <b>field</b> is
+  equal to abc (numeric comparisons are possible with &gt; and &lt;)</li>
+</ul>
   </p>
 
   <h3>Formatting</h3>

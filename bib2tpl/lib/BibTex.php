@@ -178,8 +178,6 @@ class Structures_BibTex
                 //Currently nothing is done here, but it could for example raise an warning
             }
         }
-        $this->rtfstring         = 'AUTHORS, "{\b TITLE}", {\i JOURNAL}, YEAR';
-        $this->htmlstring        = 'AUTHORS, "<strong>TITLE</strong>", <em>JOURNAL</em>, YEAR<br />';
         $this->allowedEntryTypes = array(
             'article',
             'book',
@@ -346,18 +344,6 @@ class Structures_BibTex
             }
         }
 
-	// Post-process accents 
-	// (B. Piwowarski, Apr 2011)
-	foreach($this->data as &$entry) 
-	  foreach($entry as $fieldname => &$field) 
-	  if ($fieldname != "bibtex")
-	    if ($fieldname == "author" || $fieldname == "editor") {
-	      foreach($field as &$text)
-		Structures_BibTex::process_accents($text);
-	    } else {
-	      Structures_BibTex::process_accents($entry[$fieldname]);
-	    }
-
 
         if ($valid) {
             $this->content = '';
@@ -506,9 +492,16 @@ class Structures_BibTex
                     $this->_generateWarning('WARNING_NOT_ALLOWED_ENTRY_TYPE', $ret['entrytype'], $entry.'}');
                 }
             }
+
+	    // Process accents
+	    foreach($ret as $key => &$value) 
+	      if ($key != "bibtex")
+	      Structures_BibTex::process_accents($value);
+	    
+
             //Handling the authors
             if (in_array('author', array_keys($ret)) && $this->_options['extractAuthors']) {
-                $ret['author'] = $this->_extractAuthors($ret['author']);
+	      $ret['author'] = $this->_extractAuthors($ret['author']);
 
             }
             //Handling the editors
@@ -707,125 +700,18 @@ class Structures_BibTex
      * @return array the extracted authors
      */
     function _extractAuthors($entry) {
-        $entry       = $this->_unwrap($entry);
-        $authorarray = array();
-        $authorarray = explode(' and ', $entry);
-        for ($i = 0; $i < sizeof($authorarray); $i++) {
-            $author = trim($authorarray[$i]);
-            /*The first version of how an author could be written (First von Last)
-             has no commas in it*/
-            $first    = '';
-            $von      = '';
-            $last     = '';
-            $jr       = '';
-            if (strpos($author, ',') === false) {
-                $tmparray = array();
-                $tmparray = explode(' ', $author);
-                //$tmparray = explode(' |~', $author);
-                $size     = sizeof($tmparray);
-                if (1 == $size) { //There is only a last
-                    $last = $tmparray[0];
-                } elseif (2 == $size) { //There is a first and a last
-                    $first = $tmparray[0];
-                    $last  = $tmparray[1];
-                } else {
-                    $invon  = false;
-                    $inlast = false;
-                    for ($j=0; $j<($size-1); $j++) {
-                        if ($inlast) {
-                            $last .= ' '.$tmparray[$j];
-                        } elseif ($invon) {
-                            $case = $this->_determineCase($tmparray[$j]);
-                            if (PEAR::isError($case)) {
-                                // IGNORE?
-                            } elseif ((0 == $case) || (-1 == $case)) { //Change from von to last
-                                //You only change when there is no more lower case there
-                                $islast = true;
-                                for ($k=($j+1); $k<($size-1); $k++) {
-                                    $futurecase = $this->_determineCase($tmparray[$k]);
-                                    if (PEAR::isError($case)) {
-                                        // IGNORE?
-                                    } elseif (0 == $futurecase) {
-                                        $islast = false;
-                                    }
-                                }
-                                if ($islast) {
-                                    $inlast = true;
-                                    if (-1 == $case) { //Caseless belongs to the last
-                                        $last .= ' '.$tmparray[$j];
-                                    } else {
-                                        $von  .= ' '.$tmparray[$j];
-                                    }
-                                } else {
-                                    $von    .= ' '.$tmparray[$j];
-                                }
-                            } else {
-                                $von .= ' '.$tmparray[$j];
-                            }
-                        } else {
-                            $case = $this->_determineCase($tmparray[$j]);
-                            if (PEAR::isError($case)) {
-                                // IGNORE?
-                            } elseif (0 == $case) { //Change from first to von
-                                $invon = true;
-                                $von   .= ' '.$tmparray[$j];
-                            } else {
-                                $first .= ' '.$tmparray[$j];
-                            }
-                        }
-                    }
-                    //The last entry is always the last!
-                    $last .= ' '.$tmparray[$size-1];
-                }
-            } else { //Version 2 and 3
-                $tmparray     = array();
-                $tmparray     = explode(',', $author);
-                //The first entry must contain von and last
-                $vonlastarray = array();
-                $vonlastarray = explode(' ', $tmparray[0]);
-                $size         = sizeof($vonlastarray);
-                if (1==$size) { //Only one entry->got to be the last
-                    $last = $vonlastarray[0];
-                } else {
-                    $inlast = false;
-                    for ($j=0; $j<($size-1); $j++) {
-                        if ($inlast) {
-                            $last .= ' '.$vonlastarray[$j];
-                        } else {
-                            if (0 != ($this->_determineCase($vonlastarray[$j]))) { //Change from von to last
-                                $islast = true;
-                                for ($k=($j+1); $k<($size-1); $k++) {
-                                    $this->_determineCase($vonlastarray[$k]);
-                                    $case = $this->_determineCase($vonlastarray[$k]);
-                                    if (PEAR::isError($case)) {
-                                        // IGNORE?
-                                    } elseif (0 == $case) {
-                                        $islast = false;
-                                    }
-                                }
-                                if ($islast) {
-                                    $inlast = true;
-                                    $last   .= ' '.$vonlastarray[$j];
-                                } else {
-                                    $von    .= ' '.$vonlastarray[$j];
-                                }
-                            } else {
-                                $von    .= ' '.$vonlastarray[$j];
-                            }
-                        }
-                    }
-                    $last .= ' '.$vonlastarray[$size-1];
-                }
-                //Now we check if it is version three (three entries in the array (two commas)
-                if (3==sizeof($tmparray)) {
-                    $jr = $tmparray[1];
-                }
-                //Everything in the last entry is first
-                $first = $tmparray[sizeof($tmparray)-1];
-            }
-            $authorarray[$i] = array('first'=>trim($first), 'von'=>trim($von), 'last'=>trim($last), 'jr'=>trim($jr));
-        }
-        return $authorarray;
+      require_once("PARSECREATORS.php");
+      $parseCreators = new PARSECREATORS();
+      $creators = $parseCreators->parse($entry);
+      foreach($creators as &$cArray) {
+	$cArray = array(
+		   'surname'   =>      trim($cArray[2]),
+		   'firstname' =>      trim($cArray[0]),
+		   'initials'  =>      trim($cArray[1]),
+		   'prefix'    =>      trim($cArray[3]),
+		   );
+      }
+      return $creators;
     }
 
     /**
@@ -998,44 +884,7 @@ class Structures_BibTex
         return sizeof($this->data);
     }
 
-    /**
-     * Returns the author formatted
-     *
-     * The Author is formatted as setted in the authorstring
-     *
-     * @access private
-     * @param array $array Author array
-     * @return string the formatted author string
-     */
-    function _formatAuthor($array)
-    {
-        if (!array_key_exists('von', $array)) {
-            $array['von'] = '';
-        } else {
-            $array['von'] = trim($array['von']);
-        }
-        if (!array_key_exists('last', $array)) {
-            $array['last'] = '';
-        } else {
-            $array['last'] = trim($array['last']);
-        }
-        if (!array_key_exists('jr', $array)) {
-            $array['jr'] = '';
-        } else {
-            $array['jr'] = trim($array['jr']);
-        }
-        if (!array_key_exists('first', $array)) {
-            $array['first'] = '';
-        } else {
-            $array['first'] = trim($array['first']);
-        }
-        $ret = $this->authorstring;
-        $ret = str_replace("VON", $array['von'], $ret);
-        $ret = str_replace("LAST", $array['last'], $ret);
-        $ret = str_replace("JR", $array['jr'], $ret);
-        $ret = str_replace("FIRST", $array['first'], $ret);
-        return trim($ret);
-    }
+   
 
     /**
      * Converts the stored BibTex entries to a BibTex String
@@ -1080,153 +929,6 @@ class Structures_BibTex
         return $bibtex;
     }
 
-    /**
-     * Adds a new BibTex entry to the data
-     *
-     * @access public
-     * @param array $newentry The new data to add
-     * @return void
-     */
-    function addEntry($newentry)
-    {
-        $this->data[] = $newentry;
-    }
-
-    /**
-     * Returns statistic
-     *
-     * This functions returns a hash table. The keys are the different
-     * entry types and the values are the amount of these entries.
-     *
-     * @access public
-     * @return array Hash Table with the data
-     */
-    function getStatistic()
-    {
-        $ret = array();
-        foreach ($this->data as $entry) {
-            if (array_key_exists($entry['entrytype'], $ret)) {
-                $ret[$entry['entrytype']]++;
-            } else {
-                $ret[$entry['entrytype']] = 1;
-            }
-        }
-        return $ret;
-    }
-
-    /**
-     * Returns the stored data in RTF format
-     *
-     * This method simply returns a RTF formatted string. This is done very
-     * simple and is not intended for heavy using and fine formatting. This
-     * should be done by BibTex! It is intended to give some kind of quick
-     * preview or to send someone a reference list as word/rtf format (even
-     * some people in the scientific field still use word). If you want to
-     * change the default format you have to override the class variable
-     * "rtfstring". This variable is used and the placeholders simply replaced.
-     * Lines with no data cause an warning!
-     *
-     * @return string the RTF Strings
-     */
-    function rtf()
-    {
-        $ret = "{\\rtf\n";
-        foreach ($this->data as $entry) {
-            $line    = $this->rtfstring;
-            $title   = '';
-            $journal = '';
-            $year    = '';
-            $authors = '';
-            if (array_key_exists('title', $entry)) {
-                $title = $this->_unwrap($entry['title']);
-            }
-            if (array_key_exists('journal', $entry)) {
-                $journal = $this->_unwrap($entry['journal']);
-            }
-            if (array_key_exists('year', $entry)) {
-                $year = $this->_unwrap($entry['year']);
-            }
-            if (array_key_exists('author', $entry)) {
-                if ($this->_options['extractAuthors']) {
-                    $tmparray = array(); //In this array the authors are saved and the joind with an and
-                    foreach ($entry['author'] as $authorentry) {
-                        $tmparray[] = $this->_formatAuthor($authorentry);
-                    }
-                    $authors = join(', ', $tmparray);
-                } else {
-                    $authors = $entry['author'];
-                }
-            }
-            if ((''!=$title) || (''!=$journal) || (''!=$year) || (''!=$authors)) {
-                $line = str_replace("TITLE", $title, $line);
-                $line = str_replace("JOURNAL", $journal, $line);
-                $line = str_replace("YEAR", $year, $line);
-                $line = str_replace("AUTHORS", $authors, $line);
-                $line .= "\n\\par\n";
-                $ret  .= $line;
-            } else {
-                $this->_generateWarning('WARNING_LINE_WAS_NOT_CONVERTED', '', print_r($entry,1));
-            }
-        }
-        $ret .= '}';
-        return $ret;
-    }
-
-    /**
-     * Returns the stored data in HTML format
-     *
-     * This method simply returns a HTML formatted string. This is done very
-     * simple and is not intended for heavy using and fine formatting. This
-     * should be done by BibTex! It is intended to give some kind of quick
-     * preview. If you want to change the default format you have to override
-     * the class variable "htmlstring". This variable is used and the placeholders
-     * simply replaced.
-     * Lines with no data cause an warning!
-     *
-     * @return string the HTML Strings
-     */
-    function html()
-    {
-        $ret = "<p>\n";
-        foreach ($this->data as $entry) {
-            $line    = $this->htmlstring;
-            $title   = '';
-            $journal = '';
-            $year    = '';
-            $authors = '';
-            if (array_key_exists('title', $entry)) {
-                $title = $this->_unwrap($entry['title']);
-            }
-            if (array_key_exists('journal', $entry)) {
-                $journal = $this->_unwrap($entry['journal']);
-            }
-            if (array_key_exists('year', $entry)) {
-                $year = $this->_unwrap($entry['year']);
-            }
-            if (array_key_exists('author', $entry)) {
-                if ($this->_options['extractAuthors']) {
-                    $tmparray = array(); //In this array the authors are saved and the joind with an and
-                    foreach ($entry['author'] as $authorentry) {
-                        $tmparray[] = $this->_formatAuthor($authorentry);
-                    }
-                    $authors = join(', ', $tmparray);
-                } else {
-                    $authors = $entry['author'];
-                }
-            }
-            if ((''!=$title) || (''!=$journal) || (''!=$year) || (''!=$authors)) {
-                $line = str_replace("TITLE", $title, $line);
-                $line = str_replace("JOURNAL", $journal, $line);
-                $line = str_replace("YEAR", $year, $line);
-                $line = str_replace("AUTHORS", $authors, $line);
-                $line .= "\n";
-                $ret  .= $line;
-            } else {
-                $this->_generateWarning('WARNING_LINE_WAS_NOT_CONVERTED', '', print_r($entry,1));
-            }
-        }
-        $ret .= "</p>\n";
-        return $ret;
-    }
+   
 }
 ?>

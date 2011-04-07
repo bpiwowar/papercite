@@ -183,57 +183,6 @@ class Helper
     return $sum;
   }
 
-  /**
-   * This function takes an array of authors and renders is into a comma
-   * separated list of authors. If no array is passed the value is returned
-   * without change.
-   *
-   * @access public
-   * @param array authors Value representing authors
-   * @return string Either a string if an array was passed or input value
-   *                otherwise.
-   */
-  function niceAuthors($authors, $options = array())
-  {
-    if ( is_array($authors) )
-    {
-      foreach ( $authors as $key => $author )
-      {
-        $authors[$key] = $this->niceAuthor($author, $options);
-      }
 
-      $authors = join(', ', $authors);
-    }
-
-    return $authors;
-  }
-
-  /**
-   * This function takes an author and renders is into a string.
-   * If no array is passed the value is returned without change.
-   *
-   * @access public
-   * @param array authors Value representing authors
-   * @return string Either a string if an array was passed or input value
-   *               otherwise.
-   */
-  function niceAuthor($author, $options = array())
-  {
-    if ($options == "initials") {
-      $firsts = preg_split("#[- ]#",$author["first"]);
-      foreach($firsts as $first) 
-	$initials .= "$first[0].";
-      $author["first"] = $initials;
-    }
-
-    if ( is_array($author) )
-    {
-      // Remove empty name parts
-      $author = array_filter($author);
-      $author = join(' ', $author);
-    }
-    
-    return $author;
-  }
 }
 ?>

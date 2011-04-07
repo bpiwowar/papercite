@@ -54,6 +54,21 @@ function processShortcodes($string) {
   return str_replace(array("[i]", "[/i]"), array("<span style=\"font-style: italic\">", "</span>"), $string);
 }
 
+function xmlspecialchars($text) {
+   return str_replace('&#039;', '&apos;', htmlspecialchars($text, ENT_QUOTES));
+}
+
+function readCommon($xml) {
+  $depth = $xml->depth;
+  $text = "";
+  while ($xml->levelRead($depth)) {
+    if ($xml->nodeType == XMLReader::ELEMENT) {
+      $text .= "<property name=\"$xml->name\" value=\"" . xmlspecialchars($xml->readString()) . "\"/>\n";
+    }
+  }
+  return $text;
+}
+
 function readResource(&$formats, $xml, $bibtexMap) {
   $type = $xml->getAttribute("name");
   $bibtexType = $bibtexMap->types[$type];
@@ -146,6 +161,9 @@ while ($xml->read()) {
 	$v = $xml->readString();
 	if ($v != "2.0") throw new Exception("Cannot read OSBib version ${version}");
 	break;
+  case "common":
+    $commonXML = readCommon($xml);
+    break;
     case "resource":
       readResource($formats, $xml, $bibtexMap);
       break;
@@ -156,7 +174,11 @@ while ($xml->read()) {
 
 // Print
 
+
 print "<formats>\n";
+print "\n";
+print $commonXML;
+print "\n";
 foreach($formats as $key => &$array) {
   if (sizeof($array[0]) > 0) {
     print "<format types=\"" . implode(" ", $array[0]) . "\">\n";

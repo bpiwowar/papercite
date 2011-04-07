@@ -81,6 +81,9 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.3.5 =
+  * Author are formatted according to the entry template converted
+  from OSBib
 = 0.3.4 =
   * Formats are back, translated from OSBib (not perfect, but close to
   the output in version prior to 0.3.0

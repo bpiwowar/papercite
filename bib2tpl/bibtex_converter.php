@@ -49,63 +49,13 @@
 // Use the slightly modified BibTex parser from PEAR.
 require('lib/BibTex.php');
 
+// Requires the entry template class
+require("bib2tpl-entry.php");
+
 // Some stupid functions
 require('helper.inc.php');
 
 
-/**
- * This class is an entry format
- */
-class BibtexEntryFormat {
-  var $formats = array();
-
-  function BibtexEntryFormat(&$file_content) {
-    $parser = xml_parser_create(); 
-    if (!$parser) 
-      return false;
-    xml_set_element_handler($parser, array($this, "start_element"), array($this, "end_element"));
-    xml_set_character_data_handler ($parser,  array($this, "characters"));
-    xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, false);
-    xml_parse($parser, $file_content);
-    xml_parser_free($parser);
-    $this->format = null;
-  }
-
-  function get($name) {
-    if (array_key_exists($name, $this->formats))
-      return $this->formats[$name];
-    return $this->formats["#"];
-  }
-
-  function start_element($parser, $name, $att) {
-    if ($name == "format") {
-      $this->format = "";
-      foreach(preg_split("#\\s+#",$att["types"]) as $type) {
-	$this->formats[$type] = &$this->format;
-      }
-    } else if (!is_null($this->format)) {
-      $this->format .= "<$name";
-      foreach($att as $name => $value) {
-	$this->format .= " $name='".  htmlspecialchars($value) ."'";
-      }
-      $this->format .= ">";
-    }
-  }
-
-  function end_element(&$parser, $name) {
-    if ($name == "format") {
-      unset($this->format);
-    } else if (!is_null($this->format)) {
-      $this->format .= "</$name>";
-    }
-  }
-
-  function characters(&$parser, &$data) {
-    if (!is_null($this->format))
-      $this->format .= $data;
-  }
-
-}
 
 /**
  * This class provides a method that parses bibtex files to
@@ -114,7 +64,8 @@ class BibtexEntryFormat {
  * for documentation.
  *
  * @author Raphael Reitzig
- * @version 1.0
+ * @author Benjamin Piwowarski
+ * @version 2.0
  */
 class BibtexConverter
 {
@@ -163,8 +114,10 @@ class BibtexConverter
    *   lang  => any string $s as long as proper lang/$s.php exists
    * @return void
    */
-  function BibtexConverter($options=array())
+  function BibtexConverter($options=array(), &$template, &$entry_template)
   {
+    $this->_template = &$template;
+    $this->_entry_template = &$entry_template;
 
     $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true));
 
@@ -225,7 +178,7 @@ class BibtexConverter
    * @param string template template code
    * @return mixed Result string or PEAR_Error on failure
    */
-  function convert($bibtex, &$template, &$entry_template)
+  function convert($bibtex)
   {
     // TODO Eliminate LaTeX syntax
 
@@ -236,7 +189,7 @@ class BibtexConverter
       return $stat;
     }
 
-    return $this->display($this->_parser->data, $template, $entry_template);
+    return $this->display($this->_parser->data);
   }
 
   /**
@@ -249,14 +202,14 @@ class BibtexConverter
    * @param string template template code
    * @return mixed Result string or PEAR_Error on failure
    */
-  function display(&$data, &$template, &$entry_template)
+  function display(&$data)
   {
     $this->_pre_process($data);
     $data = $this->_group($data);
     $data = $this->_sort($data);
     $this->_post_process($data);
 
-    $text = $this->_translate($data, $template, $entry_template);
+    $text = $this->_translate($data);
     return array("text" => &$text, "data" => &$data);
   }
 
@@ -283,7 +236,7 @@ class BibtexConverter
     foreach ( $data as $entry ) {
       if (    (   empty($this->_options['only']['author'])
                || preg_match('/'.$this->_options['only']['author'].'/i',
-                             $this->_helper->niceAuthors($entry['author'])))
+                             $this->_entry_template->niceAuthors($entry['author'])))
            && (   empty($this->_options['only']['entrytype'])
                || preg_match('/'.$this->_options['only']['entrytype'].'/i',
                              $entry['entrytype'])) )
@@ -353,7 +306,7 @@ class BibtexConverter
       foreach ( $data as $entry )
       {
         $target =  $this->_options['group'] === 'firstauthor'
-	  ? $this->_helper->niceAuthor($entry['firstauthor'])
+	  ? $this->_entry_template->niceAuthor($entry['firstauthor'])
                   : $entry[$this->_options['group']];
 
         if ( empty($result[$target]) )
@@ -410,9 +363,9 @@ class BibtexConverter
    * @param string template The used template
    * @return string The data represented in terms of the template
    */
-  function _translate($data, $template, &$entry_template)
+  function _translate($data)
   {
-    $result = $template;
+    $result = $this->_template;
 
     // Replace global values
     $result = preg_replace('/@globalcount@/', $this->_helper->lcount($data, 2), $result);
@@ -421,12 +374,8 @@ class BibtexConverter
     $match = array();
 
     // Extract entry template
-    unset($this->entry_tpl);
-    $this->entry_tpl = $entry_template;
-
-    // Extract entry template
     $pattern = '/@\{entry@(.*?)@\}entry@/s';
-    preg_match($pattern, $template, $match);
+    preg_match($pattern, $result, $match);
     $this->full_entry_tpl = $match[1];
     $result = preg_replace($pattern, "@#fullentry@", $result);
 
@@ -435,7 +384,6 @@ class BibtexConverter
     preg_match($pattern, $result, $match);
     $this->group_tpl = $match[1];
     $result = preg_replace($pattern, "@#group@", $result);
-
 
     // The data to be processed
     $this->_data = &$data;
@@ -560,7 +508,7 @@ class BibtexConverter
     // --- Entry 
     if ($match[1] == "#entry") {
       $type = $this->_entry["entrytype"];
-      $entryTpl = &$this->entry_tpl->get($type);
+      $entryTpl = &$this->_entry_template->get($type);
       //print "<div><b>$type</b>: ". htmlentities($entryTpl). "</div>";
       $t= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $entryTpl) . $match[2];
       return $t;
@@ -605,7 +553,7 @@ class BibtexConverter
 	return $v ? 0 : 1;
 
     if (is_array($v)) {
-      return $this->_helper->niceAuthors($v, $modifier);
+      return $this->_entry_template->niceAuthors($v);
     }
 
     return "$v";
