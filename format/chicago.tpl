@@ -52,35 +52,35 @@
 <property name="dateRangeSameMonth" value="1"/>
 
 <format types="unpublished misc">
-@?author@@author@. @;author@@?year@@year@. @;year@@?title@&lt;span style=&quot;font-style: italic&quot;&gt;@title@&lt;/span&gt;. @;title@@?editor@Edited by @editor@. @;editor@@?address@@address@@?publisher@:@:@.@;publisher@ @;address@@?publisher@@publisher@@;publisher@.
+@?author@@author@. @;@@?year@@year@. @;@@?title@&lt;span style=&quot;font-style: italic&quot;&gt;@title@&lt;/span&gt;. @;@@?editor@Edited by @editor@. @;@@?address@@address@@?publisher@:@:@.@;publisher@ @;@@?publisher@@publisher@@;@.
 </format>
 
 <format types="techreport">
-@?author@@author@. @;author@@?year@@year@. @;year@@?title@&lt;span style=&quot;font-style: italic&quot;&gt;@title@&lt;/span&gt;. @;title@@?address@@address@@?publisher@:@:@.@;publisher@ @;address@@?publisher@@publisher@@;publisher@@?date@, @date@@;date@.
+@?author@@author@. @;@@?year@@year@. @;@@?title@&lt;span style=&quot;font-style: italic&quot;&gt;@title@&lt;/span&gt;. @;@@?address@@address@@?publisher@:@:@.@;publisher@ @;@@?publisher@@publisher@@;@@?date@, @date@@;@.
 </format>
 
 <format types="book">
-@?author@@author@. @;author@@?year@@year@. @;year@@?title@&lt;span style=&quot;font-style: italic&quot;&gt;@title@&lt;/span&gt;. @;title@@?editor@Edited by @editor@. @;editor@@?edition@@edition@ ed. @;edition@@?volume@Vol. @volume@, @;volume@@?series@&lt;span style=&quot;font-style: italic&quot;&gt;@series@&lt;/span&gt;. @;series@@?address@@address@@?publisher@:@:@.@;publisher@ @;address@@?publisher@@publisher@. @;publisher@.
+@?author@@author@. @;@@?year@@year@. @;@@?title@&lt;span style=&quot;font-style: italic&quot;&gt;@title@&lt;/span&gt;. @;@@?editor@Edited by @editor@. @;@@?edition@@edition@ ed. @;@@?volume@Vol. @volume@, @;@@?series@&lt;span style=&quot;font-style: italic&quot;&gt;@series@&lt;/span&gt;. @;@@?address@@address@@?publisher@:@:@.@;publisher@ @;@@?publisher@@publisher@. @;@.
 </format>
 
-<format types="inbook">
-@?author@@author@. @;author@@?year@@year@. @;year@@?title@@title@. @;title@@?editor@Edited by @editor@. @;editor@@?bookitle@In &lt;span style=&quot;font-style: italic&quot;&gt;@bookitle@&lt;/span&gt;, @;bookitle@@?address@ @address@@?publisher@:@:@.@;publisher@ @;address@@?publisher@@publisher@. @;publisher@.
+<format types="inbook incollection">
+@?author@@author@. @;@@?year@@year@. @;@@?title@@title@. @;@@?editor@Edited by @editor@. @;@@?bookitle@In &lt;span style=&quot;font-style: italic&quot;&gt;@bookitle@&lt;/span&gt;, @;@@?address@ @address@@?publisher@:@:@.@;publisher@ @;@@?publisher@@publisher@. @;@.
 </format>
 
 <format types="article #">
-@?author@@author@. @;author@@?year@@year@. @;year@@?title@@title@. @;title@@?journal@&lt;span style=&quot;font-style: italic&quot;&gt;@journal@&lt;/span&gt; @;journal@@?volume@@volume@ @;volume@@?number@(@number@):@;number@@?pages@@pages@@;pages@.
+@?author@@author@. @;@@?year@@year@. @;@@?title@@title@. @;@@?journal@&lt;span style=&quot;font-style: italic&quot;&gt;@journal@&lt;/span&gt; @;@@?volume@@volume@ @;@@?number@(@number@):@;@@?pages@@pages@@;@.
 </format>
 
 <format types="proceedings">
-@?title@@title@. @;title@@?organization||address@@:@@;@@?organization@@organization@@;organization@@?address@@?date@, @:@@;date@@address@@;address@@?organization||address@, @:@@;@@?date@@date@@;date@@?year@ @year@@;year@.
+@?title@@title@. @;@@?organization||address@@:@@;@@?organization@@organization@@;@@?address@@?date@, @:@@;date@@address@@;@@?organization||address@, @:@@;@@?date@@date@@;@@?year@ @year@@;@.
 </format>
 
 <format types="inproceedings">
-@?author@@author@. @;author@@?year@@year@. @;year@@?title@@title@. @;title@@?booktitle@Paper read at @booktitle@@;booktitle@@?date@@?address@, @:@@;address@@date@@;date@@?address@@?@, @:@@;@at @address@@;address@.
+@?author@@author@. @;@@?year@@year@. @;@@?title@@title@. @;@@?booktitle@Paper read at @booktitle@@;@@?date@@?address@, @:@@;address@@date@@;@@?address@@?@, @:@@;@at @address@@;@.
 </format>
 
 <format types="phdthesis masterthesis">
-@?author@@author@. @;author@@?year@@year@. @;year@@?title@@title@. @;title@@?type@@type@@;type@@?institution@, @institution@@;institution@@?address@, @address@@;address@.
+@?author@@author@. @;@@?year@@year@. @;@@?title@@title@. @;@@?type@@type@@;@@?entrytype=phdthesis||entrytype=masterthesis@ @?entrytype=phdthesis@PhD Thesis@;@@?entrytype=masterthesis@Master Thesis@;@@;@@?institution@, @institution@@;@@?address@, @address@@;@.
 </format>
 
 </formats>

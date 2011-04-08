@@ -56,6 +56,110 @@ class BibtexEntryFormat {
       $this->format .= $data;
   }
 
+  function count(&$value) {
+    if (!is_object($value)) 
+      return $value ? 1 : 0;
+
+    return $value->count();
+  }
+
+  function format(&$value) {
+    if (!is_object($value)) 
+      return $value;
+
+    $c =  get_class($value);
+    switch($c) {
+    case "BibtexCreators":
+      return $this->niceAuthors($value->creators);
+    case "BibtexPages":
+      return $this->nicePages($value);
+    default:
+      print "<div><b>Internal error [papercite]</b>: unhandled class $c</div>";
+    }
+  }
+
+  /**
+   * Pages printed according to OSBib
+   */
+  function nicePages($pages) {
+    $style = &$this->properties;
+
+
+    /**
+     * If no page end, return just $pages->start;
+     */
+    if(!$pages->end)
+      {
+	return $pages->start;
+      }
+    /**
+     * Pages may be in roman numeral format etc.  Return unchanged
+     */
+    if(!is_numeric($pages->start))
+      {
+	return  $pages->start . '-' . $pages->end;
+      }
+
+
+    /**
+     * They've done something wrong so give them back exactly what they entered
+     */
+    if(($pages->end <= $pages->start) || (strlen($pages->end) < strlen($pages->start)))
+      {
+	return $pages->start . '-' . $pages->end;
+      }
+    else if($style['pageFormat'] == 2)
+      {
+	return  $pages->start . '-' . $pages->end;
+      }
+    else
+      {
+	/**
+	 * We assume page numbers are not into the 10,000 range - if so, return the complete pages
+	 */
+	if(strlen($pages->start) <= 4)
+	  {
+	    $pages->startArray = preg_split('//', $pages->start);
+	    array_shift($startArray); // always an empty element at start?
+	    array_pop($startArray); // always an empty array element at end?
+	    if($style['pageFormat'] == 0)
+	      {
+		array_pop($startArray);
+		$endPage = substr($pages->end, -1);
+		$index = -2;
+	      }
+	    else
+	      {
+		array_pop($startArray);
+		array_pop($startArray);
+		$endPage = substr($pages->end, -2);
+		$index = -3;
+	      }
+	    while(!empty($startArray))
+	      {
+		$startPop = array_pop($startArray);
+		$endSub = substr($pages->end, $index--, 1);
+		if($endSub == $startPop)
+		  {
+		    $this->item[$this->styleMap->{$type}['pages']] 
+		      = $pages->start . '-' . $endPage;
+		    return;
+		  }
+		if($endSub > $startPop)
+		  $endPage = $endSub . $endPage;
+	      }
+	  }
+	else
+	  {
+	    return $pages->start . '-' . $pages->end;
+	  }
+      }
+    /**
+     * We should never reach here - in case we do, give back complete range so that something at least is printed
+     */
+    return $pages->start . '-' . $pages->end;
+  }
+
   /**
    * This function takes an array of authors and renders is into a comma
    * separated list of authors. If no array is passed the value is returned
@@ -66,7 +170,7 @@ class BibtexEntryFormat {
    * @return string Either a string if an array was passed or input value
    *                otherwise.
    */
-  function niceAuthors($authors)
+  function niceAuthors(&$authors)
   {
     // OSBib glue
     $delimitTwo = "primaryTwoCreatorsSep";

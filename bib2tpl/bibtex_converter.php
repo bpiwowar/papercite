@@ -128,7 +128,7 @@ class BibtexConverter
       'anonymous-whole' => false,
 
       'group' => 'year',
-      'group-order' => 'desc',
+      'group_order' => 'desc',
 
       'sort' => 'none',
       'order' => 'none',
@@ -141,7 +141,8 @@ class BibtexConverter
     // Overwrite specified options
     foreach ( $this->_options as $key => $value )
     {
-      $this->_options[$key] = $options[$key];
+      if (array_key_exists($key, $options))
+	$this->_options[$key] = $options[$key];
     }
 
     /* Load translations.
@@ -156,8 +157,7 @@ class BibtexConverter
       require('lang/en.php');
     }
     $this->_options['lang'] = $translations;
-
-    $this->_helper = new Helper($this->_options);
+    $this->_helper = new Bib2TplHelper($this->_options);
   }
 
 
@@ -258,7 +258,7 @@ class BibtexConverter
    */
   function _pre_process(&$data) {
     foreach ( $data as &$entry ) {
-      $entry['firstauthor'] = $entry['author'][0];
+      $entry['firstauthor'] = $entry['author']->authors[0]["surname"];
       $entry['entryid'] = $id++;
     }
   }
@@ -554,16 +554,9 @@ class BibtexConverter
     // --- post processing
 
     if ($count)
-      if (is_array($v)) 
-	return sizeof($v);
-      else
-	return $v ? 0 : 1;
+      return $this->_entry_template->count($v);
 
-    if (is_array($v)) {
-      return $this->_entry_template->niceAuthors($v);
-    }
-
-    return "$v";
+    return $this->_entry_template->format($v);
   }
 
 

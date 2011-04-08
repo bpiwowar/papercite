@@ -47,7 +47,7 @@
  * @author Raphael Reitzig
  * @version 1.0
  */
-class Helper
+class Bib2TplHelper
 {
 
   /**
@@ -61,7 +61,7 @@ class Helper
    * @access public
    * @param array options Options array with same semantics as main class.
    */
-  function Helper($options=array())
+  function Bib2TplHelper($options=array())
   {
     $this->_options = $options;
   }
@@ -75,31 +75,40 @@ class Helper
    *                the month could not be recognized.
    */
   function _e2mn($entry) {
-    $month = empty($entry['month']) ? '' : $entry['month'];
-    
-    $result = '00';
-    $month = strtolower($month);
+   // Set default results
+   $result = '00';
+   
+   // if there is no month information then return default
+   if ( empty($entry['month']) )
+   {
+     return $result;
+   }
+   else
+   {
+     $month = $entry['month'];
+   }
+   
+   // if month is 1 or 2 decimal places then return it with zero padding e.i. 00,..05,..12  
+   if ( preg_match('/^\d[\d]$/', $month) )
+   {
+     $result = strlen($month) == 1 ? '0'.$month : $month;
+     return $result;
+   }
+   else
+   {     
+     // parses an English textual date into a Unix timestamp (the number of seconds since January 1 1970 00:00:00 GMT).
+     $date_stamp = strtotime($month);
 
-    // This is gonna get ugly; other solutions?
-    $pattern = '/^'.$month.'/';
-    if ( preg_match('/^\d[\d]$/', $month) )
-    {
-      return strlen($month) == 1 ? '0'.$month : $month;
-    }
-    else
-    {
-      foreach ( $this->_options['lang']['months'] as $number => $name )
-      {
-        if ( preg_match($pattern , $name) )
-        {
-          $result = $number;
-          break;
-        }
-      }
-    }
-
-    return result;
-  }
+     if ( $date_stamp == true) 
+       {
+	 $result = date('m', $date_stamp); //get the zero padded month number
+	 return $result;
+       }
+     
+     // if nothing was found then return default
+     return $result;
+   }
+ }
 
   /**
    * Compares two group keys for the purpose of sorting.
@@ -135,11 +144,11 @@ class Helper
       $order = -strcmp($e1['year'].$this->_e2mn($e1),
 		       $e2['year'].$this->_e2mn($e2));
     } else if ($name == "firstauthor") {
-      $order = -strcmp($e1["author"][0]["last"], $e2["author"][0]["last"]);
+      $order = -strcmp($e1["author"][0]["surname"], $e2["author"][0]["surname"]);
     } else if ($name == "author") {
       $n = min(sizeof($e1["author"]), sizeof($e2["author"]));
       for($i = 0; $i < $n; $i++) {
-	$order = -strcmp($e1["author"][$i]["last"], $e2["author"][$i]["last"]);
+	$order = -strcmp($e1["author"][$i]["surname"], $e2["author"][$i]["surname"]);
 	if ($order != 0) 
 	  break;
       }

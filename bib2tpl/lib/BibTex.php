@@ -31,6 +31,26 @@
    */
 
 require_once 'PEAR.php' ;
+
+class BibtexCreators {
+  function BibtexCreators(&$creators) {
+    $this->creators = &$creators;
+  }
+  function count() {
+    return sizeof($creators);
+  }
+}
+
+class BibtexPages {
+  function BibtexPages($start, $end) {
+    $this->start = (int)$start;
+    $this->end = (int)$end;
+  }
+  function count() {
+    return ($this->start ? 1 : 0) + ($this->end ? 1 : 0);
+  }
+}
+
 /**
  * Structures_BibTex
  *
@@ -354,7 +374,7 @@ class Structures_BibTex
     }
 
     static function process_accents(&$text) {
-      $text = preg_replace_callback("#\\\\(?:['\"^`H~\.]|¨)\w|\\\\([LlcCoO]|ss|aa|AA|[ao]e|[OA]E)#", "Structures_BibTex::_accents_cb", $text);
+      $text = preg_replace_callback("#\\\\(?:['\"^`H~\.]|¨)\w|\\\\([LlcCoO]|ss|aa|AA|[ao]e|[OA]E|&)#", "Structures_BibTex::_accents_cb", $text);
     }
 
     static $accents = array(
@@ -380,6 +400,7 @@ class Structures_BibTex
       "\'U" => "Ú", "\`U" => "Ù", "\^U" => "Û", "\¨U" => "Ü", '\"U' => "Ü", 
       "\'z" => "ź", "\.z" => "ż",
       "\'Z" => "Ź", "\.Z" => "Ż",
+      "\&" => "&"
     ); 
 
     static function _accents_cb($input) {
@@ -498,11 +519,18 @@ class Structures_BibTex
 	      if ($key != "bibtex")
 	      Structures_BibTex::process_accents($value);
 	    
+	    // Handling pages
+            if (in_array('pages', array_keys($ret))) {
+	      $matches = array();
+	      if (preg_match("/^\s*(\d+)(?:\s*--?\s*(\d+))?\s*$/", $ret['pages'], $matches)) {
+		$ret['pages'] = new BibtexPages($matches[1], $matches[2]);
+	      }
+	      // $ret['author'] = $this->_extractAuthors($ret['author']);
+            }
 
             //Handling the authors
             if (in_array('author', array_keys($ret)) && $this->_options['extractAuthors']) {
 	      $ret['author'] = $this->_extractAuthors($ret['author']);
-
             }
             //Handling the editors
             if (in_array('editor', array_keys($ret)) && $this->_options['extractAuthors']) {
@@ -699,19 +727,21 @@ class Structures_BibTex
      * @param string $entry The entry with the authors
      * @return array the extracted authors
      */
-    function _extractAuthors($entry) {
+    function _extractAuthors($authors) {
+      // Use OSBib way of parsing authors
       require_once("PARSECREATORS.php");
       $parseCreators = new PARSECREATORS();
-      $creators = $parseCreators->parse($entry);
+      $creators = $parseCreators->parse($authors);
       foreach($creators as &$cArray) {
 	$cArray = array(
-		   'surname'   =>      trim($cArray[2]),
-		   'firstname' =>      trim($cArray[0]),
-		   'initials'  =>      trim($cArray[1]),
-		   'prefix'    =>      trim($cArray[3]),
-		   );
+			"surname" => trim($cArray[2]),
+			"firtname" => trim($cArray[0]),
+			"initials" => trim($Array[1]),
+			"prefix" => trim($cArray[3])
+			);
+	unset($cArray);
       }
-      return $creators;
+      return new BibtexCreators($creators);
     }
 
     /**
