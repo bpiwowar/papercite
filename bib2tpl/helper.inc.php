@@ -45,7 +45,8 @@
  * Provides helping functions in order to keep clutter from the main file.
  *
  * @author Raphael Reitzig
- * @version 1.0
+ * @author Benjamin Piwowarski
+ * @version 2.0
  */
 class Bib2TplHelper
 {
@@ -144,11 +145,11 @@ class Bib2TplHelper
       $order = -strcmp($e1['year'].$this->_e2mn($e1),
 		       $e2['year'].$this->_e2mn($e2));
     } else if ($name == "firstauthor") {
-      $order = -strcmp($e1["author"][0]["surname"], $e2["author"][0]["surname"]);
+      $order = -strcmp($e1["author"]->creators[0]["surname"], $e2["author"]->creators[0]["surname"]);
     } else if ($name == "author") {
       $n = min(sizeof($e1["author"]), sizeof($e2["author"]));
       for($i = 0; $i < $n; $i++) {
-	$order = -strcmp($e1["author"][$i]["surname"], $e2["author"][$i]["surname"]);
+	$order = -strcmp($e1["author"]->creators[$i]["surname"], $e2["author"]->creators[$i]["surname"]);
 	if ($order != 0) 
 	  break;
       }

@@ -735,7 +735,7 @@ class Structures_BibTex
       foreach($creators as &$cArray) {
 	$cArray = array(
 			"surname" => trim($cArray[2]),
-			"firtname" => trim($cArray[0]),
+			"firstname" => trim($cArray[0]),
 			"initials" => trim($Array[1]),
 			"prefix" => trim($cArray[3])
 			);

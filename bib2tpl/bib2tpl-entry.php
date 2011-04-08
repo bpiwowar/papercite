@@ -245,7 +245,6 @@ class BibtexEntryFormat {
    */
   function niceAuthor($creator, $first = true)
   {
-
     $firstName = trim($this->checkInitials($creator, $this->properties["primaryCreatorInitials"], 
 					   $this->properties["primaryCreatorFirstName"]));
 
