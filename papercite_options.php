@@ -13,11 +13,6 @@ function papercite_create_menu() {
 }
 
 
-function register_mysettings() {
-  //register our settings
-  register_setting( 'papercite_options', 'papercite_default_bibtex_file' );
-}
-
 function papercite_options_page() {
 ?>
   <div>

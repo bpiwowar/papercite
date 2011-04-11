@@ -53,6 +53,11 @@ list (click on the documentation link).
 
 == Frequently Asked Questions ==
 
+= Where is the documentation? =
+
+The documentation is now bundled with the plug-in. Go to the plug-in
+list page in the WordPress dashboard, and click on the documentation link.
+
 = How can I edit my bibtex files? =
 
 If your file is local to the blog installation, you have two options:
@@ -81,6 +86,10 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.3.9 =
+  * Adopted patch given in bug 18 (bibtex source formatting)
+  * Fixed function name conflict with Simple Google Analytics plug-in
+  (bug 19)
 = 0.3.8 =
   * Fixed bug 14 (group_order not working)
   * Used the proposed enhancement (bug 13) of the function _e2mn
