@@ -4,7 +4,7 @@
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
   Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-  Version: 0.3.9
+  Version: 0.3.10
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
 */
@@ -108,10 +108,31 @@ class Papercite {
     return array($file, WP_PLUGIN_URL."/papercite/cache/$name.bib");
   }
 
+  static $default_options = 
+	array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
+	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow");
   /**
    * Init is called before the first callback
    */
   function init() {
+
+    // Get general preferences & page wise preferences
+    if (!$this->options) {
+      $this->options =  papercite::$default_options;
+      $pOptions = &get_option('papercite_options');
+
+      foreach(self::$option_names as &$name) {
+	if ($this->options)
+	  if (array_key_exists($name, $pOptions) && sizeof($pOptions[$name]) > 0) {
+	    $this->options[$name] = $pOptions[$name];
+	  }
+
+	$custom_field = get_post_custom_values("papercite_$name");
+	if (sizeof($custom_field) > 0)
+	  $this->options[$name] = $custom_field[0];
+      }
+    }
+
   }
 
   
@@ -158,11 +179,11 @@ class Papercite {
   /**
    * Get the bibtex data from an URI
    */
-  function getData($biburi) {
+  function getData($biburi, $timeout = 3600) {
     // (1) get the context
     if (!$this->cache[$biburi]) {
       if (strpos($biburi, "http://") === 0) 
-	$bibFile = $this->getCached($biburi);
+	$bibFile = $this->getCached($biburi, $timeout);
       else {
 	$bibFile = $this->getDataFile("bib/$biburi");
       }
@@ -187,11 +208,11 @@ class Papercite {
 	
 	  $this->cache[$biburi] = $this->_parser->data;
 	}
-      }
 
-      // --- Add custom fields
-      foreach($this->cache[$biburi] as &$entry) {
-	$this->checkFiles($entry, array(array("pdf", "pdf")));
+	// --- Add custom fields
+	foreach($this->cache[$biburi] as &$entry) {
+	  $this->checkFiles($entry, array(array("pdf", "pdf")));
+	}
       }
 
     }
@@ -207,6 +228,9 @@ class Papercite {
    */
   function process(&$matches) {
     $debug = false;
+
+    $post = null;
+    //print(get_post($post)->post_modified_gmt);
 
     // --- Initialisation ---
     
@@ -226,25 +250,8 @@ class Papercite {
     // (1) From the preferences
     // (2) From the custom fields
     // (3) From the general options
-    $options = array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
-		     "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow");
-    if ($command == "bibtex") 
-      $options["sort"] = "year";
-
-    
-    // Get general preferences
-    if (!$this->pOptions)
-      $this->pOptions = &get_option('papercite_options');
-
-    foreach(self::$option_names as &$name) {
-      if ($this->pOptions) 
-      if (array_key_exists($name, $this->pOptions) && sizeof($this->pOptions[$name]) > 0) {
-	$options[$name] = $this->pOptions[$name];
-      }
-      $custom_field = get_post_custom_values("papercite_$name");
-      if (sizeof($custom_field) > 0)
-	$options[$name] = $custom_field[0];
-    }
+    // $this->options has already processed the steps 0-2
+    $options = $this->options;
 
     // Gets the options from the command
     foreach($options_pairs as $x) {
@@ -261,7 +268,6 @@ class Papercite {
 	$options["group_order"] = "desc";
     }
 
-
     $tplOptions = array(
 			"anonymous-whole" => true, // for compatibility in the output
 			"group" => $options["group"], "group_order" => $options["group_order"], 
@@ -277,7 +283,7 @@ class Papercite {
        */
     case "bibtex":
       // --- Filter the data
-      $entries = $this->getData($options["file"]);
+      $entries = $this->getData($options["file"], $options["timeout"]);
       if (!$entries) return "<span style='color: red'>[Could not find the bibliography file(s)]</span>";
  
       if (array_key_exists('key', $options)) {
@@ -315,7 +321,7 @@ class Papercite {
 	    
       } 
       
-      return  $this->showEntries($entries, $tplOptions, false, $options["bibtex_template"], $options["format"]);
+      return  $this->showEntries($entries, $tplOptions, false, $options["bibtex_template"], $options["format"], "bibtex");
 
       /*
 	bibshow / bibcite commands
@@ -341,26 +347,34 @@ class Papercite {
       if (sizeof($this->bibshows) == 0)  
 	return "[<span title=\"Unkown reference: $key\">?</span>]";
 
-      $key = $options["key"];
+      $keys = preg_split("/,/",$options["key"]);
       $refs = &$this->bibshows[sizeof($this->bibshows)-1];
       $cites = &$this->cites[sizeof($this->cites)-1];
+      
+      $returns = "";
 
-      // First, get the corresponding entry
-      if (array_key_exists($key, $refs)) {
-	$num = $cites[$key];
+      foreach($keys as $key) {
+	if ($returns) $returns .= ", ";
 
-	// Did we already cite this?
-	if (!$num) {
-	  // no, register this
-	  $id = "BIBCITE%%%" . $this->citesCounter;
-	  $this->citesCounter++;
-	  $num = sizeof($cites);
-	  $cites[$key] = array($num, $id);
+	// First, get the corresponding entry
+	if (array_key_exists($key, $refs)) {
+	  $num = $cites[$key];
+
+	  // Did we already cite this?
+	  if (!$num) {
+	    // no, register this
+	    $id = "BIBCITE%%%" . $this->citesCounter;
+	    $this->citesCounter++;
+	    $num = sizeof($cites);
+	    $cites[$key] = array($num, $id);
+	  }
+	  $returns .= "$id";
+	} else {
+	  $returns .= "<span title=\"Unkown reference: $key\">?</span>";
 	}
-	return "[$id]";
       }
 
-      return "[<span title=\"Unkown reference: $key\">?</span>]";
+      return "[$returns]";
 
     case "/bibshow":
       // select from cites
@@ -382,7 +396,7 @@ class Papercite {
 	}
       }
       ksort($refs);
-      return $this->showEntries(array_values($refs), $tplOptions, true, $options["bibshow_template"], $options["format"]);
+      return $this->showEntries(array_values($refs), $tplOptions, true, $options["bibshow_template"], $options["format"], "bibshow");
       
     default:
       return "[error in papercite: unhandled]";
@@ -396,10 +410,15 @@ class Papercite {
    * @param options The options to pass to bib2tpl
    * @param getKeys Keep track of the keys for a final substitution
    */
-  function showEntries(&$refs, &$options, $getKeys, $mainTpl, $formatTpl) {
-
+  function showEntries(&$refs, &$options, $getKeys, $mainTpl, $formatTpl, $mode) {
     $mainFile = papercite::getDataFile("/tpl/$mainTpl.tpl");
     $formatFile = papercite::getDataFile("/format/$formatTpl.tpl");
+
+    // Fallback to defaults
+    if (!$mainFile)
+      $mainFile = papercite::getDataFile("/tpl/" .papercite::$default_options["${mode}_template"] .".tpl");
+    if (!$formatFile)
+      $formatFile = papercite::getDataFile("/format/" .papercite::$default_options["format"] . ".tpl");
 
     $main = file_get_contents($mainFile[0]);
     $format = file_get_contents($formatFile[0]);
@@ -453,6 +472,7 @@ function papercite_init() {
   wp_register_style('papercite_css', WP_PLUGIN_URL . '/papercite/papercite.css' );
   wp_enqueue_style('papercite_css');
 
+  // Initialise the object
   $papercite = new Papercite();
 }
 

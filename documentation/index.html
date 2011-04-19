@@ -80,18 +80,19 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
 
 <div class="code">[bibshow file=mybib.bib]
   Here is one reference [bibcite key=key1]
-  and another [bibcite key=key2]</div>
+  and some others [bibcite key=key2,key3]</div>
 
-  <p>  You end with the following to print the list of references:</p>
+  <p>You have to use <code>[/bibshow]</code> to end the bibshow
+  section and print the list of references:</p>
 
   <div class="code">[/bibshow]</div>
 
   <h2><code>bibshow</code> and <code>bibtex</code> options</h2>
 
-<p>  Here are the list of options that can be given to papercite.</p>
+<p> Here are the list of options that can be given to papercite.</p>
 
 <p>  Some of
-  these options can be set at a global level (through ) and page/post
+  these options can be set at a global level (through preferences) and page/post
   level (using custom fields with a prefix
   <code>papercite_</code>). These options are shown <span
   class="goptions">like this</span>.
@@ -161,12 +162,19 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
   </p>
 
   <p> The format described how an entry is displayed.
-  The following format are currently available: 
+  The following formats are currently available: 
   <ul>
-    <li><code>ieee</code> (default) is the default format loosely
-  based on IEEE</li>
+    <li><code>ieee</code> (default)</li>
+    <li><code>apa</code></li>
+    <li><code> britishmedicaljournal</code></li>
+    <li><code>chicago</code></li>
+    <li><code>harvard</code></li>
+    <li><code>ieee</code></li>
+    <li><code>mla</code></li>
+    <li><code>turabian</code></li>
   </ul>
-  Feel free to contribute new formats.
+  Feel free to contribute new formats, but note that in the future the
+  citation style might be written using the <a href="http://citationstyles.org/">Citation Style Language (CSL)</a>.
  </p>
 
   <p>
@@ -191,7 +199,7 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
     </p>
 
     <p>
-    With the <em>bib2tpl</em> code, some extra variables are defined:
+    With respect to the <em>bib2tpl</em> code, some extra variables are defined:
     <ul>
       <li><code>@WP_PLUGIN_URL@</code> will be replaced by the plugin URL.</li>
       <li><code>@papercite_id@</code> is a unique id within the page/post</li>
@@ -199,18 +207,41 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
       <li><code>@pdf@</code> is the URL to the auto-detected PDF (or
     to the URL specified in the PDF field).</li>
      </ul>
+
+     </p>
+     <p>
+     Here are some more general modifications:
+     <ul>
+       <li>
+       More generally, <code>@#<b>fieldname</b></code> prints the number
+       of entries in the field name (works with authors, editor and
+     pages)
+       </li>
+       <li>A general if-then-else structure can be encoded by
+     <code>@?condition@ ... @:@ ... @;@</code>, where the "else" and
+       "end if" can be used in a short version (no need to specify the
+     condition), and where the condition can be more elaborate than in
+     bib2tpl: you can use the operators <code>&gt;</code>,
+     <code>&lt;</code>, <code>=</code> and <code>||</code> with the
+       same semantics as in main programming languages.
+       </li>
+       </ul>
     </p>
   
 <h3>Grouping</h3>
 
-You can group the citations using the `group` option with values
-`none` (by default), `year`, `firstauthor`, or `entrytype`.
-You can order the groups using the `group-order` option which can take
-values among `asc`, `desc` or `none` (none by default).
-
-Example:
-<div class='code'>[bibtex file=mypub.bib group=year
-  group_order=desc]</div>
+       <p>
+       You can group the citations using the <code>group</code> option with values
+       <code>none</code> (by default), <code>firstauthor</code>,
+       <code>entrytype</code> or any other valid bibtex field.
+       You can order the groups using the <code>group_order</code> option which can take
+       values among <code>asc</code>, <code>desc</code> or <code>none</code> (none by default).
+       </p>
+       <p>
+       Example:
+     <div class='code'>[bibtex file=mypub.bib group=year
+       group_order=desc]</div>
+       </p>
 
   <p>The grouping is defined by the <code>group</code>
   value (<code>year</code>, <code>firstauthor</code>,
@@ -229,11 +260,11 @@ Example:
 You can sort the citations using the <code>sort</code> option together
 by a description of the sorting key. Note that the sort
 
-<div class='code'>[bibtex file=mypub.bib sort=year order=esc]</div>
+<div class='code'>[bibtex file=mypub.bib sort=year order=asc]</div>
 
 <p> Entries (within groups) are sorted
-  depending on the <code>sort</code> key  (<code>year</code>, <code>firstauthor</code>,
-  <code>entrytype</code> or <code>none</code>). The ordering is also influenced by the <code>order</code> value.
+  depending on the <code>sort</code> key (see grouping for the list of
+  possible keys). The ordering is also influenced by the <code>order</code> value.
   <ul>
     <li><code>none</code>: No order</li> 
     <li><code>asc</code>: Ascendant order</li> 

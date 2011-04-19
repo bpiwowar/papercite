@@ -34,6 +34,8 @@ function papercite_options_page() {
 // add the admin settings and such
 add_action('admin_init', 'papercite_admin_init');
 function papercite_admin_init(){
+  $options = $GLOBALS["papercite"]->init();
+
   register_setting( 'papercite_options', 'papercite_options', 'papercite_options_validate' );
 
   add_settings_section('papercite_main', 'Defaults settings', 'papercite_section_text', 'papercite');
@@ -43,6 +45,7 @@ function papercite_admin_init(){
 
   add_settings_field('bibtex_template', 'Main bibtex template', 'papercite_bibtex_template', 'papercite', 'papercite_main');
   add_settings_field('bibshow_template', 'Main bibshow template', 'papercite_bibshow_template', 'papercite', 'papercite_main');
+  //  add_settings_field('deny', 'Deny bibtex entries with [bibtex]', 'papercite_deny', 'papercite', 'papercite_main');
 }
 
 function papercite_section_text() {
@@ -51,27 +54,34 @@ function papercite_section_text() {
 
 
 function papercite_file() {
-  $options = get_option('papercite_options');
+  $options = $GLOBALS["papercite"]->pOptions;
   echo "<input id='papercite_file' name='papercite_options[file]' size='40' type='text' value='{$options['file']}' />";
 } 
 
 function papercite_format() {
-  $options = get_option('papercite_options');
+  $options = $GLOBALS["papercite"]->pOptions;
   echo "<input id='papercite_format' name='papercite_options[format]' size='40' type='text' value='{$options['format']}' />";
 } 
 
 function papercite_timeout() {
-  $options = get_option('papercite_options');
+  $options = $GLOBALS["papercite"]->pOptions;
   echo "<input id='papercite_timeout' name='papercite_options[timeout]' size='40' type='text' value='{$options['timeout']}' />";
 } 
 
 function papercite_bibtex_template() {
-  $options = get_option('papercite_options');
+  $options = $GLOBALS["papercite"]->pOptions;
   echo "<input id='papercite_bibtex_template' name='papercite_options[bibtex_template]' size='40' type='text' value='{$options['bibtex_template']}' />";
 }
- function papercite_bibshow_template() {
-  $options = get_option('papercite_options');
+
+function papercite_bibshow_template() {
+  $options = $GLOBALS["papercite"]->pOptions;
   echo "<input id='papercite_bibshow_template' name='papercite_options[bibshow_template]' size='40' type='text' value='{$options['bibshow_template']}' />";
+} 
+
+function papercite_deny() {
+  $options = $GLOBALS["papercite"]->pOptions;
+  echo "<input id='papercite_deny' name='papercite_options[deny]' size='40' type='text' value='"
+    . implode(" ", $options['deny']) . "' />";
 } 
 
 

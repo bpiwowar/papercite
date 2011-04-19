@@ -446,7 +446,9 @@ class Structures_BibTex
             if ($this->_options['validate']) {
                 $this->_generateWarning('PREAMBLE_ENTRY_NOT_YET_SUPPORTED', '', $entry.'}');
             }
-        } else {
+        }  elseif ('@comment' ==  strtolower(substr($entry, 0, 8))) {
+	  // Just ignores
+	}  else {
             // Look for key
             $matches = array();
             preg_match('/^@\w+\{([\w\d]+),/' ,$entry, $matches);
@@ -525,7 +527,6 @@ class Structures_BibTex
 	      if (preg_match("/^\s*(\d+)(?:\s*--?\s*(\d+))?\s*$/", $ret['pages'], $matches)) {
 		$ret['pages'] = new BibtexPages($matches[1], $matches[2]);
 	      }
-	      // $ret['author'] = $this->_extractAuthors($ret['author']);
             }
 
             //Handling the authors

@@ -110,7 +110,7 @@ class BibtexConverter
    *   group-order => (asc|desc|none)
    *   sort => (none|year|firstauthor|entrytype)
    *   order => (asc|desc|none)
-   *   key_format => (numeric)
+   *   key_format => (numeric|cite)
    *   lang  => any string $s as long as proper lang/$s.php exists
    * @return void
    */
