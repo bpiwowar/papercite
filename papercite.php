@@ -1,10 +1,11 @@
 <?php
 
+
 /*
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
   Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-  Version: 0.3.11
+  Version: 0.3.12
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
 */
@@ -198,26 +199,31 @@ class Papercite {
       if (file_exists($bibFile)) {
 	$data = file_get_contents($bibFile);
 	if (!empty($data)) {
- 
-	  $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true));
-	  $this->_parser->loadString($data);
-	  $stat = $this->_parser->parse();
-	  if ( !$stat ) {
-	    return $stat;
+	  
+	  if (class_exists("BibTexEntries")) {
+	    $parser = new BibTexEntries();
+	    if (!$parser->parse($data)) 
+	      return $this->cache[$biburi] = false;
+	    else
+	      $this->cache[$biburi] = $parser->data;
+	  } else {
+	    $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true));
+	    $this->_parser->loadString($data);
+	    $stat = $this->_parser->parse();
+	      
+	    if ( !$stat )  return  $this->cache[$biburi] = false;
+	    $this->cache[$biburi] = $this->_parser->data;
 	  }
 	
-	  $this->cache[$biburi] = $this->_parser->data;
+
+	  // --- Add custom fields
+	  foreach($this->cache[$biburi] as &$entry) {
+	    $this->checkFiles($entry, array(array("pdf", "pdf")));
+	  }
 	}
 
-	// --- Add custom fields
-	foreach($this->cache[$biburi] as &$entry) {
-	  $this->checkFiles($entry, array(array("pdf", "pdf")));
-	}
       }
-
     }
-
-
     return $this->cache[$biburi];
   }
     
@@ -345,7 +351,7 @@ class Papercite {
       // Just cite
     case "bibcite":
       if (sizeof($this->bibshows) == 0)  
-	return "[<span title=\"Unkown reference: $key\">?</span>]";
+	return "[<span title=\"Unkown reference: $options[key]\">?</span>]";
 
       $keys = preg_split("/,/",$options["key"]);
       $refs = &$this->bibshows[sizeof($this->bibshows)-1];
@@ -423,7 +429,6 @@ class Papercite {
     $main = file_get_contents($mainFile[0]);
     $format = file_get_contents($formatFile[0]);
     $bibtexEntryTemplate = new BibtexEntryFormat($format);
-
 
     foreach($refs as &$entry)
       $entry["papercite_id"] = $this->counter++;

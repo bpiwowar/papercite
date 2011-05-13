@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 2.7
 Tested up to: 3.1.1
-Stable tag: 0.3.11
+Stable tag: 0.3.12
 
 papercite helps to format bibtex entries to display a bibliography or
 cite papers.
@@ -29,7 +29,7 @@ Features:
 * Publications can be grouped and sorted in various ways
 
 The papercite plugin has been developed and tested under Wordpress
-3.1. It is based on bib2html version 0.9.3.
+3.1. Versions before 0.3 were based on bib2html version 0.9.3.
 
 **Documentation can be found from within WordPress plugin list (click on
 the documentation link)**. 
@@ -86,6 +86,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.3.12 =
+  * Fix missing <?php (bug 24 and 25)
 = 0.3.11 =
   * Fix a bug introduced in 0.3.10
 = 0.3.10 =

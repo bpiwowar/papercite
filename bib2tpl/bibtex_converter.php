@@ -46,8 +46,15 @@
 ?>
 <?php
 
-// Use the slightly modified BibTex parser from PEAR.
-require('lib/BibTex.php');
+$papercite_altParser = dirname(__FILE__) . "/BibTex_parser.php";
+if (file_exists($papercite_altParser)) {
+  // Unstable version
+  require_once($papercite_altParser);
+} else {
+  // Use the slightly modified BibTex parser from PEAR.
+  require('lib/BibTex.php');
+}
+
 
 // Requires the entry template class
 require("bib2tpl-entry.php");
@@ -119,7 +126,7 @@ class BibtexConverter
     $this->_template = &$template;
     $this->_entry_template = &$entry_template;
 
-    $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true));
+    //  $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true));
 
     // Default options
     $this->_options = array(

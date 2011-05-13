@@ -1,4 +1,5 @@
-<?
+<?php
+
 /**
  * This class is an entry format
  * @author Benjamin Piwowarski
