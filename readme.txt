@@ -180,6 +180,9 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Upgrade Notice ==
 
+= 0.3.13 =
+Bug fixes and new experimental parser (disabled by default) to handle
+bibtex files faster (useful for large bibtex files)
 = 0.3.11 =
 Should be the last stable release before the 0.4.0 and CoINS support
 = 0.3.5 =
