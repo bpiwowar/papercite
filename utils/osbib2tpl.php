@@ -69,6 +69,12 @@ function readCommon($xml) {
   return $text;
 }
 
+/** Get a value from an array or return an empty string
+ */
+function get(&$array, $key) {
+  if (isset($array[$key])) return $array[$key];
+  return "";
+}
 
 function readResource(&$formats, $xml, $bibtexMap) {
   $type = $xml->getAttribute("name");
@@ -201,7 +207,7 @@ function readResource(&$formats, $xml, $bibtexMap) {
 	  $min = $secondKey + 1;
 	  $max = $firstKey;
 	  for($index = $firstKey; $index <= $secondKey; $index++) {
-	    $rowCondition = $data[$index]["condition"];
+	    $rowCondition = get($data[$index], "condition");
 	    if ($rowCondition) {
 	      $min = min($min, $index);
 	      $max = max($max, $index);
@@ -225,12 +231,12 @@ function readResource(&$formats, $xml, $bibtexMap) {
   $text = "";
   for($i = 0; $i < sizeof($data); $i++) {
     $row = &$data[$i];
-    $value = $row["value"];
-    $options = &$row["options"];
-    $condition = &$row["condition"];
-    $name = $row["name"];
+    $value = get($row, "value");
+    $options = &get($row, "options");
+    $condition = &get($row, "condition");
+    $name = get($row, "name");
 
-    $text .= $options["indPre"];
+    $text .= get($options, "indPre");
 
     if ($condition) {
       $field = "@?$condition@$options[pre]${value}$options[post]@;@";
@@ -239,15 +245,15 @@ function readResource(&$formats, $xml, $bibtexMap) {
       else 
       	$field = preg_replace("/__SINGULAR_PLURAL__/", "$options[singular]", $field);
 
-      $next = $i+1 < sizeof($data) ?  $data[$i+1]["condition"] : false;
+      $next = $i+1 < sizeof($data) ?  get($data[$i+1], "condition") : false;
       if ($next) {
-	$field = preg_replace("/__DEPENDENT_ON_NEXT_FIELD__/", "@?$next@$options[dependentPost]@:@$options[dependentPostAlternative]@;$next@", $field);
+	$field = preg_replace("/__DEPENDENT_ON_NEXT_FIELD__/", "@?$next@" . get($options, "dependentPost") . "@:@$options[dependentPostAlternative]@;$next@", $field);
       } else 	
 	$field = preg_replace("/__DEPENDENT_ON_NEXT_FIELD__/", "$options[dependentPostAlternative]", $field);
 
-      $previous = $i > 0 ?  $data[$i-1]["condition"] : false;
+      $previous = $i > 0 ?  get($data[$i-1], "condition") : false;
       if ($previous) {
-	$field = preg_replace("/__DEPENDENT_ON_PREVIOUS_FIELD__/", "@?$next@$options[dependentPre]@:@$options[dependentPreAlternative]@;$next@", $field);
+	$field = preg_replace("/__DEPENDENT_ON_PREVIOUS_FIELD__/", "@?$next@" . get($options, "dependentPre") . "@:@$options[dependentPreAlternative]@;$next@", $field);
       } else 	
 	$field = preg_replace("/__DEPENDENT_ON_PREVIOUS_FIELD__/", "$options[dependentPreAlternative]", $field);
 
@@ -255,7 +261,7 @@ function readResource(&$formats, $xml, $bibtexMap) {
       $text .= $field;
     }   
 
-    $text .= $options["indPost"];
+    $text .= get($options, "indPost");
 
   }
 

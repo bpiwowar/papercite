@@ -71,8 +71,8 @@
 @?author@@author@. @;@@?title@&quot;@title@.&quot; @;@@?journal@[u]@journal@[/u] @;@@?volume@@volume@@?number@.@:@ @;number@@;@@?number@@number@ @;@@?year@(@year@)@?pages@: @:@@;pages@@;@@?pages@@pages@@;@.
 </format>
 
-<format types="phdthesis masterthesis">
-@?author@@author@. @;@@?title@&quot;@title@.&quot; @;@@?type@@type@ @;@@?entrytype=phdthesis||entrytype=masterthesis@@?entrytype=phdthesis@PhD Thesis@;@@?entrytype=masterthesis@Master Thesis@;@. @;@@?institution@@institution@, @;@@?year@@year@@;@.
+<format types="phdthesis mastersthesis">
+@?author@@author@. @;@@?title@&quot;@title@.&quot; @;@@?type@@type@ @;@@?entrytype=phdthesis||entrytype=mastersthesis@@?entrytype=phdthesis@PhD Thesis@;@@?entrytype=mastersthesis@Master Thesis@;@. @;@@?institution@@institution@, @;@@?year@@year@@;@.
 </format>
 
 <format types="techreport">

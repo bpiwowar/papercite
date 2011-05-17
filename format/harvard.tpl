@@ -77,8 +77,8 @@
 @?author@@author@ @;@@?year@(@year@) @;@@?title@@title@. @;@@?journal||volume@IN @:@@;@@?journal@&lt;span style=&quot;font-style: italic&quot;&gt;@journal@&lt;/span&gt;, @;@@?volume@@volume@@;@@?journal||volume@.@:@@;@@?pages@@pages@@;@.
 </format>
 
-<format types="phdthesis masterthesis">
-@?author@@author@ @;@@?year@(@year@) @;@@?title@@title@. @;@@?type@@type@@;@@?entrytype=phdthesis||entrytype=masterthesis@ @?entrytype=phdthesis@PhD Thesis@;@@?entrytype=masterthesis@Master Thesis@;@. @;@@?address@@address@, @;@@?institution@@institution@@;@.
+<format types="phdthesis mastersthesis">
+@?author@@author@ @;@@?year@(@year@) @;@@?title@@title@. @;@@?type@@type@@;@@?entrytype=phdthesis||entrytype=mastersthesis@ @?entrytype=phdthesis@PhD Thesis@;@@?entrytype=mastersthesis@Master Thesis@;@. @;@@?address@@address@, @;@@?institution@@institution@@;@.
 </format>
 
 </formats>

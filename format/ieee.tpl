@@ -71,8 +71,8 @@
 @?author@@author@, @;@@?title@&quot;@title@@;@@?booktitle||address@,&quot; @:@.&quot; @;@@?booktitle@in &lt;span style=&quot;font-style: italic&quot;&gt;@booktitle@&lt;/span&gt;@;@@?address@, @address@@;@@?booktitle||address@, @:@@;@@?date@@date@@;@@?year@ @year@@;@@?pages@, @?#pages&gt;1@pp. @:pages@p. @;pages@@pages@@;@.
 </format>
 
-<format types="phdthesis masterthesis">
-@?author@@author@, @;@@?title@&quot;@title@,&quot; @;@@?type@@type@ @;@@?entrytype=phdthesis||entrytype=masterthesis@@?entrytype=phdthesis@PhD Thesis@;@@?entrytype=masterthesis@Master Thesis@;@@;@@?institution@, @institution@@;@@?address@, @address@@;@@?year@, @year@@;@.
+<format types="phdthesis mastersthesis">
+@?author@@author@, @;@@?title@&quot;@title@,&quot; @;@@?type@@type@ @;@@?entrytype=phdthesis||entrytype=mastersthesis@@?entrytype=phdthesis@PhD Thesis@;@@?entrytype=mastersthesis@Master Thesis@;@@;@@?institution@, @institution@@;@@?address@, @address@@;@@?year@, @year@@;@.
 </format>
 
 <format types="techreport">

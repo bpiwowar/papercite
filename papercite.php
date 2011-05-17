@@ -5,7 +5,7 @@
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
   Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-  Version: 0.3.12
+  Version: 0.3.13
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
 */
@@ -41,7 +41,6 @@ include("papercite_options.php");
 
 class Papercite {
 
-  static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template");
 
   var $parse = false;
 
@@ -109,9 +108,14 @@ class Papercite {
     return array($file, WP_PLUGIN_URL."/papercite/cache/$name.bib");
   }
 
+  static $bibtex_parsers = array("pear" => "Pear parser", "papercite" => "Papercite parser (beta but faster)");
+
+  // Names of the options that can be set
+  static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser");
+
   static $default_options = 
 	array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
-	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow");
+	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "pear");
   /**
    * Init is called before the first callback
    */
@@ -122,16 +126,20 @@ class Papercite {
       $this->options =  papercite::$default_options;
       $pOptions = &get_option('papercite_options');
 
-      foreach(self::$option_names as &$name) {
-	if (is_array($pOptions) && array_key_exists($name, $pOptions) && sizeof($pOptions[$name]) > 0) {
-	  $this->options[$name] = $pOptions[$name];
+      // Use preferences if set to override default values
+      if (is_array($pOptions)) {
+	foreach(self::$option_names as &$name) {
+	  if (array_key_exists($name, $pOptions) && sizeof($pOptions[$name]) > 0) {
+	    $this->options[$name] = $pOptions[$name];
+	  }
 	}
-
-	// Now, use custom field
-	$custom_field = get_post_custom_values("papercite_$name");
-	if (sizeof($custom_field) > 0)
-	  $this->options[$name] = $custom_field[0];
       }
+
+      // Use custom field values
+      $custom_field = get_post_custom_values("papercite_$name");
+      if (sizeof($custom_field) > 0)
+	$this->options[$name] = $custom_field[0];
+      
     }
 
   }
@@ -180,54 +188,83 @@ class Papercite {
   /**
    * Get the bibtex data from an URI
    */
-  function getData($biburi, $timeout = 3600) {
-    // (1) get the context
-    if (!$this->cache[$biburi]) {
-      if (strpos($biburi, "http://") === 0) 
-	$bibFile = $this->getCached($biburi, $timeout);
-      else {
-	$bibFile = $this->getDataFile("bib/$biburi");
-      }
+  function &getData($biburis, $timeout = 3600) {
+    // Loop over the different given URIs
+    $array = explode(",", $biburis);
+    $result = array();
+    foreach($array as $biburi) {
+
+      // (1) Get the context
+      if (!$this->cache[$biburi]) {
+	if (strpos($biburi, "http://") === 0) 
+	  $bibFile = $this->getCached($biburi, $timeout);
+	else {
+	  $bibFile = $this->getDataFile("bib/$biburi");
+	}
       
-      if (!$bibFile || !file_exists($bibFile[0])) {
-	return NULL;
-      }
+	if (!$bibFile || !file_exists($bibFile[0]))
+	  continue;	
 
-      $bibFile = $bibFile[0];
+	$bibFile = $bibFile[0];
 
-      // (2) Parse the BibTeX
-      if (file_exists($bibFile)) {
-	$data = file_get_contents($bibFile);
-	if (!empty($data)) {
-	  
-	  if (class_exists("BibTexEntries")) {
-	    $parser = new BibTexEntries();
-	    if (!$parser->parse($data)) 
-	      return $this->cache[$biburi] = false;
-	    else
-	      $this->cache[$biburi] = $parser->data;
-	  } else {
-	    $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true));
-	    $this->_parser->loadString($data);
-	    $stat = $this->_parser->parse();
+	// (2) Parse the BibTeX
+	if (file_exists($bibFile)) {
+	  $data = file_get_contents($bibFile);
+
+	  if (!empty($data)) {
+	    switch($this->options["bibtex_parser"]) {
+	    case "papercite":
+	      $parser = new BibTexEntries();
+	      if (!$parser->parse($data)) {
+		$this->cache[$biburi] = false;
+		continue;
+	      } else
+		$this->cache[$biburi] = &$parser->data;
+	      break;
+	    default:
+	      $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true));
+	      $this->_parser->loadString($data);
+	      $stat = $this->_parser->parse();
 	      
-	    if ( !$stat )  return  $this->cache[$biburi] = false;
-	    $this->cache[$biburi] = $this->_parser->data;
-	  }
+	      if ( !$stat )  return  $this->cache[$biburi] = false;
+	      $this->cache[$biburi] = &$this->_parser->data;
+	    }
 	
 
-	  // --- Add custom fields
-	  foreach($this->cache[$biburi] as &$entry) {
-	    $this->checkFiles($entry, array(array("pdf", "pdf")));
+	    // --- Add custom fields
+	    foreach($this->cache[$biburi] as &$entry) {
+	      $this->checkFiles($entry, array(array("pdf", "pdf")));
+	    }
 	  }
 	}
-
       }
+
+      // Add to the list
+      if ($this->cache[$biburi]) 
+	$result[] = $this->cache[$biburi];
     }
-    return $this->cache[$biburi];
+    
+    if (sizeof($result) == 0) return false;
+    return $result;
+ 
   }
     
- 
+
+  static function getEntriesByKey(&$entries, &$keys) {
+    $a = array();
+    foreach ($entries as $outer) {
+      foreach($outer as $entry) {
+	if (in_array($entry["cite"], $keys)) {
+	  $a[] = $entry;
+	  $n = $n + 1;
+	  
+	  // We found everything, early break
+	  if ($n == sizeof($keys)) break;
+	}
+      }
+    }
+    return $a;
+  } 
 
   /**
    * Main entry point: Handles a match in the post
@@ -241,6 +278,17 @@ class Papercite {
     // --- Initialisation ---
     
     // Includes once
+    switch($this->options["bibtex_parser"]) {
+    case "papercite":
+      // Use papercite parser
+      require_once(dirname(__FILE__) . "/bib2tpl/BibTex_parser.php");
+      break;
+    default:
+      // Use the slightly modified BibTex parser from PEAR.
+      require_once(dirname(__FILE__) . '/bib2tpl/lib/BibTex.php');
+      break;
+    }
+
     require_once("bib2tpl/bibtex_converter.php");
 
     // Get the options   
@@ -297,16 +345,8 @@ class Papercite {
 	$keys = split(",", $options["key"]);
 	$a = array();
 	$n = 0;
-	foreach($entries as $entry) {
-	  if (in_array($entry["cite"], $keys)) {
-	    $a[] = $entry;
-	    $n = $n + 1;
 
-	    // We found everything, early break
-	    if ($n == sizeof($keys)) break;
-	  }
-	}
-	$entries = $a;
+	$result = papercite::getEntriesByKey($entries, $keys);
       } else {
 	// Based on the entry types
 	$allow = $options["allow"];
@@ -315,19 +355,27 @@ class Papercite {
 	  $allow = $allow ? split(",",$allow) : false;
 	  $deny =  $deny ? split(",", $deny) : false;
 
-	  $entries2 = $entries;
-	  $entries = array();
-	  foreach($entries2 as &$entry) {
-	    $t = $entry["entrytype"];
-	    if ((!$allow || in_array($t, $allow)) && (!$deny || !in_array($t, $deny))) {
-	      $entries[] = $entry;
+	  $result = array();
+	  // TODO: replace this by a method call
+	  foreach($entries as &$outer) {
+	    foreach($outer as &$entry) {
+	      $t = &$entry["entrytype"];
+	      if ((!$allow || in_array($t, $allow)) && (!$deny || !in_array($t, $deny))) {
+		$result[] = $entry;
+	      }
 	    }
 	  }
+	} else {
+	$result = array();
+	foreach($entries as &$outer) {
+	    foreach($outer as &$entry) {
+		$result[] = $entry;
+	    }
 	}
-	    
+      } 
       } 
       
-      return  $this->showEntries($entries, $tplOptions, false, $options["bibtex_template"], $options["format"], "bibtex");
+      return  $this->showEntries($result, $tplOptions, false, $options["bibtex_template"], $options["format"], "bibtex");
 
       /*
 	bibshow / bibcite commands
@@ -336,10 +384,13 @@ class Papercite {
      $data = $this->getData($options["file"]);
       if (!$data) return "<span style='color: red'>[Could not find the bibliography file(s)]</span>";
 
+      // TODO: replace this by a method call
       $refs = array();
-      foreach($data as &$entry) {
-	$key = $entry["cite"];
-	$refs[$key] = &$entry;
+      foreach($data as $outer) {
+	foreach($outer as &$entry) {
+	  $key = $entry["cite"];
+	  $refs[$key] = &$entry;
+	}
       }
 
       $this->bibshow_tpl_options[] = $tplOptions;
@@ -430,8 +481,9 @@ class Papercite {
     $format = file_get_contents($formatFile[0]);
     $bibtexEntryTemplate = new BibtexEntryFormat($format);
 
-    foreach($refs as &$entry)
+    foreach($refs as &$entry) {
       $entry["papercite_id"] = $this->counter++;
+    }
 
     // Convert
     $bib2tpl = new BibtexConverter($options, $main, $bibtexEntryTemplate);

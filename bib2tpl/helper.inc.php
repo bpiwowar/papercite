@@ -37,9 +37,6 @@
  * Licence (short): http://creativecommons.org/licenses/by-nc-sa/3.0/
  * License (long): http://creativecommons.org/licenses/by-nc-sa/3.0/legalcode
 */
-?>
-
-<?php
 
 /**
  * Provides helping functions in order to keep clutter from the main file.

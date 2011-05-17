@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Papercite documentation</title>
+<title>Papercite documentation (version 0.3.13)</title>
 <style>
 div.code {
 border: 1px solid black;
@@ -91,6 +91,16 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
 
 <p> Here are the list of options that can be given to papercite.</p>
 
+  <h3>Global options</h3>
+
+  <ul>
+    <li><b>Bibtex parser</b> (papercite >= 0.3.13): you can choose the pear parser
+    (default) or the new faster (but beta) papercite own bibtex parser
+    to handle big bibtex files</li>
+  </ul>
+
+  <h3>Local options</h3>
+
 <p>  Some of
   these options can be set at a global level (through preferences) and page/post
   level (using custom fields with a prefix
@@ -102,7 +112,9 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
   First, some options are necessary to tell which bibtex file should
   be used:</p>
   <ul>
-    <li><code class="goptions">file</code>: The default bibtex file (can be a URL)</li>
+    <li><code class="goptions">file</code>: The default bibtex file(s)
+  separated by commas. Files are either stored as described in the
+  papercite-data folder, or an URL can be given</li>
     <li><code class="goptions">timeout</code>: The default time-out before reloading an
     external resource</li>
  </ul>

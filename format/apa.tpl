@@ -75,8 +75,8 @@
 @?author@@author@. @;@@?year||date@(@:@@;@@?year@@year@@;@@?date@, @date@@;@@?year||date@). @:@@;@@?title@&lt;span style=&quot;font-style: italic&quot;&gt;@title@&lt;/span&gt;. @;@@?booktitle@Paper presented at the @booktitle@@;@@?address@, @address@@;@.
 </format>
 
-<format types="phdthesis masterthesis">
-@?author@@author@. @;@@?year||title@(@:@@;@@?year@(@year@)@?title@. @:@.@;title@@;@@?title@&lt;span style=&quot;font-style: italic&quot;&gt;@title@&lt;/span&gt;.@;@@?year||title@). @:@@;@@?type@Unpublished @type@ @;@@?entrytype=phdthesis||entrytype=masterthesis@@?entrytype=phdthesis@PhD Thesis@;@@?entrytype=masterthesis@Master Thesis@;@@;@@?institution@, @institution@@;@@?address@, @address@@;@.
+<format types="phdthesis mastersthesis">
+@?author@@author@. @;@@?year||title@(@:@@;@@?year@(@year@)@?title@. @:@.@;title@@;@@?title@&lt;span style=&quot;font-style: italic&quot;&gt;@title@&lt;/span&gt;.@;@@?year||title@). @:@@;@@?type@Unpublished @type@ @;@@?entrytype=phdthesis||entrytype=mastersthesis@@?entrytype=phdthesis@PhD Thesis@;@@?entrytype=mastersthesis@Master Thesis@;@@;@@?institution@, @institution@@;@@?address@, @address@@;@.
 </format>
 
 <format types="techreport">

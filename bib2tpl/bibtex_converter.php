@@ -43,17 +43,6 @@
  * Licence (short): http://creativecommons.org/licenses/by-nc-sa/3.0/
  * License (long): http://creativecommons.org/licenses/by-nc-sa/3.0/legalcode
 */
-?>
-<?php
-
-$papercite_altParser = dirname(__FILE__) . "/BibTex_parser.php";
-if (file_exists($papercite_altParser)) {
-  // Unstable version
-  require_once($papercite_altParser);
-} else {
-  // Use the slightly modified BibTex parser from PEAR.
-  require('lib/BibTex.php');
-}
 
 
 // Requires the entry template class

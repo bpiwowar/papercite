@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 2.7
 Tested up to: 3.1.1
-Stable tag: 0.3.12
+Stable tag: 0.3.13
 
 papercite helps to format bibtex entries to display a bibliography or
 cite papers.
@@ -32,7 +32,8 @@ The papercite plugin has been developed and tested under Wordpress
 3.1. Versions before 0.3 were based on bib2html version 0.9.3.
 
 **Documentation can be found from within WordPress plugin list (click on
-the documentation link)**. 
+the documentation link)**. You can see the documentation of the plugin
+as installed on my site <a href="http://www.bpiwowar.net/wp-content/plugins/papercite/documentation/index.html">here</a>. 
 
 To report bugs or request features, please navigate to 
 http://trac.bpiwowar.net/papercite
@@ -86,6 +87,10 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.3.13 =
+  * Enhancement (bug 26): several bibtex files can be given
+  * New (optional) bibtex parser handles larger bibtex files (bug 23) 
+  * Master thesis is now properly handled (bug 27)
 = 0.3.12 =
   * Fix missing <?php (bug 24 and 25)
 = 0.3.11 =

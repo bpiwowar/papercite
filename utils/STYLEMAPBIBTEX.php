@@ -119,7 +119,7 @@ class STYLEMAPBIBTEX
 			'proceedings'		=>	'proceedings',
 			'conference_paper'	=>	FALSE,
 			'proceedings_article'	=>	'inproceedings',
-			'thesis'		=>	array(array('phdthesis', array("label" => "PhD Thesis")), array('masterthesis', array("label" => "Master Thesis"))),
+			'thesis'		=>	array(array('phdthesis', array("label" => "PhD Thesis")), array('mastersthesis', array("label" => "Master Thesis"))),
 			'web_article'		=>	FALSE,
 			'film'			=>	FALSE,
 			'broadcast'		=>	FALSE,

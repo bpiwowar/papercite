@@ -79,8 +79,8 @@
 @?author@@author@. @;@@?year@@year@. @;@@?title@@title@. @;@@?booktitle@Paper read at @booktitle@@;@@?date@@?address@, @:@@;address@@date@@;@@?address@@?@, @:@@;@at @address@@;@.
 </format>
 
-<format types="phdthesis masterthesis">
-@?author@@author@. @;@@?year@@year@. @;@@?title@@title@. @;@@?type@@type@@;@@?entrytype=phdthesis||entrytype=masterthesis@ @?entrytype=phdthesis@PhD Thesis@;@@?entrytype=masterthesis@Master Thesis@;@@;@@?institution@, @institution@@;@@?address@, @address@@;@.
+<format types="phdthesis mastersthesis">
+@?author@@author@. @;@@?year@@year@. @;@@?title@@title@. @;@@?type@@type@@;@@?entrytype=phdthesis||entrytype=mastersthesis@ @?entrytype=phdthesis@PhD Thesis@;@@?entrytype=mastersthesis@Master Thesis@;@@;@@?institution@, @institution@@;@@?address@, @address@@;@.
 </format>
 
 </formats>
