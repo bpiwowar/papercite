@@ -46,6 +46,7 @@ class BibtexEntryFormat {
 
   function end_element(&$parser, $name) {
     if ($name == "format") {
+      $this->format = preg_replace("#[\n\r]+#"," ",$this->format);
       unset($this->format);
     } else if (!is_null($this->format)) {
       $this->format .= "</$name>";

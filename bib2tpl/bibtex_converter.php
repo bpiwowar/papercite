@@ -366,8 +366,9 @@ class BibtexConverter
     // Replace global values
     $result = preg_replace('/@globalcount@/', $this->_helper->lcount($data, 2), $result);
     $result = preg_replace('/@globalgroupcount@/', count($data), $result);
-
+    $result = preg_replace('/[\n\r]+/',' ',$result);
     $match = array();
+    //print "<div style='border: 1pt solid red;'>"; print_r(nl2br(htmlentities($result))); print "</div>";
 
     // Extract entry template
     $pattern = '/@\{entry@(.*?)@\}entry@/s';
