@@ -1,3 +1,8 @@
-div.papercite_bibtex {
+.papercite_bibtex {
     display: none;
+}
+
+.papercite_toggle:link, .papercite_toggle:visited {
+    color: gray;
+    text-decoration: none;
 }

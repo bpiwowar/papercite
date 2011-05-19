@@ -5,7 +5,7 @@
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
   Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-  Version: 0.3.13
+  Version: 0.3.14
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
 */
@@ -281,11 +281,11 @@ class Papercite {
     switch($this->options["bibtex_parser"]) {
     case "papercite":
       // Use papercite parser
-      require_once(dirname(__FILE__) . "/bib2tpl/BibTex_parser.php");
+      require_once(dirname(__FILE__) . "/lib/BibTex_parser.php");
       break;
     default:
       // Use the slightly modified BibTex parser from PEAR.
-      require_once(dirname(__FILE__) . '/bib2tpl/lib/BibTex.php');
+      require_once(dirname(__FILE__) . '/lib/BibTex.php');
       break;
     }
 
@@ -534,17 +534,22 @@ function papercite_init() {
 }
 
 // --- Callback function ----
-function papercite_cb($myContent) {
+function &papercite_cb($myContent) {
   // Init
   $papercite = &$GLOBALS["papercite"];
   $papercite->init();
   
+  //  print "<div style='border: 1pt solid blue'>";  print(nl2br(htmlentities($myContent)));  print "</div>";
+
   // (1) First phase - handles everything but bibcite keys
   $text = preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/",
 				array($papercite, "process"), $myContent);
   
   // (2) Handles custom keys in bibshow and return
-  return str_replace($papercite->keys, $papercite->keyValues, $text);
+  $text = str_replace($papercite->keys, $papercite->keyValues, $text);
+
+  //  print "<div style='border: 1pt solid black'>";  print(nl2br(htmlentities($text)));  print "</div>";
+  return $text;
 }
 
 // --- Add the documentation link in the plugin list
@@ -559,6 +564,6 @@ add_filter('plugin_row_meta', 'papercite_row_cb',1,2);
 // --- Add the different handlers to WordPress ---
 add_action('init', 'papercite_init');	
 add_action('wp_head', 'papercite_head');
-add_filter('the_content', 'papercite_cb');
+add_filter('the_content', 'papercite_cb', -1);
 
 ?>

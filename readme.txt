@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 2.7
 Tested up to: 3.1.1
-Stable tag: 0.3.13
+Stable tag: 0.3.14
 
 papercite helps to format bibtex entries to display a bibliography or
 cite papers.
@@ -87,6 +87,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.3.14 =
+  * The HTML code produced has been cleaned up (valid HTML) [bug 28]
 = 0.3.13 =
   * Enhancement (bug 26): several bibtex files can be given
   * New (optional) bibtex parser handles larger bibtex files (bug 23) 
@@ -180,6 +182,10 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Upgrade Notice ==
 
+= 0.3.14 =
+If you have custom templates, please read. The template generation has been slightly modified - you have to
+explicitely markup paragraphs and line breaks, since papercite now
+removes any \n or \r in the templates to avoid clashes with WordPress.
 = 0.3.13 =
 Bug fixes and new experimental parser (disabled by default) to handle
 bibtex files faster (useful for large bibtex files)
