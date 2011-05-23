@@ -36,7 +36,7 @@ the documentation link)**. You can see the documentation of the plugin
 as installed on my site <a href="http://www.bpiwowar.net/wp-content/plugins/papercite/documentation/index.html">here</a>. 
 
 To report bugs or request features, please navigate to 
-http://trac.bpiwowar.net/papercite
+https://github.com/bpiwowar/papercite
 
 == Installation ==
 
