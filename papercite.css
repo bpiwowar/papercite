@@ -1,8 +1,11 @@
 .papercite_bibtex {
     display: none;
+    white-space: pre-wrap;
 }
 
 .papercite_toggle:link, .papercite_toggle:visited {
     color: gray;
     text-decoration: none;
 }
+
+

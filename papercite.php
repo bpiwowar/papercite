@@ -218,8 +218,9 @@ class Papercite {
 	      if (!$parser->parse($data)) {
 		$this->cache[$biburi] = false;
 		continue;
-	      } else
+	      } else {
 		$this->cache[$biburi] = &$parser->data;
+	      }
 	      break;
 	    default:
 	      $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true));
