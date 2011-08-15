@@ -64,7 +64,7 @@
 </format>
 
 <format types="inbook incollection">
-@?author@@author@. @;@@?title@@title@. @;@@?editor@In: @editor@, @?#editor&gt;1@`editors`@:editor@`editor`@;editor@. @;@@?bookitle@@?edition@@:@In: @;edition@&lt;span style=&quot;font-style: italic&quot;&gt;@bookitle@&lt;/span&gt;. @;@@?edition@@edition@ ed. @;@@?address@@address@: @;@@?publisher@@publisher@@;@@?year@@?pages@, @:@@;pages@@year@@;@@?pages@@?@:@:@, @;@@pages@@;@.
+@?author@@author@. @;@@?title@@title@. @;@@?editor@In: @editor@, @?#editor&gt;1@`editors`@:editor@`editor`@;editor@. @;@@?booktitle@@?edition@@:@In: @;edition@&lt;span style=&quot;font-style: italic&quot;&gt;@booktitle@&lt;/span&gt;. @;@@?edition@@edition@ ed. @;@@?address@@address@: @;@@?publisher@@publisher@@;@@?year@@?pages@, @:@@;pages@@year@@;@@?pages@@?@:@:@, @;@@pages@@;@.
 </format>
 
 <format types="article #">
