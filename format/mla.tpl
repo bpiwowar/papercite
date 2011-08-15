@@ -24,7 +24,7 @@
 <property name="primaryCreatorRepeat" value="2"/>
 <property name="otherCreatorListLimit" value="1"/>
 <property name="otherCreatorListAbbreviation" value=", et al."/>
-<property name="pageFormat" value="1"/>
+<property name="pageFormat" value="2"/>
 <property name="editorSwitch" value="1"/>
 <property name="editorSwitchIfYes" value="editor, ^ed.^eds.^ "/>
 <property name="primaryCreatorSepFirstBetween" value=", "/>
@@ -64,7 +64,7 @@
 </format>
 
 <format types="inbook incollection">
-@?author@@author@. @;@@?title@&quot;@title@.&quot; @;@@?bookitle@@bookitle@. @;@@?editor@@?#editor&gt;1@Eds.@:editor@Ed.@;editor@ @editor@. @;@@?edition@@edition@ ed. @;@@?volume@Vol. @volume@. @;@@?series@@series@. @;@@?address@@address@: @;@@?publisher@@publisher@, @;@@?year@@year@. @;@@?pages@@pages@@;@.
+@?author@@author@. @;@@?title@&quot;@title@.&quot; @;@@?booktitle@@booktitle@. @;@@?editor@@?#editor&gt;1@Eds.@:editor@Ed.@;editor@ @editor@. @;@@?edition@@edition@ ed. @;@@?volume@Vol. @volume@. @;@@?series@@series@. @;@@?address@@address@: @;@@?publisher@@publisher@, @;@@?year@@year@. @;@@?pages@@pages@@;@.
 </format>
 
 <format types="article #">
