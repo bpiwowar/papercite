@@ -5,7 +5,7 @@
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
   Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-  Version: 0.3.14
+  Version: 0.3.15
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
 */
@@ -421,10 +421,13 @@ class Papercite {
 	  // Did we already cite this?
 	  if (!$num) {
 	    // no, register this
-	    $id = "BIBCITE%%%" . $this->citesCounter;
+	    $id = "BIBCITE%%" . $this->citesCounter . "%";
 	    $this->citesCounter++;
 	    $num = sizeof($cites);
 	    $cites[$key] = array($num, $id);
+	  } else {
+	    // yes, just copy the id
+	    $id =  $num[1];
 	  }
 	  $returns .= "$id";
 	} else {
@@ -469,10 +472,11 @@ class Papercite {
    * @param getKeys Keep track of the keys for a final substitution
    */
   function showEntries(&$refs, &$options, $getKeys, $mainTpl, $formatTpl, $mode) {
+    // Get the template files
     $mainFile = papercite::getDataFile("/tpl/$mainTpl.tpl");
     $formatFile = papercite::getDataFile("/format/$formatTpl.tpl");
 
-    // Fallback to defaults
+    // Fallback to defaults if needed
     if (!$mainFile)
       $mainFile = papercite::getDataFile("/tpl/" .papercite::$default_options["${mode}_template"] .".tpl");
     if (!$formatFile)
@@ -482,15 +486,18 @@ class Papercite {
     $format = file_get_contents($formatFile[0]);
     $bibtexEntryTemplate = new BibtexEntryFormat($format);
 
+    // Gives a distinct ID to each publication (i.e. to display the corresponding bibtex)
+    // in the reference list
     foreach($refs as &$entry) {
       $entry["papercite_id"] = $this->counter++;
     }
 
-    // Convert
+    // Convert (also set the citation key)
     $bib2tpl = new BibtexConverter($options, $main, $bibtexEntryTemplate);
     $bib2tpl->setGlobal("WP_PLUGIN_URL", WP_PLUGIN_URL);
     $r =  $bib2tpl->display($refs);
 
+    // If we need to get the citation key back
     if ($getKeys) {
       foreach($refs as &$group)
 	foreach($group as &$ref) {
