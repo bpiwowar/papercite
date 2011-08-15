@@ -68,7 +68,7 @@
 </format>
 
 <format types="article #">
-@?author@@author@. @;@@?title@&quot;@title@.&quot; @;@@?journal@[u]@journal@[/u] @;@@?volume@@volume@@?number@.@:@ @;number@@;@@?number@@number@ @;@@?year@(@year@)@?pages@: @:@@;pages@@;@@?pages@@pages@@;@.
+@?author@@author@. @;@@?title@&quot;@title@.&quot; @;@@?journal@&lt;span style=&quot;font-weight: bold&quot;&gt;@journal@&lt;/span&gt; @;@@?volume@@volume@@?number@.@:@ @;number@@;@@?number@@number@ @;@@?year@(@year@)@?pages@: @:@@;pages@@;@@?pages@@pages@@;@.
 </format>
 
 <format types="phdthesis mastersthesis">
@@ -76,7 +76,7 @@
 </format>
 
 <format types="techreport">
-@?author@@author@. @;@@?institution@@institution@, @;@@?title@[u]@title@[/u]. @;@@?year@@year@@;@@?address@ @address@@;@.
+@?author@@author@. @;@@?institution@@institution@, @;@@?title@&lt;span style=&quot;font-weight: bold&quot;&gt;@title@&lt;/span&gt;. @;@@?year@@year@@;@@?address@ @address@@;@.
 </format>
 
 </formats>
