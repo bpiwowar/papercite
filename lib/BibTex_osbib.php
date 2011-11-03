@@ -58,6 +58,8 @@ class BibTexEntries {
 
     $this->extractEntries();
     $this->returnArrays();
+    foreach($this->data as &$entry) 
+      BibTexEntries::_postProcessing($entry);
     
     return true;
   }
@@ -376,6 +378,7 @@ class BibTexEntries {
 	      // 02/05/2005 G. Gardey don't expand macro for key 
 	      // and entrytype
 	      if($key != 'cite' && $key != 'entrytype'){
+    
 		$this->data[$i][$key] = trim($this->removeDelimitersAndExpand($this->data[$i][$key])); 
 	      }
 	    }
@@ -427,7 +430,7 @@ class BibTexEntries {
   }
 
   /**
-   * Extracting the data of one content
+   * Extracting the data of one entry
    *
    * @access private
    * @param string $entry The entry
@@ -435,7 +438,7 @@ class BibTexEntries {
    */
   static function _postProcessing(&$ret) {
     // Process accents
-    foreach($ret as $key => &$value) 
+    foreach($ret as $key => &$value)
       if ($key != "bibtex" && $key != "cite")
 	BibTexEntries::process_accents($value);
     

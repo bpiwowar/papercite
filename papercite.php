@@ -227,7 +227,7 @@ class Papercite {
 	      $this->cache[$biburi] = &$this->_parser->data;
 	      break;
 
-	    default:
+	    default: // osbib
 	      $parser = new BibTexEntries();
 	      if (!$parser->parse($data)) {
 		$this->cache[$biburi] = false;
