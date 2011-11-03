@@ -87,6 +87,10 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.3.16 =
+  * Updated the documentation about how papercite searches for PDFs
+  * Added support for the old OSBib parser which should be faster than
+  all others
 = 0.3.15 =
   * Corrected "Bootitle" to "booktitle" in all formats (thanks to
   Enkerli@github)

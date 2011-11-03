@@ -5,7 +5,7 @@
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
   Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-  Version: 0.3.15
+  Version: 0.3.16
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
 */
@@ -108,14 +108,14 @@ class Papercite {
     return array($file, WP_PLUGIN_URL."/papercite/cache/$name.bib");
   }
 
-  static $bibtex_parsers = array("pear" => "Pear parser", "papercite" => "Papercite parser (beta but faster)");
+  static $bibtex_parsers = array("pear" => "Pear parser", "osbib" => "OSBiB parser");
 
   // Names of the options that can be set
   static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser");
 
   static $default_options = 
 	array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
-	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "pear");
+	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "osbib");
   /**
    * Init is called before the first callback
    */
@@ -139,6 +139,11 @@ class Papercite {
       $custom_field = get_post_custom_values("papercite_$name");
       if (sizeof($custom_field) > 0)
 	$this->options[$name] = $custom_field[0];
+
+      // Upgrade if needed
+      if ($this->options["bibtex_parser"] == "papercite") {
+	$this->options["bibtex_parser"] = "osbib";
+      }
       
     }
 
@@ -213,7 +218,16 @@ class Papercite {
 
 	  if (!empty($data)) {
 	    switch($this->options["bibtex_parser"]) {
-	    case "papercite":
+	    case "pear":
+	      $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true));
+	      $this->_parser->loadString($data);
+	      $stat = $this->_parser->parse();
+	      
+	      if ( !$stat )  return  $this->cache[$biburi] = false;
+	      $this->cache[$biburi] = &$this->_parser->data;
+	      break;
+
+	    default:
 	      $parser = new BibTexEntries();
 	      if (!$parser->parse($data)) {
 		$this->cache[$biburi] = false;
@@ -222,13 +236,6 @@ class Papercite {
 		$this->cache[$biburi] = &$parser->data;
 	      }
 	      break;
-	    default:
-	      $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true));
-	      $this->_parser->loadString($data);
-	      $stat = $this->_parser->parse();
-	      
-	      if ( !$stat )  return  $this->cache[$biburi] = false;
-	      $this->cache[$biburi] = &$this->_parser->data;
 	    }
 	
 
@@ -278,18 +285,10 @@ class Papercite {
 
     // --- Initialisation ---
     
-    // Includes once
-    switch($this->options["bibtex_parser"]) {
-    case "papercite":
-      // Use papercite parser
-      require_once(dirname(__FILE__) . "/lib/BibTex_parser.php");
-      break;
-    default:
-      // Use the slightly modified BibTex parser from PEAR.
-      require_once(dirname(__FILE__) . '/lib/BibTex.php');
-      break;
-    }
+    // Includes once the bibtex parser
+    require_once(dirname(__FILE__) . "/lib/BibTex_" . $this->options["bibtex_parser"] . ".php");
 
+    // Includes once the converter
     require_once("bib2tpl/bibtex_converter.php");
 
     // Get the options   
@@ -484,6 +483,7 @@ class Papercite {
 
     $main = file_get_contents($mainFile[0]);
     $format = file_get_contents($formatFile[0]);
+
     $bibtexEntryTemplate = new BibtexEntryFormat($format);
 
     // Gives a distinct ID to each publication (i.e. to display the corresponding bibtex)
