@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 2.7
 Tested up to: 3.1.1
-Stable tag: 0.3.15
+Stable tag: 0.3.16
 
 papercite helps to format bibtex entries to display a bibliography or
 cite papers.
@@ -89,8 +89,10 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 = 0.3.16 =
   * Updated the documentation about how papercite searches for PDFs
-  * Added support for the old OSBib parser which should be faster than
-  all others
+  * Added the OSBiB bibtex parser which should be much fadster than
+  the previous (pear) one (note that it is not actived by default for
+  the moment, so you should go to the plugin preferences page to set
+  it as your bibtex parser).
 = 0.3.15 =
   * Corrected "Bootitle" to "booktitle" in all formats (thanks to
   Enkerli@github)

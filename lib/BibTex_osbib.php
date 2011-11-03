@@ -3,12 +3,14 @@
 /**
  * Class for working with BibTex data. 
  * 
- * Most of it comes from OSBib
+ * Most the code comes from OSBib 3.0
  * http://bibliophile.sourceforge.net under the GPL licence.
  *
  * @author B. Piwowarski
- * @date May 2011
+ * @date November 2011
  */
+
+require_once("UTF8.php");
 
 /**
  * A list of creators (e.g., authors, editors)
@@ -49,13 +51,14 @@ class BibTexEntries {
   var $strings = array();
 
   function parse(&$s) {
+    $this->preamble = $this->strings = $this->data = array();
+    $this->count = 0;
     $this->fieldExtract = TRUE;
     $this->removeDelimit = TRUE;
     $this->expandMacro = TRUE;
-    $this->parseFile = FALSE;
+    $this->parseFile = TRUE;
 
     $this->loadBibtexString($s);
-
     $this->extractEntries();
     $this->returnArrays();
     foreach($this->data as &$entry) 
@@ -76,357 +79,456 @@ class BibTexEntries {
     $this->currentLine = 0;
   }
 
-
-  function getLine()
-  {
-    // 21/08/2004 G.Gardey
-    // remove comments from parsing
-    if($this->parseFile){
-      if(!feof($this->fid)){
-	do{
-	  $line = trim(fgets($this->fid));
-	  $isComment = (strlen($line) > 0) ? $line[0] == '%' : FALSE;
-	}
-	while(!feof($this->fid) && $isComment);
-	return $line;
-      }
-      return FALSE;
-    }
-    else{
-      do{
-	$line = trim($this->bibtexString[$this->currentLine]);
-	$isComment = (strlen($line)>0) ? $line[0] == '%' : FALSE;
-	$this->currentLine++;
-      }
-      while($this->currentLine <count($this->bibtexString) && $isComment);
-      $val = ($this->currentLine < count($this->bibtexString)) ? $line : FALSE;
-      return $val;
-    }
-  }
-  // Count entry delimiters
-  function braceCount($line, $delimitStart)
-  {   
-    if($delimitStart == '{')
-      $delimitEnd = '}';
-    else
-      {
-	$delimitStart = '(';
-	$delimitEnd = ')';
-      }
-    $count = 0;
-    $count = substr_count($line, $delimitStart);
-    $count -= substr_count($line, $delimitEnd);
-    return $count;
-  }
-
-  // Extract value part of @string field enclosed by double-quotes.
-  function extractStringValue($string)
-  {
-    // 2/05/2005 G. Gardey Add support for @string macro
-    // defined by curly bracket : @string{M12 = {December}}
-    $oldvalue = $this->expandMacro;
-    $this->expandMacro = false;
-    // $string contains a end delimiter
-    // remove it
-    $string = trim(substr($string,0,strlen($string)-1));
-    // remove delimiters
-    $string = $this->removeDelimiters($string);
-    // restore expandMacro
-    $this->expandMacro = $oldvalue;
-    return $string;
-  }
-  // Extract a field
-  function fieldSplit($seg)
-  {
-    // handle fields like another-field = {}
-    $array = preg_split("/,\s*([-_.:,a-zA-Z0-9]+)\s*={1}\s*/U", $seg, PREG_SPLIT_DELIM_CAPTURE);
-    //$array = preg_split("/,\s*(\w+)\s*={1}\s*/U", $seg, PREG_SPLIT_DELIM_CAPTURE);
-    if(!array_key_exists(1, $array))
-      return array($array[0], FALSE);
-    return array($array[0], $array[1]);
-  }
-  // Extract and format fields
-  function reduceFields($oldString)
-  {
-    // 03/05/2005 G. Gardey. Do not remove all occurences, juste one
-    //              * correctly parse an entry ended by: somefield = {aValue}}
-    $lg = strlen($oldString);
-    if($oldString[$lg-1] == "}" || $oldString[$lg-1] == ")" || $oldString[$lg-1] == ","){
-      $oldString = substr($oldString,0,$lg-1);
-    }
-    //		$oldString = rtrim($oldString, "}),");
-    $split = preg_split("/=/", $oldString, 2);
-    $string = $split[1];
-    while($string)
-      {
-	list($entry, $string) = $this->fieldSplit($string);
-	$values[] = $entry;
-      }
-    foreach($values as $value)
-      {
-	$pos = strpos($oldString, $value);
-	$oldString = substr_replace($oldString, '', $pos, strlen($value));
-      }
-    $rev = strrev(trim($oldString));
-    if($rev{0} != ',')
-      $oldString .= ',';
-    $keys = preg_split("/=,/", $oldString);
-    // 22/08/2004 - Mark Grimshaw
-    // I have absolutely no idea why this array_pop is required but it is.  Seems to always be an empty key at the end after the split 
-    // which causes problems if not removed.
-    array_pop($keys);
-    foreach($keys as $key)
-      {
-	$value = trim(array_shift($values));
-	$rev = strrev($value);
-	// remove any dangling ',' left on final field of entry
-	if($rev{0} == ',')
-	  $value = rtrim($value, ",");
-	if(!$value)
-	  continue;
-	// 21/08/2004 G.Gardey -> expand macro
-	// Don't remove delimiters now
-	// needs to know if the value is a string macro
-	//			$this->data[$this->count][strtolower(trim($key))] = trim($this->removeDelimiters(trim($value)));
-	$key = strtolower(trim($key));
-	$value = trim($value);
-	$this->data[$this->count][$key] = $value;
-      }
-  }
-  // Start splitting a bibtex entry into component fields.
-  // Store the entry type and citation.
-  function fullSplit($entry)
-  {        
-    $matches = preg_split("/@(.*)\s*[{(](.*),/U", $entry, 2, PREG_SPLIT_DELIM_CAPTURE);
-    $this->data[$this->count]['entrytype'] = strtolower($matches[1]);
-    // sometimes a bibtex file will have no citation key
-    if(preg_match("/=/", $matches[2])) // this is a field
-      $matches = preg_split("/@(.*)\s*[{(](.*)/U", $entry, 2, PREG_SPLIT_DELIM_CAPTURE);
-    //print_r($matches); print "<P>";
-    $this->data[$this->count]['cite'] = trim($matches[2]);
-    $this->data[$this->count]['bibtex'] = $entry;
-    $this->reduceFields($matches[3]);
-  }
-
-  // Grab a complete bibtex entry
-  function getEntry($line)
-  {
-    $entry = '';
-    $count = 0;
-    $lastLine = FALSE;
-    if(preg_match("/@(.*)\s*([{(])/", preg_quote($line), $matches))
-      {
-	do
-	  {
-	    $count += $this->braceCount($line, $matches[2]);
-	    $entry .= "\n" . $line;
-	    if(($line = $this->getLine()) === FALSE)
-	      break;
-	    $lastLine = $line;
-	  }
-	while($count);
-            
-      }
-    else
-      {
-	$line .= $this->getLine();
-	$this->getEntry($line);
-      }
-    if(!array_key_exists(1, $matches))
-      return $lastLine;
-    if(preg_match("/string/i", $matches[1]))
-      $this->strings[] = $entry;
-    else if(preg_match("/preamble/i", $matches[1]))
-      $this->preamble[] = $entry;
-    else
-      {
-	if($this->fieldExtract)
-	  $this->fullSplit($entry);
-	else
-	  $this->data[$this->count] = $entry;
-	$this->count++;
-      }
-    return $lastLine;
-  }
-	
-  // 02/05/2005 G.Gardey	only remove delimiters from a string
-  function removeDelimiters($string){
-    // MG 10/06/2005 - Make a note of whether delimiters exist - required in removeDelimitersAndExpand() otherwise, expansion happens everywhere including 
-    // inside {...} and "..."
-    $this->delimitersExist = FALSE;
-    if($string  && ($string{0} == "\"")){
-      $string = substr($string, 1);
-      $string = substr($string, 0, -1);
-    }
-    else if($string && ($string{0} == "{"))
-      {
-	if(strlen($string) > 0 && $string[strlen($string)-1] == "}"){
-	  $string = substr($string, 1);
-	  $string = substr($string, 0, -1);
-	}
-      }
-    return $string;
-  }
-	
-  // Remove enclosures around entry field values.  Additionally, expand macros if flag set.
-  function removeDelimitersAndExpand($string, $preamble = FALSE)
-  {
-    // 02/05/2005 G. Gardey
-    $string = $this->removeDelimiters($string);
-    $delimitersExist = $this->delimitersExist;
-    // expand the macro if defined
-    // 23/08/2004 Mark - changed isset() to !empty() since $this->strings isset in constructor.
-    if($string && $this->expandMacro)
-      {
-	if(!empty($this->strings) && !$preamble)
-	  {
-	    // macro are case insensitive
-	    foreach($this->strings as $key => $value)
-	      {
-		// 09/March/2005 - Mark Grimshaw - sometimes $key is empty - not sure why
-		//			if(!$key || !$value || !$string)
-		//				continue;
-		if(!$delimitersExist)
-		  $string = eregi_replace($key, $value, $string);
-		// 22/08/2004 Mark Grimshaw - make sure a '#' surrounded by any number of spaces is replaced by just one space.
-		// 30/04/2005 Mark Grimshaw - ensure entries such as journal = {{Journal of } # JRNL23} are properly parsed
-		// 02/05/2005 G. Gardey - another solution for the previous line
-		$items = split("#",$string);
-		$string = "";
-		foreach($items as $val){
-		  $string .= $this->removeDelimiters(trim($val))." ";
-		}
-                    
-		$string = preg_replace("/\s+/", " ", $string);
-		//            				$string = str_replace('#',' ',$string);
-	      }
-	  }
-	if(!empty($this->userStrings))
-	  {
-	    // 24/08/2004 G.Gardey replace user defined strings macro
-	    foreach($this->userStrings as $key => $value)
-	      {
-		$string = eregi_replace($key,$value,$string);
-		$string = preg_replace("/\s*#\s*/", " ", $string);
-	      }
-	  }
-      }
-    return $string;
-  }
-
-  // This method starts the whole process
-  function extractEntries() {
-    $lastLine = FALSE;
-    if($this->parseFile)
-      {
-	while(!feof($this->fid))
-	  {
-	    $line = $lastLine ? $lastLine : $this->getLine();
-	    if(!preg_match("/^@/i", $line))
-	      continue;
-	    if(($lastLine = $this->getEntry($line)) !== FALSE)
-	      continue;
-	  }
-      }
-    else{
-      while($this->currentLine < count($this->bibtexString))
+// Get a non-empty line from the bib file or from the bibtexString
+	function getLine()
 	{
-	  $line = $lastLine ? $lastLine : $this->getLine();
-	  if(!preg_match("/^@/i", $line))
-	    continue;
-	  if(($lastLine = $this->getEntry($line)) !== FALSE)
-	    continue;
+		if($this->parseFile)
+		{
+			if(!feof($this->fid))
+			{
+				do
+				{
+					$line = trim(fgets($this->fid));
+				}
+				while(!feof($this->fid) && !$line);
+				return $line;
+			}
+			return FALSE;
+		}
+		else
+		{
+			do
+			{
+				$line = trim($this->bibtexString[$this->currentLine]);
+				$this->currentLine++;
+			}
+			while($this->currentLine < count($this->bibtexString) && !$line);
+			return $line;
+		}
 	}
-    }
-  }
-  // Return arrays of entries etc. to the calling process.
-  function returnArrays()
-  {
-    foreach($this->preamble as $value)
-      {
-	preg_match("/.*[{(](.*)/", $value, $matches);
-	$preamble = substr($matches[1], 0, -1);
-	$preambles['bibtexPreamble'] = trim($this->removeDelimitersAndExpand(trim($preamble), TRUE));
-      }
-    if(isset($preambles))
-      $this->preamble = $preambles;
-    if($this->fieldExtract)
-      {
-	foreach($this->strings as $value)
-	  {
-	    // changed 21/08/2004 G. Gardey
-	    // 23/08/2004 Mark G. account for comments on same line as @string - count delimiters in string value
-	    $value = trim($value);
-	    $matches = preg_split("/@string\s*([{(])/i", $value, 2, PREG_SPLIT_DELIM_CAPTURE);
-	    $delimit = $matches[1];
-	    $matches = preg_split("/=/", $matches[2], 2, PREG_SPLIT_DELIM_CAPTURE);
-	    $strings[trim($matches[0])] = trim($this->extractStringValue($matches[1]));
-	  }
-      }
-    if(isset($strings))
-      $this->strings = $strings;
-        
-    // changed 21/08/2004 G. Gardey
-    // 22/08/2004 Mark Grimshaw - stopped useless looping.
-    // removeDelimit and expandMacro have NO effect if !$this->fieldExtract
-    if($this->removeDelimit || $this->expandMacro && $this->fieldExtract)
-      {
-	for($i = 0; $i < count($this->data); $i++)
-	  {
-	    if($this->data[$i]) {
-	    foreach($this->data[$i] as $key => $value)
-	      // 02/05/2005 G. Gardey don't expand macro for key 
-	      // and entrytype
-	      if($key != 'cite' && $key != 'entrytype'){
-    
-		$this->data[$i][$key] = trim($this->removeDelimitersAndExpand($this->data[$i][$key])); 
-	      }
-	    }
-	  }
-      }
-    if(empty($this->preamble))
-      $this->preamble = FALSE;
-    if(empty($this->strings))
-      $this->strings = FALSE;
-    if(empty($this->data))
-      $this->data = FALSE;
-    return array($this->preamble, $this->strings, $this->data);
-  }
+// Extract value part of @string field enclosed by double-quotes or braces.
+// The string may be expanded with previously-defined strings
+	function extractStringValue($string) 
+	{
+		// $string contains a end delimiter, remove it
+		$string = trim(substr($string,0,strlen($string)-1));
+		// remove delimiters and expand
+		$string = $this->removeDelimitersAndExpand($string);
+		return $string;
+	}
+// Extract a field
+	function fieldSplit($seg)
+	{
+// echo "**** ";print_r($seg);echo "<BR>";
+		// handle fields like another-field = {}
+		$array = preg_split("/,\s*([-_.:,a-zA-Z0-9]+)\s*={1}\s*/U", $seg, PREG_SPLIT_DELIM_CAPTURE);
+// echo "**** ";print_r($array);echo "<BR>";
+		//$array = preg_split("/,\s*(\w+)\s*={1}\s*/U", $seg, PREG_SPLIT_DELIM_CAPTURE);
+		if(!array_key_exists(1, $array))
+			return array($array[0], FALSE);
+		return array($array[0], $array[1]);
+	}
+// Extract and format fields
+	function reduceFields($oldString)
+	{
+		// 03/05/2005 G. Gardey. Do not remove all occurences, juste one
+		// * correctly parse an entry ended by: somefield = {aValue}}
+		$lg = strlen($oldString);
+		if($oldString[$lg-1] == "}" || $oldString[$lg-1] == ")" || $oldString[$lg-1] == ",")
+			$oldString = substr($oldString,0,$lg-1);
+		// $oldString = rtrim($oldString, "}),");
+		$split = preg_split("/=/", $oldString, 2);
+		$string = $split[1];
+		while($string)
+		{
+			list($entry, $string) = $this->fieldSplit($string);
+			$values[] = $entry;
+		}
+		foreach($values as $value)
+		{
+			$pos = strpos($oldString, $value);
+			$oldString = substr_replace($oldString, '', $pos, strlen($value));
+		}
+		$rev = strrev(trim($oldString));
+		if($rev{0} != ',')
+			$oldString .= ',';
+		$keys = preg_split("/=,/", $oldString);
+		// 22/08/2004 - Mark Grimshaw
+		// I have absolutely no idea why this array_pop is required but it is.  Seems to always be 
+		// an empty key at the end after the split which causes problems if not removed.
+		array_pop($keys);
+		foreach($keys as $key)
+		{
+			$value = trim(array_shift($values));
+			$rev = strrev($value);
+			// remove any dangling ',' left on final field of entry
+			if($rev{0} == ',')
+				$value = rtrim($value, ",");
+			if(!$value)
+				continue;
+			// 21/08/2004 G.Gardey -> expand macro
+			// Don't remove delimiters now needs to know if the value is a string macro
+			// $this->data[$this->count][strtolower(trim($key))] = trim($this->removeDelimiters(trim($value)));
+			$key = UTF8::utf8_strtolower(trim($key));
+			$value = trim($value);
+			$this->data[$this->count][$key] = $value;
+		}
+// echo "**** ";print_r($this->data[$this->count]);echo "<BR>";
+	}
+// Start splitting a bibtex entry into component fields.
+// Store the entry type and citation.
+	function fullSplit($entry)
+	{        
+		$matches = preg_split("/@(.*)[{(](.*),/U", $entry, 2, PREG_SPLIT_DELIM_CAPTURE); 
+		$this->data[$this->count]['bibtexEntryType'] = strtolower(trim($matches[1]));
+		// sometimes a bibtex entry will have no citation key
+		if(preg_match("/=/", $matches[2])) // this is a field
+			$matches = preg_split("/@(.*)\s*[{(](.*)/U", $entry, 2, PREG_SPLIT_DELIM_CAPTURE);
+		// print_r($matches); print "<P>";
+		$this->data[$this->count]['cite'] = $matches[2];
+		$this->data[$this->count]['bibtex'] = $entry;
+		$this->reduceFields($matches[3]);
+	}
+
+// Grab a complete bibtex entry
+	function parseEntry($entry)
+	{
+		$count = 0;
+		$lastLine = FALSE;
+		if(preg_match("/@(.*)([{(])/U", preg_quote($entry), $matches)) 
+		{
+			if(!array_key_exists(1, $matches))
+				return $lastLine;
+			if(preg_match("/string/i", trim($matches[1])))
+				$this->strings[] = $entry;
+			else if(preg_match("/preamble/i", trim($matches[1])))
+				$this->preamble[] = $entry;
+			else if(preg_match("/comment/i", $matches[1])); // MG (31/Jan/2006) -- ignore @comment
+			else
+			{
+				if($this->fieldExtract)
+					$this->fullSplit($entry);
+				else
+					$this->data[$this->count] = $entry;
+				$this->count++;
+			}
+			return $lastLine;
+		}
+	}
+
+// Remove delimiters from a string
+	function removeDelimiters($string)
+	{
+		if($string  && ($string{0} == "\""))
+		{
+			$string = substr($string, 1);
+			$string = substr($string, 0, -1);
+		}
+		else if($string && ($string{0} == "{"))
+		{
+			if(strlen($string) > 0 && $string[strlen($string)-1] == "}")
+			{
+				$string = substr($string, 1);
+				$string = substr($string, 0, -1);
+			}
+		}
+		else if(!is_numeric($string) && !array_key_exists($string, $this->strings)
+			 && (array_search($string, $this->undefinedStrings) === FALSE))
+		{
+			$this->undefinedStrings[] = $string; // Undefined string that is not a year etc.
+			return '';
+		}
+		return $string;
+	}
+
+// This function works like explode('#',$val) but has to take into account whether
+// the character # is part of a string (i.e., is enclosed into "..." or {...} ) 
+// or defines a string concatenation as in @string{ "x # x" # ss # {xx{x}x} }
+	function explodeString($val)
+	{
+		$openquote = $bracelevel = $i = $j = 0; 
+		while ($i < strlen($val))
+		{
+			if ($val[$i] == '"')
+				$openquote = !$openquote;
+			elseif ($val[$i] == '{')
+				$bracelevel++;
+			elseif ($val[$i] == '}')
+				$bracelevel--;
+			elseif ( $val[$i] == '#' && !$openquote && !$bracelevel )
+			{
+				$strings[] = substr($val,$j,$i-$j);
+				$j=$i+1;
+			}
+			$i++;
+		}
+		$strings[] = substr($val,$j);
+		return $strings;
+	}
+
+// This function receives a string and a closing delimiter '}' or ')' 
+// and looks for the position of the closing delimiter taking into
+// account the following Bibtex rules:
+//  * Inside the braces, there can arbitrarily nested pairs of braces,
+//    but braces must also be balanced inside quotes! 
+//  * Inside quotes, to place the " character it is not sufficient 
+//    to simply escape with \": Quotes must be placed inside braces. 
+	function closingDelimiter($val,$delimitEnd)
+	{
+//  echo "####>$delimitEnd $val<BR>";
+		$openquote = $bracelevel = $i = $j = 0; 
+		while ($i < strlen($val))
+		{
+			// a '"' found at brace level 0 defines a value such as "ss{\"o}ss"
+			if ($val[$i] == '"' && !$bracelevel)
+				$openquote = !$openquote;
+			elseif ($val[$i] == '{')
+				$bracelevel++;
+			elseif ($val[$i] == '}')
+				$bracelevel--;
+			if ( $val[$i] == $delimitEnd && !$openquote && !$bracelevel )
+				return $i;
+			$i++;
+		}
+// echo "--> $bracelevel, $openquote";
+		return 0;
+	}
+
+// Remove enclosures around entry field values.  Additionally, expand macros if flag set.
+	function removeDelimitersAndExpand($string, $inpreamble = FALSE)
+	{
+		// only expand the macro if flag set, if strings defined and not in preamble
+		if(!$this->expandMacro || empty($this->strings) || $inpreamble)
+			$string = $this->removeDelimiters($string);
+		else
+		{
+			$stringlist = $this->explodeString($string);
+			$string = "";
+			foreach ($stringlist as $str)
+			{
+				// trim the string since usually # is enclosed by spaces
+				$str = trim($str); 
+				// replace the string if macro is already defined
+				// strtolower is used since macros are case insensitive
+				if (isset($this->strings[strtolower($str)]))
+					$string .= $this->strings[strtolower($str)];
+				else 
+					$string .= $this->removeDelimiters(trim($str));
+			}
+		}
+		return $string;
+	}
+
+// This function extract entries taking into account how comments are defined in BibTeX.
+// BibTeX splits the file in two areas: inside an entry and outside an entry, the delimitation 
+// being indicated by the presence of a @ sign. When this character is met, BibTex expects to 
+// find an entry. Before that sign, and after an entry, everything is considered a comment! 
+	function extractEntries()
+	{
+		$inside = $possibleEntryStart = FALSE;
+		$entry="";
+		while($line=$this->getLine())
+		{
+			if($possibleEntryStart)
+				$line = $possibleEntryStart . $line;
+			if (!$inside && strchr($line,"@"))
+			{
+				// throw all characters before the '@'
+				$line=strstr($line,'@');
+				if(!strchr($line, "{") && !strchr($line, "("))
+					$possibleEntryStart = $line;
+				elseif(preg_match("/@.*([{(])/U", preg_quote($line), $matches))
+				{
+					$inside = TRUE;
+					if ($matches[1] == '{')
+						$delimitEnd = '}';
+					else
+						$delimitEnd = ')';
+					$possibleEntryStart = FALSE;
+				}
+			}
+			if ($inside)
+			{
+				$entry .= " ".$line;
+				if ($j=$this->closingDelimiter($entry,$delimitEnd))
+				{
+					// all characters after the delimiter are thrown but the remaining 
+					// characters must be kept since they may start the next entry !!!
+					$lastLine = substr($entry,$j+1);
+					$entry = substr($entry,0,$j+1);
+					// Strip excess whitespaces from the entry 
+					$entry = preg_replace('/\s\s+/', ' ', $entry);
+					$this->parseEntry($entry);
+					$entry = strchr($lastLine,"@");
+					if ($entry) 
+						$inside = TRUE;
+					else 
+						$inside = FALSE;
+				}
+			}
+		}
+	}
+
+// Return arrays of entries etc. to the calling process.
+	function returnArrays()
+	{
+		foreach($this->preamble as $value)
+		{
+			preg_match("/.*?[{(](.*)/", $value, $matches);
+			$preamble = substr($matches[1], 0, -1);
+			$preambles['bibtexPreamble'] = trim($this->removeDelimitersAndExpand(trim($preamble), TRUE));
+		}
+		if(isset($preambles))
+			$this->preamble = $preambles;
+		if($this->fieldExtract)
+		{
+			// Next lines must take into account strings defined by previously-defined strings
+			$strings = $this->strings; 
+			// $this->strings is initialized with strings provided by user if they exists
+			// it is supposed that there are no substitutions to be made in the user strings, i.e., no # 
+			$this->strings = isset($this->userStrings) ? $this->userStrings : array() ; 
+			foreach($strings as $value) 
+			{
+				// changed 21/08/2004 G. Gardey
+				// 23/08/2004 Mark G. account for comments on same line as @string - count delimiters in string value
+				$value = trim($value);
+				$matches = preg_split("/@\s*string\s*([{(])/i", $value, 2, PREG_SPLIT_DELIM_CAPTURE);
+				$delimit = $matches[1];
+				$matches = preg_split("/=/", $matches[2], 2, PREG_SPLIT_DELIM_CAPTURE);
+				// macros are case insensitive
+				$this->strings[strtolower(trim($matches[0]))] = $this->extractStringValue($matches[1]); 
+			}
+		}
+		// changed 21/08/2004 G. Gardey
+		// 22/08/2004 Mark Grimshaw - stopped useless looping.
+		// removeDelimit and expandMacro have NO effect if !$this->fieldExtract
+		if($this->removeDelimit || $this->expandMacro && $this->fieldExtract)
+		{
+			for($i = 0; $i < count($this->data); $i++)
+			{
+				foreach($this->data[$i] as $key => $value)
+				// 02/05/2005 G. Gardey don't expand macro for bibtexCitation 
+				// and bibtexEntryType
+				if($key != 'cite' && $key != "bibtex" && $key != 'bibtexEntryType')
+					$this->data[$i][$key] = trim($this->removeDelimitersAndExpand($this->data[$i][$key])); 
+			}
+		}
+// EZ: Remove this to be able to use the same instance for parsing several files, 
+// e.g., parsing a entry file with its associated abbreviation file
+//		if(empty($this->preamble))
+//			$this->preamble = FALSE;
+//		if(empty($this->strings))
+//			$this->strings = FALSE;
+//		if(empty($this->data))
+//			$this->data = FALSE;
+		return array($this->preamble, $this->strings, $this->data, $this->undefinedStrings);
+	}
 
   static function process_accents(&$text) {
-    $text = preg_replace_callback("#\\\\(?:['\"^`H~\.]|¨)\w|\\\\([LlcCoO]|ss|aa|AA|[ao]e|[OA]E|&)#", "BibTexEntries::_accents_cb", $text);
+    // Replace anything of the form
+    // {\x{y}}
+    // {\xy}
+    // \xy
+    // \x{y}
+    $slash = '\\\\';
+    $text = preg_replace_callback("#\{$slash(.)\{(.)\}\}#", "BibTexEntries::_accents_cb", $text);
+    $text = preg_replace_callback("#\{$slash(.)(.)\}#", "BibTexEntries::_accents_cb", $text);
+    $text = preg_replace_callback("#$slash(.)\{(.)\}#", "BibTexEntries::_accents_cb", $text);
+    $text = preg_replace_callback("#$slash(.)(.)#", "BibTexEntries::_accents_cb", $text);
+    //    $text = preg_replace_callback("#\\\\(?:['\"^`H~\.]|¨)\w|\\\\([LlcCoO]|ss|aa|AA|[ao]e|[OA]E|&)#", "BibTexEntries::_accents_cb", $text);
   }
 
   static $accents = array(
-			  "\'a" => "á", "\`a" => "à", "\^a" => "â", "\¨a" => "ä", '\"a' => "ä",
-			  "\'A" => "Á", "\`A" => "À", "\^A" => "Â", "\¨A" => "Ä", '\"A' => "Ä",
-			  "\aa" => "å", "\AA" => "Å", "\ae" => "æ", "\AE" => "Æ",
-			  "\cc" => "ç",
-			  "\cC" => "Ç",
-			  "\'e" => "é", "\`e" => "è", "\^e" => "ê", "\¨e" => "ë", '\"e' => "ë",
-			  "\'E" => "é", "\`E" => "È", "\^E" => "Ê", "\¨E" => "Ë", '\"E' => "Ë",
-			  "\'i" => "í", "\`i" => "ì", "\^i" => "î", "\¨i" => "ï", '\"i' => "ï",
-			  "\'I" => "Í", "\`I" => "Ì", "\^I" => "Î", "\¨I" => "Ï", '\"I' => "Ï",
-			  "\l" => "ł", 
-			  "\L" => "Ł",
-			  "\~n" => "ñ",
-			  "\~N" => "Ñ",
-			  "\o" => "ø", "\oe" => "œ",
-			  "\O" => "Ø", "\OE" => "Œ",
-			  "\'o" => "ó", "\`o" => "ò", "\^o" => "ô", "\¨o" => "ö", '\"o' => "ö", "\~o" => "õ", "\Ho" => "ő",
-			  "\'O" => "Ó", "\`o" => "Ò", "\^O" => "Ô", "\¨O" => "Ö", '\"O' => "Ö", "\~O" => "Õ", "\HO" => "Ő",
-			  '\ss' => "ß",
-			  "\'u" => "ú", "\`u" => "ù", "\^u" => "û", "\¨u" => "ü", '\"u' => "ü",
-			  "\'U" => "Ú", "\`U" => "Ù", "\^U" => "Û", "\¨U" => "Ü", '\"U' => "Ü", 
-			  "\'z" => "ź", "\.z" => "ż",
-			  "\'Z" => "Ź", "\.Z" => "Ż",
-			  "\&" => "&"
-			  ); 
+			  "'" => array("a" => "á", "e" => "é", "i" => "í", "o" => "ó", "u" => "ú", "z" => "ź",
+				       "A" => "Á", "E" => "É", "I" => "Í", "O" => "Ó", "U" => "Ú", "Z" => "Ź"),
+			  "`" => array("a" => "à", "e" => "è", "i" => "ì", "o" => "ò", "u" => "ù",
+				       "A" => "À", "E" => "È", "I" => "Ì", "O" => "Ò", "U" => "Ù"),
+			  '"' => array("a" => "ä", "e" => "ë", "i" => "ï", "o" => "ö", "u" => "ü",
+				       "A" => "Ä", "E" => "Ë", "I" => "Ï", "O" => "Ö", "U" => "Ü"),
+			  '^' => array("a" => "â", "e" => "ê", "i" => "î", "o" => "ô", "u" => "û", 
+				       "A" => "Â", "E" => "Ê", "I" => "Î", "O" => "Ô", "U" => "Û"),
+			  '.' => array("z" => "ż", 
+				       "Z" => "Ż"),
+			  '~' => array("n" => "ñ", "o" => "õ",
+				       "N" => "Ñ", "O" => "Õ"),
+			  "a" => array("a" => "å", "e" => "æ",
+				       "A" => "Å", "E" => "Æ"),
+			  'c' => 'ç',
+			  'C' => 'Ç',
+			  'o' => array("" => "ø", "e" => "œ"),
+			  'O' => ARRAY("" => "Ø", "E" => "Œ"),
+			  's' => array("s" => "ß"),
+			  'H' => array("o" => "ő", 
+				       "O" => "Ő"),
+			  'l' => "ł",
+			  'L' => "Ł",
+			  '&' => '&'
+			  );
+  
 
   static function _accents_cb($input) {
-    if (!array_key_exists($input[0], BibTexEntries::$accents))
+    $r = BibtexEntries::_accents_cb2($input);
+    print "<div><b>$input[1][$input[2]]</b> =&gt; $r</div>";
+    return $r;
+  }
+  static function _accents_cb2($input) {
+    
+    if (!array_key_exists($input[1], BibTexEntries::$accents)) {
       return "$input[0]";
-    return  BibTexEntries::$accents[$input[0]];
+    }
+    $a = &BibTexEntries::$accents[$input[1]];
+    if (!is_array($a)) 
+      return "$a$input[2]";
+
+    if (!array_key_exists($input[2], $a)) {
+      if (array_key_exists("", $a)) 
+	return $a[""] . $input[2];
+      return "$input[0]";
+    }
+
+    return  $a[$input[2]];
+  }
+
+
+  /** Format the title by preserving capitalisation */
+  static function formatTitle($pString, $delimitLeft = FALSE, $delimitRight = FALSE)
+  {
+    if(!$delimitLeft)
+      $delimitLeft = '{';
+    if(!$delimitRight)
+      $delimitRight = '}';
+    $delimitLeft = preg_quote($delimitLeft);
+    $delimitRight = preg_quote($delimitRight);
+    $match = "/" . $delimitLeft . "/";
+    /**
+     * '0' == 'Osbib Bibliographic Formatting'
+     * '1' == 'Osbib bibliographic formatting'
+     */
+    if (true)
+      {
+	// Something here (preg_split probably) interferes with UTF-8 encoding (data is stored in 
+	// the database as UTF-8 as long as web browser charset == UTF-8).  
+	// So first decode then encode back to UTF-8 at end.
+	// There is a 'u' UTF-8 parameter for preg_xxx but it doesn't work.
+	//	$pString = UTF8::decodeUtf8($pString);
+	$newString = '';
+	while(preg_match($match, $pString))
+	  {
+	    $array = preg_split("/(.*)$delimitLeft(.*)$delimitRight(.*)/U", 
+				$pString, 2, PREG_SPLIT_DELIM_CAPTURE);
+	    /**
+	     * in case user has input {..} incorrectly
+	     */
+	    if(sizeof($array) == 1)
+	      break;
+	    $newString .= UTF8::utf8_strtolower(UTF8::encodeUtf8($array[1])) . $array[2];
+	    $pString = $array[4];
+	  }
+	$newString .= UTF8::utf8_strtolower(UTF8::encodeUtf8($pString));
+      }
+    $pString = isset($newString) ? $newString : $pString;
+    $title = UTF8::utf8_ucfirst(trim($pString));
+    return $title;
   }
 
   /**
@@ -441,6 +543,11 @@ class BibTexEntries {
     foreach($ret as $key => &$value)
       if ($key != "bibtex" && $key != "cite")
 	BibTexEntries::process_accents($value);
+
+    foreach(array("title","booktitle") as $f)
+      if (in_array($f, array_keys($ret))) 
+	$ret[$f] = BibTexEntries::formatTitle($ret[$f]);
+    
     
     // Handling pages
     if (in_array('pages', array_keys($ret))) {

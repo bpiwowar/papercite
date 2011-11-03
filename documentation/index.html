@@ -10,6 +10,16 @@ margin: 1em;
 font-family: monospace;
 }
 
+a {
+text-decoration: none;
+color: blue;
+}
+
+a:hover {
+text-decoration: underline;
+color: #004;
+}
+
 h2 {
 border: 1px solid black;
 padding: .2em;
@@ -25,8 +35,21 @@ color: red;
 
 <h1>Papercite documentation</h1>
 
+<h2>Table of contents</h2>
+<ol>
+  <li><a href="#data_structure">File data structure</a></li>
+  <li><a href="#bibtex_entries">BibTex entries</a>: how special bibtex fields
+  are used</li>
+  <li><a href="#usage">Usage</a>: describes the two ways to use papercite</li>
+  <li><a href="#options">Options</a>
+  <ol>
+    <li><a href="#global_options">Global options</a></li>
+    <li><a href="#local_options">Local options</a></li>
+    </ol>
+  </li>
+</ol>
 
-<h2>Data structure</h2>
+<a name="data_structure"></a><h2>Data structure</h2>
 
 <ol>
   <li>Create a folder in <code>wp-content/papercite-data</code> or
@@ -46,12 +69,12 @@ color: red;
   bibtex key in lowercase, where <code>:</code> and <code>/</code> have been replaced by <code>-</code>.</li>
 </ol>
 
-<h2>BibTex entries</h2>
+<a name="bibtex_entries"></a><h2>BibTex entries</h2>
 
 When available, the <code>pdf</code> field is used to determine the location of the pdf file. This location can be
 a valid URL or a path relative to the pdf folder.
 
-<h2>Usages</h2>
+<a name="usage"></a><h2>Usages</h2>
 
 
 <h3>Bibliography mode</h3>
@@ -91,19 +114,20 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
 
   <div class="code">[/bibshow]</div>
 
-  <h2><code>bibshow</code> and <code>bibtex</code> options</h2>
+
+<a name="options"></a><h2><code>bibshow</code> and <code>bibtex</code> options</h2>
 
 <p> Here are the list of options that can be given to papercite.</p>
 
-  <h3>Global options</h3>
+  <a name="global_options"></a><h3>Global options</h3>
 
   <ul>
-    <li><b>Bibtex parser</b> (papercite >= 0.3.13): you can choose the pear parser
-    (default) or the new faster (but beta) papercite own bibtex parser
+    <li><b>Bibtex parser</b> (papercite >= 0.3.16): you can choose the pear parser
+    (default) or the new faster (but beta) OSBiB-based parser
     to handle big bibtex files</li>
   </ul>
 
-  <h3>Local options</h3>
+  <a name="local_options"></a><h3>Local options</h3>
 
 <p>  Some of
   these options can be set at a global level (through preferences) and page/post
