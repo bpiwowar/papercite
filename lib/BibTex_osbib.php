@@ -466,12 +466,12 @@ class BibTexEntries {
 			  );
   
 
-  static function _accents_cb($input) {
+  static function _accents_cb2($input) {
     $r = BibtexEntries::_accents_cb2($input);
     print "<div><b>$input[1][$input[2]]</b> =&gt; $r</div>";
     return $r;
   }
-  static function _accents_cb2($input) {
+  static function _accents_cb($input) {
     
     if (!array_key_exists($input[1], BibTexEntries::$accents)) {
       return "$input[0]";
