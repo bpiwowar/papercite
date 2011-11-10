@@ -87,6 +87,9 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.3.18 =
+  * Enhancement #25 (display the bibliography at the end if no bibshow
+  is given)
 = 0.3.17 =
   * Fixed a small bug in the OSBiB parser
 = 0.3.16 =

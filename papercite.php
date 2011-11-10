@@ -5,7 +5,7 @@
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
   Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-  Version: 0.3.17
+  Version: 0.3.18
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
 */
@@ -437,32 +437,36 @@ class Papercite {
       return "[$returns]";
 
     case "/bibshow":
-      // select from cites
-      if (sizeof($this->bibshows) == 0) return "";
-      // Remove the array from the stack
-      $data = &array_pop($this->bibshows);
-      $cites = &array_pop($this->cites);
-      $tplOptions = &array_pop($this->bibshow_tpl_options);
-      $options = &array_pop($this->bibshow_options);
-      $refs = array();
+      return $this->end_bibshow();
 
-      // Order the citations according to citation order
-      // (might be re-ordered latter)
-      foreach($data as $key => &$entry) {
-	$num = $cites[$key];
-	if ($num) {
-	  $refs[$num[0]] = $entry;
-	  $refs[$num[0]]["pKey"] = $num[1];
-	}
-      }
-      ksort($refs);
-      return $this->showEntries(array_values($refs), $tplOptions, true, $options["bibshow_template"], $options["format"], "bibshow");
-      
     default:
       return "[error in papercite: unhandled]";
     }
   }
 
+
+  function end_bibshow() {
+    // select from cites
+    if (sizeof($this->bibshows) == 0) return "";
+    // Remove the array from the stack
+    $data = &array_pop($this->bibshows);
+    $cites = &array_pop($this->cites);
+    $tplOptions = &array_pop($this->bibshow_tpl_options);
+    $options = &array_pop($this->bibshow_options);
+    $refs = array();
+
+    // Order the citations according to citation order
+    // (might be re-ordered latter)
+    foreach($data as $key => &$entry) {
+      $num = $cites[$key];
+      if ($num) {
+	$refs[$num[0]] = $entry;
+	$refs[$num[0]]["pKey"] = $num[1];
+      }
+    }
+    ksort($refs);
+    return $this->showEntries(array_values($refs), $tplOptions, true, $options["bibshow_template"], $options["format"], "bibshow");
+  }
 
   /**
    * Show a set of entries
@@ -552,8 +556,13 @@ function &papercite_cb($myContent) {
   // (1) First phase - handles everything but bibcite keys
   $text = preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/",
 				array($papercite, "process"), $myContent);
-  
-  // (2) Handles custom keys in bibshow and return
+
+  // (2) Handles missing bibshow tags
+  while (sizeof($papercite->bibshows) > 0)
+    $text .= $papercite->end_bibshow();
+
+
+  // (3) Handles custom keys in bibshow and return
   $text = str_replace($papercite->keys, $papercite->keyValues, $text);
 
   //  print "<div style='border: 1pt solid black'>";  print(nl2br(htmlentities($text)));  print "</div>";
