@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 2.7
 Tested up to: 3.2.1
-Stable tag: 0.3.17
+Stable tag: 0.3.18
 
 papercite helps to format bibtex entries to display a bibliography or
 cite papers.
