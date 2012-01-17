@@ -87,6 +87,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.3.19 =
+  * Handles properly authors initials : closes #31 (thanks to petrosb)
 = 0.3.18 =
   * Enhancement #25 (display the bibliography at the end if no bibshow
   is given)

@@ -580,7 +580,7 @@ class BibTexEntries {
       $cArray = array(
 		      "surname" => trim($cArray[2]),
 		      "firstname" => trim($cArray[0]),
-		      "initials" => trim($Array[1]),
+		      "initials" => trim($cArray[1]),
 		      "prefix" => trim($cArray[3])
 		      );
       unset($cArray);
