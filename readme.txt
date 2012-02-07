@@ -2,8 +2,8 @@
 Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 2.7
-Tested up to: 3.2.1
-Stable tag: 0.3.18
+Tested up to: 3.3.1
+Stable tag: 0.3.19
 
 papercite helps to format bibtex entries to display a bibliography or
 cite papers.
@@ -87,6 +87,10 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.3.19 =
+  * OSBib now returns a correct entry type (closes #28)
+  * Improved parsing for the OSBib parser (closes #29, #27)
+  * Handles properly authors initials : closes #31 (thanks to petrosb)
 = 0.3.18 =
   * Enhancement #25 (display the bibliography at the end if no bibshow
   is given)

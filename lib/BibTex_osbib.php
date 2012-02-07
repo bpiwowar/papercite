@@ -180,7 +180,7 @@ class BibTexEntries {
 	function fullSplit($entry)
 	{        
 		$matches = preg_split("/@(.*)[{(](.*),/U", $entry, 2, PREG_SPLIT_DELIM_CAPTURE); 
-		$this->data[$this->count]['bibtexEntryType'] = strtolower(trim($matches[1]));
+		$this->data[$this->count]['entrytype'] = strtolower(trim($matches[1]));
 		// sometimes a bibtex entry will have no citation key
 		if(preg_match("/=/", $matches[2])) // this is a field
 			$matches = preg_split("/@(.*)\s*[{(](.*)/U", $entry, 2, PREG_SPLIT_DELIM_CAPTURE);
@@ -434,7 +434,9 @@ class BibTexEntries {
     $text = preg_replace_callback("#\{$slash(.)\{(.)\}\}#", "BibTexEntries::_accents_cb", $text);
     $text = preg_replace_callback("#\{$slash(.)(.)\}#", "BibTexEntries::_accents_cb", $text);
     $text = preg_replace_callback("#$slash(.)\{(.)\}#", "BibTexEntries::_accents_cb", $text);
-    $text = preg_replace_callback("#$slash(.)(.)#", "BibTexEntries::_accents_cb", $text);
+    // When there are no braces, we require a non alphanumeric character
+    $text = preg_replace_callback("#$slash([^a-zA-Z])(.)#", "BibTexEntries::_accents_cb", $text);
+    $text = preg_replace_callback("#$slash([a-zA-Z])(.)(?![a-zA-Z])#", "BibTexEntries::_accents_cb", $text);
     //    $text = preg_replace_callback("#\\\\(?:['\"^`H~\.]|¨)\w|\\\\([LlcCoO]|ss|aa|AA|[ao]e|[OA]E|&)#", "BibTexEntries::_accents_cb", $text);
   }
 
@@ -486,44 +488,59 @@ class BibTexEntries {
 
 
   /** Format the title by preserving capitalisation */
-  static function formatTitle($pString, $delimitLeft = FALSE, $delimitRight = FALSE)
+  static function formatTitle($pString, $delimitLeft = '{', $delimitRight = '}')
   {
-    if(!$delimitLeft)
-      $delimitLeft = '{';
-    if(!$delimitRight)
-      $delimitRight = '}';
-    $delimitLeft = preg_quote($delimitLeft);
-    $delimitRight = preg_quote($delimitRight);
-    $match = "/" . $delimitLeft . "/";
-    /**
-     * '0' == 'Osbib Bibliographic Formatting'
-     * '1' == 'Osbib bibliographic formatting'
-     */
-    if (true)
-      {
-	// Something here (preg_split probably) interferes with UTF-8 encoding (data is stored in 
-	// the database as UTF-8 as long as web browser charset == UTF-8).  
-	// So first decode then encode back to UTF-8 at end.
-	// There is a 'u' UTF-8 parameter for preg_xxx but it doesn't work.
-	//	$pString = UTF8::decodeUtf8($pString);
-	$newString = '';
-	while(preg_match($match, $pString))
-	  {
-	    $array = preg_split("/(.*)$delimitLeft(.*)$delimitRight(.*)/U", 
-				$pString, 2, PREG_SPLIT_DELIM_CAPTURE);
-	    /**
-	     * in case user has input {..} incorrectly
-	     */
-	    if(sizeof($array) == 1)
-	      break;
-	    $newString .= UTF8::utf8_strtolower(UTF8::encodeUtf8($array[1])) . $array[2];
-	    $pString = $array[4];
-	  }
-	$newString .= UTF8::utf8_strtolower(UTF8::encodeUtf8($pString));
+    $in_maths = false;
+    $brace_level = 0;
+
+    $newString = "";
+    //print "<div style='font-weight:bold'>" . htmlentities($pString) . "</div>";
+
+    $start = true;
+
+    foreach(preg_split("/[\${}]/", 
+		       $pString, 0, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE) as $v) {
+
+      // delimiter
+      $c = $pString[$v[1] - 1];
+      
+      // Add the current string unless it is a brace and we are not in math mode
+      if (($in_maths &&  ($c == '}' || $c == '{')) || $c == '$') 
+	$newString .= $c;
+      
+      switch($c) {
+      case '$':
+	$in_maths = !$in_maths;
+	break;
+      case '{':
+	$brace_level++;
+	break;
+      case '}':
+	$brace_level--;
+	break;
+      default:
+	break;
       }
-    $pString = isset($newString) ? $newString : $pString;
-    $title = UTF8::utf8_ucfirst(trim($pString));
-    return $title;
+
+      //print "<div>$brace_level [" . $pString[$v[1]-1] .": $v[1]] " . htmlentities($v[0]) . "</div>";
+
+      if ($in_maths || $brace_level > 0)
+	$newString .= $v[0];
+      else
+	$newString .= $start ? UTF8::utf8_ucfirst( UTF8::utf8_strtolower($v[0]) ) : UTF8::utf8_strtolower($v[0]);
+
+      $start = false;
+
+
+
+      // Error: return the original string
+      if ($brace_level < 0) {
+	print "Error while parsing";
+	return $pString;
+      }
+    }
+
+    return $newString;
   }
 
   /**
@@ -539,6 +556,7 @@ class BibTexEntries {
       if ($key != "bibtex" && $key != "cite")
 	BibTexEntries::process_accents($value);
 
+    // Remove braces and handles capitalization
     foreach(array("title","booktitle") as $f)
       if (in_array($f, array_keys($ret))) 
 	$ret[$f] = BibTexEntries::formatTitle($ret[$f]);
@@ -561,7 +579,7 @@ class BibTexEntries {
     if (in_array('editor', array_keys($ret))) {
       $ret['editor'] = BibTexEntries::_extractAuthors($ret['editor']);
     }
-    
+
   }
 
   /**
@@ -580,7 +598,7 @@ class BibTexEntries {
       $cArray = array(
 		      "surname" => trim($cArray[2]),
 		      "firstname" => trim($cArray[0]),
-		      "initials" => trim($Array[1]),
+		      "initials" => trim($cArray[1]),
 		      "prefix" => trim($cArray[3])
 		      );
       unset($cArray);
