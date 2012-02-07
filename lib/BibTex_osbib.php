@@ -541,36 +541,6 @@ class BibTexEntries {
     }
 
     return $newString;
-
-    $delimitLeft = preg_quote($delimitLeft);
-    $delimitRight = preg_quote($delimitRight);
-    $match = "/" . $delimitLeft . "/";
-    print htmlentities($pString) . "<br/>";
-    // Something here (preg_split probably) interferes with UTF-8 encoding (data is stored in 
-    // the database as UTF-8 as long as web browser charset == UTF-8).  
-    // So first decode then encode back to UTF-8 at end.
-    // There is a 'u' UTF-8 parameter for preg_xxx but it doesn't work.
-    //	$pString = UTF8::decodeUtf8($pString);
-    $newString = '';
-    while(preg_match($match, $pString))
-      {
-    
-	$array = preg_split("/(.*)$delimitLeft(.*)$delimitRight(.*)/U", 
-			    $pString, 2, PREG_SPLIT_DELIM_CAPTURE);
-	print "<div><b style='color:blue'>[" . htmlentities($pString) . "]</b> " . htmlentities(print_r($array,true)) . "</div>";
-	/**
-	 * in case user has input {..} incorrectly
-	 */
-	if(sizeof($array) == 1)
-	  break;
-	$newString .= UTF8::utf8_strtolower(UTF8::encodeUtf8($array[1])) . $array[2];
-	$pString = $array[4];
-      }
-    $newString .= UTF8::utf8_strtolower(UTF8::encodeUtf8($pString));
-      
-    $pString = isset($newString) ? $newString : $pString;
-    $title = UTF8::utf8_ucfirst(trim($pString));
-    return $title;
   }
 
   /**
