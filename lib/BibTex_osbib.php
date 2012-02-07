@@ -409,7 +409,7 @@ class BibTexEntries {
 				foreach($this->data[$i] as $key => $value)
 				// 02/05/2005 G. Gardey don't expand macro for bibtexCitation 
 				// and bibtexEntryType
-				if($key != 'cite' && $key != "bibtex" && $key != 'bibtexEntryType')
+				if($key != 'cite' && $key != "bibtex" && $key != 'entrytype')
 					$this->data[$i][$key] = trim($this->removeDelimitersAndExpand($this->data[$i][$key])); 
 			}
 		}
@@ -553,7 +553,7 @@ class BibTexEntries {
   static function _postProcessing(&$ret) {
     // Process accents
     foreach($ret as $key => &$value)
-      if ($key != "bibtex" && $key != "cite")
+      if ($key != "entrytype" && $key != "bibtex" && $key != "cite")
 	BibTexEntries::process_accents($value);
 
     // Remove braces and handles capitalization
