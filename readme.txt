@@ -87,8 +87,9 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
-= 0.3.19 =
+= 0.3.20 =
   * OSBib now returns a correct entry type (closes #28)
+= 0.3.19 =
   * Improved parsing for the OSBib parser (closes #29, #27)
   * Handles properly authors initials : closes #31 (thanks to petrosb)
 = 0.3.18 =
