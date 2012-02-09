@@ -95,7 +95,7 @@ class Bib2TplHelper
    else
    {     
      // parses an English textual date into a Unix timestamp (the number of seconds since January 1 1970 00:00:00 GMT).
-     $date_stamp = strtotime($month);
+     $date_stamp = strtotime(strtok($month,'-'));
 
      if ( $date_stamp == true) 
        {
