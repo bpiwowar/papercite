@@ -88,6 +88,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 == Changelog ==
 
 = Git repository =
+  * Fixed issue #26 (newlines stripped from bibtex)
   * Fixed bug #32 (thanks to petrosb)
 = 0.3.20 =
   * OSBib now returns a correct entry type (closes #28)

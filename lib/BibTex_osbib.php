@@ -349,7 +349,7 @@ class BibTexEntries {
 			}
 			if ($inside)
 			{
-				$entry .= " ".$line;
+			  $entry .= ($entry ?  "\n" : "") . $line;
 				if ($j=$this->closingDelimiter($entry,$delimitEnd))
 				{
 					// all characters after the delimiter are thrown but the remaining 
