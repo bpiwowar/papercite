@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 2.7
 Tested up to: 3.3.1
-Stable tag: 0.3.20
+Stable tag: 0.3.21
 
 papercite helps to format bibtex entries to display a bibliography or
 cite papers.
@@ -87,7 +87,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
-= Git repository =
+= 0.3.21 =
   * Fixed issue #26 (newlines stripped from bibtex)
   * Fixed bug #32 (thanks to petrosb)
 = 0.3.20 =
