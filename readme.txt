@@ -87,6 +87,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= Git repository =
+  * Fixed bug #32 (thanks to petrosb)
 = 0.3.20 =
   * OSBib now returns a correct entry type (closes #28)
 = 0.3.19 =
