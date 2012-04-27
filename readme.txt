@@ -5,7 +5,7 @@ Requires at least: 2.7
 Tested up to: 3.3.1
 Stable tag: 0.3.21
 
-papercite helps to format bibtex entries to display a bibliography or
+Papercite helps to format bibtex entries to display a bibliography or
 cite papers.
 
 == Description ==
@@ -35,7 +35,7 @@ The papercite plugin has been developed and tested under Wordpress
 the documentation link)**. You can see the documentation of the plugin
 as installed on my site <a href="http://www.bpiwowar.net/wp-content/plugins/papercite/documentation/index.html">here</a>. 
 
-To report bugs or request features, please navigate to 
+To report bugs or request features, please go to 
 https://github.com/bpiwowar/papercite
 
 == Installation ==
@@ -87,6 +87,9 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= HEAD =
+  * New style "plain" (thanks to Andrius Velykis)
+  * Improved compatibility with the highlight plugin (thanks to Andrius Velykis)
 = 0.3.21 =
   * Fixed issue #26 (newlines stripped from bibtex)
   * Fixed bug #32 (thanks to petrosb)
