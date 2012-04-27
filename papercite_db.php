@@ -5,6 +5,7 @@
 * See http://codex.wordpress.org/Creating_Tables_with_Plugins
 */
 
+global $wpdb;
 global $papercite_db_version;
 global $papercite_table_name;
 $papercite_table_name = $GLOBALS["wpdb"]->prefix . "plugin_papercite";
@@ -18,9 +19,10 @@ function papercite_msg_upgraded() {
 function papercite_install() {
     global $wpdb, $papercite_db_version, $papercite_table_name;
 
+    $exists =  sizeof($wpdb->get_col("SHOW TABLES LIKE '$papercite_table_name'")) == 1;
      $installed_ver = get_option( "papercite_db_version" );
      // Creates / updates the table
-     if( $installed_ver != $papercite_db_version) {
+     if (!$exists || $installed_ver != $papercite_db_version) {
          $sql = "CREATE TABLE $papercite_table_name (
              url VARCHAR(255) NOT NULL, 
              bibtexid VARCHAR(255) NOT NULL,
