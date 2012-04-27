@@ -89,6 +89,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 = HEAD =
   * New style "plain" (thanks to Andrius Velykis)
+  * New template "av-bibtex" (thanks to Andrius Velykis)
   * Improved compatibility with the highlight plugin (thanks to Andrius Velykis)
 = 0.3.21 =
   * Fixed issue #26 (newlines stripped from bibtex)
