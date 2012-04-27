@@ -1,5 +1,8 @@
 .papercite_bibtex {
     display: none;
+}
+
+.papercite_bibtex pre {
     white-space: pre-wrap;
 }
 
