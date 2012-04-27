@@ -511,10 +511,13 @@ class BibtexConverter
 
     // --- Entry 
     if ($match[1] == "#entry") {
-      $type = $this->_entry["entrytype"];
-      $entryTpl = &$this->_entry_template->get($type);
-      //print "<div><b>$type</b>: ". htmlentities($entryTpl). "</div>";
-      $t= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $entryTpl) . $match[2];
+        if ($this->_entry["entrytype"]) {
+          $type = $this->_entry["entrytype"];
+          $entryTpl = &$this->_entry_template->get($type);
+          //print "<div><b>$type</b>: ". htmlentities($entryTpl). "</div>";
+          $t=  preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $entryTpl) . $match[2];
+        } 
+        else $t = "<span style='color:red'>Unknown bibtex entry with key [".$this->_entry["cite"] ."]</span>" . $match[2];
       return $t;
     }
 

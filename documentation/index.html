@@ -126,6 +126,9 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
   <ul>
     <li><b>Bibtex parser</b> (papercite >= 0.3.16): you can choose the
     pear parser (deprecated) or the OSBiB-based parser (default).</li>
+    <li><b>Database backend</b> (papercite >= 0.4.0): The database backend is used
+        to store the result of bibtex parsing in a database, allowing to speed up the 
+        processing of shortcodes.</li>
   </ul>
 
   <a name="local_options"></a><h3>Local options</h3>
@@ -213,6 +216,7 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
     <li><code>ieee</code></li>
     <li><code>mla</code></li>
     <li><code>turabian</code></li>
+    <li><code>plain</code></li>
   </ul>
   Feel free to contribute new formats, but note that in the future the
   citation style might be written using the <a href="http://citationstyles.org/">Citation Style Language (CSL)</a>.
@@ -225,7 +229,10 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
   <ul>
     <li><code>default-bibtex</code> is the default template used for the
   <code>bibtex</code> command</li>
-    <li><code>default-bibshow</code> is he default template used for the
+    <li><code>av-bibtex</code> is another template for the <code>bibtex</code> command. It adds
+  support for <code>abstract</code> field (toggled like the bibtex entry), explicit
+  <code>doi:</code> link and a <em>Download PDF</em> link for <code>url</code> field.
+    <li><code>default-bibshow</code> is the default template used for the
   <code>bibshow</code> command</li>
     </ul>
     
