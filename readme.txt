@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 2.7
 Tested up to: 3.3.2
-Stable tag: HEAD
+Stable tag: 0.4.0
 
 Papercite helps to format bibtex entries to display a bibliography or
 cite papers.
@@ -87,7 +87,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
-= HEAD =
+= 0.4.0 =
   * Optional database backend
   * New style "plain" (thanks to Andrius Velykis)
   * New template "av-bibtex" (thanks to Andrius Velykis)
