@@ -107,7 +107,14 @@ function papercite_bibtex_parser() {
 
 function papercite_use_db() {
   $option = $GLOBALS["papercite"]->options["use_db"];
-  echo "<p>Papercite can use a database backend to avoid reparsing bibtex files and loading the full data each time<p>";
+
+  require_once(dirname(__FILE__) . "/papercite_db.php");
+  global $papercite_table_name, $wpdb;
+  $exists =  sizeof($wpdb->get_col("SHOW TABLES LIKE '$papercite_table_name'")) == 1;
+  
+  echo "<div>Papercite can use a database backend to avoid reparsing bibtex files and loading the full data each time<div>";
+  if ($exists)  print "<div style='color:blue'>The database has been created.</div>";
+  else print "<div style='" . ($option ? "color:red" : ""). "'>The database does not exist.</div>";
   echo "<input type='radio' id='papercite_use_db' " . ($option ? " checked='checked' " : "") . " value='yes' name='papercite_options[use_db]' /> Yes ";
   echo "<input type='radio' id='papercite_use_db' " . (!$option ? " checked='checked' " : "") . "value='no' name='papercite_options[use_db]' /> No";
 }
