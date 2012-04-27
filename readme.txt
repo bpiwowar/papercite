@@ -2,7 +2,7 @@
 Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 2.7
-Tested up to: 3.3.1
+Tested up to: 3.3.2
 Stable tag: 0.3.21
 
 Papercite helps to format bibtex entries to display a bibliography or
@@ -88,6 +88,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 == Changelog ==
 
 = HEAD =
+  * Optional database backend
   * New style "plain" (thanks to Andrius Velykis)
   * Improved compatibility with the highlight plugin (thanks to Andrius Velykis)
 = 0.3.21 =
