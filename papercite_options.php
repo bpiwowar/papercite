@@ -6,6 +6,7 @@
   - 
  */
 
+
 add_action('admin_menu', 'papercite_create_menu');
 
 
@@ -19,7 +20,7 @@ function papercite_options_page() {
   <div>
     <h2>Papercite options</h2>
     
-    Options relating to the papercite plugin.
+    Options related to the papercite plugin.
     
     <form action="options.php" method="post">
     <?php settings_fields('papercite_options'); ?>
@@ -39,6 +40,7 @@ function papercite_admin_init(){
 
   register_setting( 'papercite_options', 'papercite_options', 'papercite_options_validate' );
 
+  // Default settings
   add_settings_section('papercite_main', 'Defaults settings', 'papercite_section_text', 'papercite');
   add_settings_field('file', 'Default bibtex file', 'papercite_file', 'papercite', 'papercite_main');
   add_settings_field('format', 'Default format', 'papercite_format', 'papercite', 'papercite_main');
@@ -46,14 +48,21 @@ function papercite_admin_init(){
 
   add_settings_field('bibtex_template', 'Main bibtex template', 'papercite_bibtex_template', 'papercite', 'papercite_main');
   add_settings_field('bibshow_template', 'Main bibshow template', 'papercite_bibshow_template', 'papercite', 'papercite_main');
-  //  add_settings_field('deny', 'Deny bibtex entries with [bibtex]', 'papercite_deny', 'papercite', 'papercite_main');
 
-  add_settings_field('bibtex_parser', 'Bibtex parser', 'papercite_bibtex_parser', 'papercite', 'papercite_main');
+  add_settings_section('papercite_choices', 'Options', 'papercite_choices_text', 'papercite');
+  add_settings_field('bibtex_parser', 'Bibtex parser', 'papercite_bibtex_parser', 'papercite', 'papercite_choices');
+  add_settings_field('use_db', 'Database', 'papercite_use_db', 'papercite', 'papercite_choices');
 }
 
 function papercite_section_text() {
   echo '<p>Set the default settings - leave the fields empty to use papercite default values</p>';
 } 
+
+
+function papercite_choices_text() {
+  echo '<p>Options to set how papercite process the data</p>';
+} 
+
 
 
 function papercite_file() {
@@ -96,6 +105,12 @@ function papercite_bibtex_parser() {
   print "</select>";
 } 
 
+function papercite_use_db() {
+  $option = $GLOBALS["papercite"]->options["use_db"];
+  echo "<p>Papercite can use a database backend to avoid reparsing bibtex files and loading the full data each time<p>";
+  echo "<input type='radio' id='papercite_use_db' " . ($option ? " checked='checked' " : "") . " value='yes' name='papercite_options[use_db]' /> Yes ";
+  echo "<input type='radio' id='papercite_use_db' " . (!$option ? " checked='checked' " : "") . "value='no' name='papercite_options[use_db]' /> No";
+}
 
 function papercite_set(&$options, &$input, $name) {
   if (array_key_exists($name, $input)) {
@@ -108,6 +123,8 @@ function papercite_set(&$options, &$input, $name) {
 function papercite_options_validate($input) {
   $options = get_option('papercite_options');
 
+  $options['use_db'] = $input['use_db'] == "yes";
+      
   $options['file'] = trim($input['file']);
   $options['timeout'] = trim($input["timeout"]);
   

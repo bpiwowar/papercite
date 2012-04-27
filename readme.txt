@@ -2,8 +2,8 @@
 Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 2.7
-Tested up to: 3.3.1
-Stable tag: 0.3.21
+Tested up to: 3.3.2
+Stable tag: HEAD
 
 Papercite helps to format bibtex entries to display a bibliography or
 cite papers.
@@ -16,20 +16,20 @@ local or remote) and entries can be formatted by default using various
 predefined styles. Bibtex source file and a link to the publication
 are also available from the HTML. 
 
-Features:
+Features (borrowed from bib2html):
 
 * Input data directly from the bibtex text file
 * Source files can be URL (e.g., from citeulike.org and bibsonomy.org)
-* Template based HTML generation
 * Possibility of filtering the bibtex entries based on their type (allow, deny)
 * Possibility to access the single bibtex entry source code to enable copy&paste (toggle-enabled visualization)
 * Possibility of editing the bibtex file directly from the wordpress administration page
-* Adds the possibility of writing a text with references to a bibtex entries, and to print the bibliography at the end.
-* Auto-detection of PDF files based on the BibTeX key
-* Publications can be grouped and sorted in various ways
 
-The papercite plugin has been developed and tested under Wordpress
-3.1. Versions before 0.3 were based on bib2html version 0.9.3.
+Papercite own features:
+* Publications can be grouped and sorted in various ways
+* Easy output customisation with the use of two templates: one for each entry, one for the list of entries
+* Auto-detection of PDF files based on the BibTeX key
+* Citation mode: use references in the text and print the citations at the end of a block, page or post
+* (papercite >= 0.4.0) *Database backend* to speed up the processing by caching the bibtex entries
 
 **Documentation can be found from within WordPress plugin list (click on
 the documentation link)**. You can see the documentation of the plugin
@@ -88,6 +88,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 == Changelog ==
 
 = HEAD =
+  * Optional database backend
   * New style "plain" (thanks to Andrius Velykis)
   * New template "av-bibtex" (thanks to Andrius Velykis)
   * Improved compatibility with the highlight plugin (thanks to Andrius Velykis)
