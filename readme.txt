@@ -25,6 +25,7 @@ Features (borrowed from bib2html):
 * Possibility of editing the bibtex file directly from the wordpress administration page
 
 Papercite own features:
+
 * Publications can be grouped and sorted in various ways
 * Easy output customisation with the use of two templates: one for each entry, one for the list of entries
 * Auto-detection of PDF files based on the BibTeX key
