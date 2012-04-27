@@ -27,9 +27,7 @@ Features:
 * Adds the possibility of writing a text with references to a bibtex entries, and to print the bibliography at the end.
 * Auto-detection of PDF files based on the BibTeX key
 * Publications can be grouped and sorted in various ways
-
-The papercite plugin has been developed and tested under Wordpress
-3.1. Versions before 0.3 were based on bib2html version 0.9.3.
+* (papercite >= 0.4.0) *Database backend* to speed up the processing by caching the bibtex entries
 
 **Documentation can be found from within WordPress plugin list (click on
 the documentation link)**. You can see the documentation of the plugin
@@ -89,7 +87,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 = HEAD =
   * Optional database backend
-  * New style "plain" (thanks to Andrius Velykis)
+  * New style 
+  * New style "plain" (thanks to Andrius Velykis, closes #33)
   * Improved compatibility with the highlight plugin (thanks to Andrius Velykis)
 = 0.3.21 =
   * Fixed issue #26 (newlines stripped from bibtex)
