@@ -9,7 +9,7 @@ global $wpdb;
 global $papercite_db_version;
 global $papercite_table_name;
 $papercite_table_name = $GLOBALS["wpdb"]->prefix . "plugin_papercite";
-$papercite_db_version = "1.1";
+$papercite_db_version = "1.2";
 
 
 function papercite_msg_upgraded() {
@@ -19,14 +19,13 @@ function papercite_msg_upgraded() {
 function papercite_install() {
     global $wpdb, $papercite_db_version, $papercite_table_name;
 
-    $exists =  sizeof($wpdb->get_col("SHOW TABLES LIKE '$papercite_table_name'")) == 1;
+    // $exists =  sizeof($wpdb->get_col("SHOW TABLES LIKE '$papercite_table_name'")) == 1;
      $installed_ver = get_option( "papercite_db_version" );
-     // Creates / updates the table
-     if (!$exists || $installed_ver != $papercite_db_version) {
+     if ($installed_ver != $papercite_db_version) {
          $sql = "CREATE TABLE $papercite_table_name (
-             url VARCHAR(255) NOT NULL, 
-             bibtexid VARCHAR(255) NOT NULL,
-             entrytype VARCHAR(30) NOT NULL,
+             url VARCHAR(255) CHARSET ASCII NOT NULL,  
+             bibtexid VARCHAR(255) CHARSET ASCII NOT NULL,
+             entrytype VARCHAR(255) CHARSET ASCII NOT NULL,
              year SMALLINT,
              data TEXT NOT NULL,
              PRIMARY KEY id (url, bibtexid),
@@ -42,6 +41,7 @@ function papercite_install() {
              update_option("papercite_db_version", $papercite_db_version);
              add_action('admin_notices', 'papercite_msg_upgraded');
          }
+         
      }
 }
 
