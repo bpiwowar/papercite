@@ -148,7 +148,7 @@ class Papercite {
       }
       
     }
-
+    
   }
 
   
@@ -166,7 +166,7 @@ class Papercite {
       $subpath = '/blogs.dir/'. $wpdb->blogid . "/files/papercite-data/$relfile";
       $path = WP_CONTENT_DIR . $subpath;
       if (file_exists($path))
-	return array($path, WP_CONTENT_URL.$subpath);
+	      return array($path, WP_CONTENT_URL.$subpath);
     }
 
     if (file_exists(WP_CONTENT_DIR . "/papercite-data/$relfile"))
@@ -187,7 +187,7 @@ class Papercite {
     foreach($types as &$type) {
       $file = papercite::getDataFile("$type[0]/$id.$type[1]");
       if ($file) {
-	$entry[$type[0]] =  $file[1];
+	      $entry[$type[0]] =  $file[1];
       }
     }
   }
@@ -205,39 +205,44 @@ class Papercite {
     foreach($array as $biburi) {
 
       // (1) Get the context
+      $data = FALSE;
       if (!$this->cache[$biburi]) {
-	if (strpos($biburi, "http://") === 0) 
-	  $bibFile = $this->getCached($biburi, $timeout);
-	else {
-	  $bibFile = $this->getDataFile("bib/$biburi");
-	}
-      
-	if (!$bibFile || !file_exists($bibFile[0]))
+      	if (strpos($biburi, "custom://") === 0) {
+      	    $data = get_post_custom_values("papercite_" . substr($biburi, 9));
+      	    if ($data) $data = $data[0];
+      	}
+    	else if (strpos($biburi, "http://") === 0) 
+    	  $bibFile = $this->getCached($biburi, $timeout);
+    	else {
+    	  $bibFile = $this->getDataFile("bib/$biburi");
+    	}
+
+	if ($data === FALSE && !($bibFile && file_exists($bibFile[0])))
 	  continue;	
 
-	$bibFile = $bibFile[0];
-	
-	
 
 	// (2) Parse the BibTeX
-	if (file_exists($bibFile)) {
-	    $fileTS = filemtime($bibFile);
+	if ($data || file_exists($bibFile[0])) {
+	    if (!$data) {
+	        $fileTS = filemtime($bibFile[0]);
 	    
-    	// Check if we don't have the data in cache
-        if ($this->useDb()) {
-            // We use entrytype as a timestamp
-            $dbTS = intval($wpdb->get_var($wpdb->prepare("SELECT entrytype FROM $papercite_table_name WHERE url=%s and bibtexid=''", "ts:" . $biburi)));
-            if ($dbTS >= $fileTS) {
-            	$result[$biburi] = $this->cache[$biburi] = "__DB__";
-            	continue;
-            } 
-        }
+        	// Check if we don't have the data in cache
+            if ($this->useDb()) {
+                // We use entrytype as a timestamp
+                $dbTS = intval($wpdb->get_var($wpdb->prepare("SELECT entrytype FROM $papercite_table_name WHERE url=%s and bibtexid=''", "ts://" . $biburi)));
+                if ($dbTS >= $fileTS) {
+                	$result[$biburi] = $this->cache[$biburi] = "__DB__";
+                	continue;
+                } 
+            }
+        
 
-	  $data = file_get_contents($bibFile);
-
+    	    $data = file_get_contents($bibFile[0]);
+        } 
+    
 	  if (!empty($data)) {
 	    switch($this->options["bibtex_parser"]) {
-	    case "pear":
+	    case "pear": // Pear parser
 	      $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true));
 	      $this->_parser->loadString($data);
 	      $stat = $this->_parser->parse();
@@ -246,7 +251,7 @@ class Papercite {
 	      $this->cache[$biburi] = &$this->_parser->data;
 	      break;
 
-	    default: // osbib
+	    default: // OSBiB parser
 	      $parser = new BibTexEntries();
 	      if (!$parser->parse($data)) {
 		$this->cache[$biburi] = false;
@@ -264,7 +269,7 @@ class Papercite {
 	    }
 	    
 	    // Save to DB
-	    if ($this->useDb()) {
+	    if (!$stringedFile && $this->useDb()) {
 	        // First delete everything
 	        $wpdb->query($wpdb->prepare("DELETE FROM $papercite_table_name WHERE url=%s", $biburi));
 	        $code = true;
@@ -277,7 +282,7 @@ class Papercite {
                 }
 	        }
 	        if ($code !== FALSE) { 
-	            $statement = $wpdb->prepare("INSERT INTO $papercite_table_name(url, bibtexid, entrytype) VALUES(%s,%s,%s)", "ts:".$biburi, "", $fileTS);
+	            $statement = $wpdb->prepare("INSERT INTO $papercite_table_name(url, bibtexid, entrytype) VALUES(%s,%s,%s)", "ts://".$biburi, "", $fileTS);
 	            $code = $wpdb->query($statement);
 	        } 
         }

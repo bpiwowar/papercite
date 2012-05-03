@@ -105,18 +105,59 @@ function papercite_bibtex_parser() {
   print "</select>";
 } 
 
+add_action('wp_ajax_papercite_create_db', 'papercite_ajax_callback');
+
+function papercite_ajax_callback() {
+    require_once(dirname(__FILE__) . "/papercite_db.php");
+    print json_encode(papercite_install(true));
+	die(); 
+}
+
 function papercite_use_db() {
   $option = $GLOBALS["papercite"]->options["use_db"];
 
+
   require_once(dirname(__FILE__) . "/papercite_db.php");
   global $papercite_table_name, $wpdb;
+
   $exists =  sizeof($wpdb->get_col("SHOW TABLES LIKE '$papercite_table_name'")) == 1;
-  
+ 
   echo "<div>Papercite can use a database backend to avoid reparsing bibtex files and loading the full data each time<div>";
-  if ($exists)  print "<div style='color:blue'>The database has been created.</div>";
-  else print "<div style='" . ($option ? "color:red" : ""). "'>The database does not exist.</div>";
+  print "<div id=\"papercite_db_ok\" style='" . ($exists ? "" : "display:none;"). "color:blue'>The database has been created.</div>";
+  print "<div id=\"papercite_db_nok\" style='" .(!$exists ? "" : "display:none;"). ($option ? "color:red;" : ""). "'>The database does not exist. [<span class='papercite_link' id='papercite_create_db'>Create</span>]</div>";
+
+  if ($exists) {
+    // Display some information
+    print "<div class='papercite_info'>" . $wpdb->get_var("SELECT count(*) FROM $papercite_table_name WHERE not URL like 'ts://%'") . " entries in the database</div>";
+    print "<div class='papercite_info'>Cached bibtex files: " . 
+      implode(", ", $wpdb->get_col("SELECT substr(URL,6) from $papercite_table_name WHERE URL like 'ts://%'")) . "</div>";
+  }
+
   echo "<input type='radio' id='papercite_use_db' " . ($option ? " checked='checked' " : "") . " value='yes' name='papercite_options[use_db]' /> Yes ";
   echo "<input type='radio' id='papercite_use_db' " . (!$option ? " checked='checked' " : "") . "value='no' name='papercite_options[use_db]' /> No";
+  
+  wp_enqueue_script( 'json2' );
+  wp_enqueue_script( 'jquery-ui-dialog' );
+  ?>
+  <script type="text/javascript" >
+  jQuery("#papercite_create_db").click(function() {
+  	var data = {
+  		action: 'papercite_create_db'
+  	};
+
+  	jQuery.post(ajaxurl, data, function(response) {
+  	    var r = JSON.parse(response);
+  	    var d = jQuery("<div style='background:white; border: 1px solid black; padding: 3px; margin: 3px; '></div>");
+  	    if (r[1] == "") {
+  	      d.html("Table created").dialog({modal: true});
+  	      jQuery("#papercite_db_nok").hide();
+  	      jQuery("#papercite_db_ok").show();
+        } else d.html(r[1]).dialog({modal: true});
+  	});
+  });
+  </script>
+  <?php
+  
 }
 
 function papercite_set(&$options, &$input, $name) {
