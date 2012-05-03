@@ -12,3 +12,12 @@
 }
 
 
+.papercite_link, .papercite_link:link, .papercite_link:visited {
+  color: #222;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+}
+.papercite_info {
+  color: #555;
+}

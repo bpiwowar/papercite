@@ -16,21 +16,26 @@ local or remote) and entries can be formatted by default using various
 predefined styles. Bibtex source file and a link to the publication
 are also available from the HTML. 
 
-Features (borrowed from bib2html):
+*Input*: Sources files are BibTex files that can be:
+* Stored into a WordPress folder (with multi-site support);
+* An URL (e.g., from citeulike.org and bibsonomy.org);
+* A custom field when local to a post/page
 
-* Input data directly from the bibtex text file
-* Source files can be URL (e.g., from citeulike.org and bibsonomy.org)
+*Efficiency*:
+* (papercite >= 0.4.0) *Database backend* to speed up the processing by caching the bibtex entries for big BibTeX files.
+* Fast OsBiB-based parser
+
+*Filtering and grouping*:
 * Possibility of filtering the bibtex entries based on their type (allow, deny)
 * Possibility to access the single bibtex entry source code to enable copy&paste (toggle-enabled visualization)
 * Possibility of editing the bibtex file directly from the wordpress administration page
-
-Papercite own features:
-
 * Publications can be grouped and sorted in various ways
+
+*Output*:
 * Easy output customisation with the use of two templates: one for each entry, one for the list of entries
-* Auto-detection of PDF files based on the BibTeX key
+* Auto-detection of PDF files based on the BibTeX key (or on the PDF entry)
 * Citation mode: use references in the text and print the citations at the end of a block, page or post
-* (papercite >= 0.4.0) *Database backend* to speed up the processing by caching the bibtex entries
+
 
 **Documentation can be found from within WordPress plugin list (click on
 the documentation link)**. You can see the documentation of the plugin
@@ -88,6 +93,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+  * Post/page BibTeX entries from custom fields
+  * Bug fixes and information for database backend
 = 0.4.0 =
   * Optional database backend
   * New style "plain" (thanks to Andrius Velykis)
