@@ -4,6 +4,8 @@ Tags: formatting, bibtex
 Requires at least: 2.7
 Tested up to: 3.3.2
 Stable tag: HEAD
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Papercite helps to format bibtex entries to display a bibliography or
 cite papers.
@@ -17,21 +19,25 @@ predefined styles. Bibtex source file and a link to the publication
 are also available from the HTML. 
 
 *Input*: Sources files are BibTex files that can be:
+
 * Stored into a WordPress folder (with multi-site support);
 * An URL (e.g., from citeulike.org and bibsonomy.org);
-* A custom field when local to a post/page
+* (Since 0.4.1) A custom field when local to a post/page
 
 *Efficiency*:
-* (papercite >= 0.4.0) *Database backend* to speed up the processing by caching the bibtex entries for big BibTeX files.
+
+* (Since 0.4.0) *Database backend* to speed up the processing by caching the bibtex entries for big BibTeX files.
 * Fast OsBiB-based parser
 
 *Filtering and grouping*:
+
 * Possibility of filtering the bibtex entries based on their type (allow, deny)
 * Possibility to access the single bibtex entry source code to enable copy&paste (toggle-enabled visualization)
 * Possibility of editing the bibtex file directly from the wordpress administration page
 * Publications can be grouped and sorted in various ways
 
 *Output*:
+
 * Easy output customisation with the use of two templates: one for each entry, one for the list of entries
 * Auto-detection of PDF files based on the BibTeX key (or on the PDF entry)
 * Citation mode: use references in the text and print the citations at the end of a block, page or post

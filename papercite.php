@@ -11,13 +11,12 @@
 */
 
 
-/*  Copyright 2010 Benjamin Piwowarski (email: benjamin in the domain bpiwowar <DOT> net)
+/*  Copyright 2012  Benjamin Piwowarski  (email : benjamim@bpiwowar.net)
 
     Contributors:
     - Stefan Aiche: group by year option
     - Łukasz Radliński: bug fixes & handling polish characters
-
-    Some parts of the code come from bib2html (version 0.9.3) written by
+    - Some parts of the code come from bib2html (version 0.9.3) written by
     Sergio Andreozzi.
 
     This program is free software; you can redistribute it and/or modify
