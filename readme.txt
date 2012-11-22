@@ -99,6 +99,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+  * Improved accent support - bug #36 (josemmoya)
   * Post/page BibTeX entries from custom fields
   * Bug fixes and information for database backend
 = 0.4.0 =
