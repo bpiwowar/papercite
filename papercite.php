@@ -39,6 +39,7 @@
 
 
 include("papercite_options.php");
+include("lib/BibTeX2CSL.php");
 
   /**
    * Get string with author name(s) and make regex of it.
@@ -88,10 +89,7 @@ include("papercite_options.php");
 }
 
 class Papercite {
-
-
   var $parse = false;
-
 
   // List of publications for those citations
   var $bibshows = array();

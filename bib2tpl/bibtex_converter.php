@@ -531,6 +531,11 @@ class BibtexConverter
       return $t;
     }
 
+    // --- CSL
+    if ($match[1] == "csl") {
+      return print_r(BibTeX2CSL::convert($this->_entry), true);
+    }
+
     // --- Normal processing
     return $this->_get_value($match[1]).$match[2];
   }

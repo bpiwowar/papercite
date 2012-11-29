@@ -28,7 +28,33 @@ class PaperciteBibtexCreators {
       return new PaperciteBibtexCreators($creators);
   }
   
+    function toCSL() {
+        // dropping-particle, non-dropping-particle
+        $authors = array();
+        foreach($this->creators as $c) 
+            $authors[] = array("given" => $c["firstname"], "family" => $c["surname"],
+            "suffix" => $c["suffix"]);
+        return $authors;
+    }
 }
 
 
+/**
+ * A page range
+ */
+class BibtexPages {
+    function BibtexPages($start, $end) {
+        $this->start = (int)$start;
+        $this->end = (int)$end;
+    }
+    function toCSL($i) {
+        $c = $this->count();
+        if ($c == 1) return $this->start;
+        return $this->start . "-" . $this->end;
+    }
+
+    function count() {
+        return ($this->start ? 1 : 0) + ($this->end ? 1 : 0);
+    }
+}
 ?>

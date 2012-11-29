@@ -1,5 +1,5 @@
     @{group@
-     @{entry@ <div class="papercite_entry">[@key@]
+     @{entry@ <div class="papercite_entry">[@key@]@csl@
      	@?pdf@ <a href="@pdf@" title='Download PDF' class='papercite_pdf'><img src='@WP_PLUGIN_URL@/papercite/img/pdf.png' alt="[pdf]"/></a>@;pdf@
 	@?doi@<a href='http://dx.doi.org/@doi@' class='papercite_doi' title='View document in publisher site'><img src='@WP_PLUGIN_URL@/papercite/img/external.png' width='10' height='10' alt='[doi]' /></a>@;doi@
     	@#entry@<br/>
