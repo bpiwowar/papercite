@@ -1,8 +1,8 @@
 === Plugin Name ===
 Contributors: bpiwowar
 Tags: formatting, bibtex
-Requires at least: 2.7
-Tested up to: 3.3.2
+Requires at least: 3.0
+Tested up to: 3.5
 Stable tag: HEAD
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -99,6 +99,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+  * Support for PHP 5.4 (bug #37)
   * Improved accent support - bug #36 (josemmoya)
   * Post/page BibTeX entries from custom fields
   * Bug fixes and information for database backend
