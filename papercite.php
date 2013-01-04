@@ -473,7 +473,7 @@ class Papercite {
 
       $this->bibshow_tpl_options[] = $tplOptions;
       $this->bibshow_options[] = $options;
-      array_push($this->bibshows, &$refs);
+      array_push($this->bibshows, $refs);
       $this->cites[] = array();
       break;
 

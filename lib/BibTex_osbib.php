@@ -425,15 +425,19 @@ class BibTexEntries {
 	}
 
   static function process_accents(&$text) {
-    // Replace anything of the form
+    // Replace anything of the form (x, y are any character)
     // {\x{y}}
+    // {\x{\i}}
     // {\xy}
     // \xy
     // \x{y}
+    // \x{\i}
     $slash = '\\\\';
     $text = preg_replace_callback("#\{$slash(.)\{(.)\}\}#", "BibTexEntries::_accents_cb", $text);
+    $text = preg_replace_callback("#\{$slash(.)\{$slash(i)\}\}#", "BibTexEntries::_accents_cb", $text);
     $text = preg_replace_callback("#\{$slash(.)(.)\}#", "BibTexEntries::_accents_cb", $text);
     $text = preg_replace_callback("#$slash(.)\{(.)\}#", "BibTexEntries::_accents_cb", $text);
+    $text = preg_replace_callback("#$slash(.)\{$slash(i)\}#", "BibTexEntries::_accents_cb", $text);
     // When there are no braces, we require a non alphanumeric character
     $text = preg_replace_callback("#$slash([^a-zA-Z])(.)#", "BibTexEntries::_accents_cb", $text);
     $text = preg_replace_callback("#$slash([a-zA-Z])(.)(?![a-zA-Z])#", "BibTexEntries::_accents_cb", $text);
@@ -441,8 +445,8 @@ class BibTexEntries {
   }
 
   static $accents = array(
-			  "'" => array("a" => "á", "e" => "é", "i" => "í", "o" => "ó", "u" => "ú", "z" => "ź",
-				       "A" => "Á", "E" => "É", "I" => "Í", "O" => "Ó", "U" => "Ú", "Z" => "Ź"),
+			  "'" => array("a" => "á", "e" => "é", "i" => "í", "o" => "ó", "u" => "ú", "z" => "ź", "c" => "ć",
+                       "A" => "Á", "E" => "É", "I" => "Í", "O" => "Ó", "U" => "Ú", "Z" => "Ź"),
 			  "`" => array("a" => "à", "e" => "è", "i" => "ì", "o" => "ò", "u" => "ù",
 				       "A" => "À", "E" => "È", "I" => "Ì", "O" => "Ò", "U" => "Ù"),
 			  '"' => array("a" => "ä", "e" => "ë", "i" => "ï", "o" => "ö", "u" => "ü",
@@ -464,7 +468,8 @@ class BibTexEntries {
 				       "O" => "Ő"),
 			  'l' => "ł",
 			  'L' => "Ł",
-			  '&' => '&'
+			  '&' => '&',
+			  '_' => '_'
 			  );
   
 
