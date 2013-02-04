@@ -647,6 +647,11 @@ function papercite_init() {
 function &papercite_cb($myContent) {
   // Init
   $papercite = &$GLOBALS["papercite"];
+  
+  // Fixes issue #39 (maintenance mode support)
+  if(!is_object($papercite))
+      return $myContent;
+  
   $papercite->init();
   
   // Database support if needed
