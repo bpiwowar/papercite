@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 0.4.2
+Stable tag: 0.4.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -99,6 +99,10 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.4.3 =
+  * Maintenance mode plugins support (bug #39)
+  * Support for PHP 5.4 (bug #37)
+  * Improved accent support - bug #36 (josemmoya)
 = 0.4.2 =
   * Fixes fatal error in PHP 5.4 (bug #37)
   * Improved accent support - bug #36 (josemmoya)
