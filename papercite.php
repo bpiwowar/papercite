@@ -210,9 +210,9 @@ class Papercite {
       	    $data = get_post_custom_values("papercite_" . substr($biburi, 9));
       	    if ($data) $data = $data[0];
       	}
-    	else if (strpos($biburi, "http://") === 0) 
+    	else if (preg_match_all('#^(ftp|http)s?://#', $biburi) == 1) {
     	  $bibFile = $this->getCached($biburi, $timeout);
-    	else {
+    	} else {
     	  $bibFile = $this->getDataFile("bib/$biburi");
     	}
 
