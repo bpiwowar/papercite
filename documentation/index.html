@@ -28,6 +28,14 @@ padding: .2em;
 .goptions {
 color: red;
 }
+
+.faq dt {
+    background: #eee;
+    font-weight: bold;
+    border-left: 2px solid red;
+    padding: 3px;
+}
+
 </style>
 </head>
 
@@ -47,15 +55,19 @@ color: red;
     <li><a href="#local_options">Local options</a></li>
     </ol>
   </li>
+  <li><a href="#FAQ">FAQ</a></li>
 </ol>
 
 <a name="data_structure"></a><h2>Data structure</h2>
 
-<ol>
-  <li>Create a folder in <code>wp-content/papercite-data</code> or
-  <code>wp-content/blogs.dir/<b>XXX</b>/files/papercite-data</code>
-  (in case of multiple sites hosted on WordPress), with
-  the following subfolders (none is mandatory):
+The data folder where all custom files (bibtex, PDF, templates) will be 
+denoted <b><code>$DATA</code></b> in this document. This folder is either
+<code>wp-content/papercite-data</code> or
+ <code>wp-content/blogs.dir/<b>XXX</b>/files/papercite-data</code>
+ (in case of multiple sites hosted on WordPress).
+
+ <ol>
+  <li>Within the folder <code>$DATA</code>, the subfolders
   <ul>
     <li><code>bib</code> contains your bibtex files</li>
     <li><code>pdf</code> contains your pdf files</li>
@@ -75,10 +87,8 @@ color: red;
 
 BibTex files can be stored:
 <ul>
-    <li>In a special folder, i.e. <code>wp-content/papercite-data</code> or
-      <code>wp-content/blogs.dir/<b>XXX</b>/files/papercite-data</code>
-      (in case of multiple sites hosted on WordPress). In that case, 
-      the file can be refered to by using direcly the file name (with the extension).</li>
+    <li>In a special folder <code>$DATA/bib</code>. In that case, 
+      the file can be referred to by using directly the file name (with the extension).</li>
      <li>Anywhere on the Internet - papercite will download any file if the <code>file</code>
          begins by <code>http://</code></li>
      <li>As a custom field prefixed by <code>papercite_</code>. For example, the URL <code>custom://data</code>
@@ -334,5 +344,29 @@ by a description of the sorting key. Note that the sort
     <li><code>asc</code>: Ascendant order</li> 
     <li><code>desc</code>: Descendant order</li> 
   </ul></p>
+  
+
+<h2>FAQ</h2>  <a name="FAQ"></a>
+
+<h3>Customizing templates</h3>
+
+<dl class="faq">
+    <dt>
+    Adding extra text at the end of each publication (e.g. the number of citations, etc.)
+    </dt>
+    <dd>
+        Basically, in the <code>$DATA/tpl</code> folder, you can copy the default template (default-bibtex.tpl and default-bibshow.tpl depending on which command you use) and modify it by adding after <code>@#entry@</code> the command
+        <pre>@?citations@@citations@ citations@;citations@.</pre>
+
+        Then you can use a custom field citations in your bibtex file, e.g.
+<pre>@inproceedings{...
+   citations = {3},
+   ...
+}</pre>
+    </dd>
+
+</dt>
+
+  
 </body>
 </html>
