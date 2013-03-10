@@ -516,7 +516,7 @@ class BibtexConverter
           $entryTpl = &$this->_entry_template->get($type);
           //print "<div><b>$type</b>: ". htmlentities($entryTpl). "</div>";
           $t=  preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $entryTpl) . $match[2];
-        } 
+        }
         else $t = "<span style='color:red'>Unknown bibtex entry with key [".$this->_entry["cite"] ."]</span>" . $match[2];
       return $t;
     }
@@ -556,7 +556,12 @@ class BibtexConverter
     if ($count)
       return $this->_entry_template->count($v);
 
-    return $this->_entry_template->format($v);
+    $str = $this->_entry_template->format($v);
+    if ($name != 'bibtex')
+      // replace newlines with spaces, to avoid PHP converting them to <br/>
+      $str = preg_replace("/[\r\n]+/", " ", $str);
+
+    return $str;
   }
 
 
