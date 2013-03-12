@@ -99,6 +99,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+  * Fix for newlines by L. Murray (issues #26 and #35)
   * Handles for URL types (issue #41, A. Dyck)
   * Maintenance mode plugins support (bug #39)
   * Support for PHP 5.4 (bug #37)
