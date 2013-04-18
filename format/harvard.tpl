@@ -70,7 +70,7 @@
 </format>
 
 <format types="inbook incollection">
-@?author@@author@ @;@@?year@(@year@) @;@@?title@@title@. @;@@?editor||bookitle@IN @:@@;@@?editor@@editor@ (@?#editor&gt;1@Eds.@:editor@Ed.@;editor@), @;@@?bookitle@&lt;span style=&quot;font-style: italic&quot;&gt;@bookitle@&lt;/span&gt;@;@@?editor||bookitle@.@:@@;@@?edition@ @edition@ ed.@;@@?address@ @address@@;@.
+@?author@@author@ @;@@?year@(@year@) @;@@?title@@title@. @;@@?editor||booktitle@IN @:@@;@@?editor@@editor@ (@?#editor&gt;1@Eds.@:editor@Ed.@;editor@), @;@@?booktitle@&lt;span style=&quot;font-style: italic&quot;&gt;@booktitle@&lt;/span&gt;@;@@?editor||booktitle@.@:@@;@@?edition@ @edition@ ed.@;@@?address@ @address@@;@.
 </format>
 
 <format types="article #">

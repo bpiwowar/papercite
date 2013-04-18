@@ -60,7 +60,7 @@
 </format>
 
 <format types="inbook incollection">
-@?author@@author@, @;@@?title@&quot;@title@@;@@?bookitle||edition||editor@,&quot; @:@.&quot; @;@@?bookitle@in &lt;span style=&quot;font-style: italic&quot;&gt;@bookitle@&lt;/span&gt;@;@@?edition@, @edition@ ed.@;@@?editor@, @editor@, @?#editor&gt;1@Eds@:editor@Ed@;editor@.@;@@?bookitle||edition||editor@, @:@@;@@?address@@address@: @;@@?publisher@@publisher@@;@@?year@, @year@@;@@?volume@, vol. @volume@@;@@?pages@, @?#pages&gt;1@pp. @:pages@p. @;pages@@pages@@;@.
+@?author@@author@, @;@@?title@&quot;@title@@;@@?booktitle||edition||editor@,&quot; @:@.&quot; @;@@?booktitle@in &lt;span style=&quot;font-style: italic&quot;&gt;@booktitle@&lt;/span&gt;@;@@?edition@, @edition@ ed.@;@@?editor@, @editor@, @?#editor&gt;1@Eds@:editor@Ed@;editor@.@;@@?booktitle||edition||editor@, @:@@;@@?address@@address@: @;@@?publisher@@publisher@@;@@?year@, @year@@;@@?volume@, vol. @volume@@;@@?pages@, @?#pages&gt;1@pp. @:pages@p. @;pages@@pages@@;@.
 </format>
 
 <format types="article #">

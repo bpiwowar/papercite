@@ -99,6 +99,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+  * Fix problems with ignored booktitle in books (harvard and ieee styles) - fixes issue #45
   * Fix for newlines by L. Murray (issues #26 and #35)
   * Handles for URL types (issue #41, A. Dyck)
   * Maintenance mode plugins support (bug #39)
