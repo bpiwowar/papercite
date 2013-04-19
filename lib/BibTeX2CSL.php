@@ -92,7 +92,8 @@ class BibTeX2CSL {
 
         "pages" => "page",
 
-        "url" => "url"
+        "url" => "url",
+        
     );
 
     function import(&$key, &$dest_key) {
@@ -100,11 +101,11 @@ class BibTeX2CSL {
             $value = $this->bibtex[$key];
 
             if (is_object($value)) {
-                $this->entry[$dest_key] = $value->toCSL();
+                $this->entry->$dest_key = $value->toCSL();
                 return true;
             } 
 
-            $this->entry[$dest_key] = &$value;
+            $this->entry->$dest_key = &$value;
             return true;
         }
         return false;
@@ -115,7 +116,7 @@ class BibTeX2CSL {
 
     function __construct(&$bibtex) {
         $this->bibtex = &$bibtex;
-        $this->entry = array();
+        $this->entry = new stdClass();
     }
 
     static function convert(&$bibtex) {
@@ -136,6 +137,11 @@ class BibTeX2CSL {
             else $csl->import($keys, $dest_key);
         }
         
+        // Handles dates
+        
+
+        $csl->entry->issued = new stdClass();
+        $csl->entry->issued->{"date-parts"} = array(array($bibtex["year"]));
         return $csl->entry;
 
     }

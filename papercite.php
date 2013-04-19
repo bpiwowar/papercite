@@ -38,8 +38,9 @@
 // Options
 
 
-include("papercite_options.php");
-include("lib/BibTeX2CSL.php");
+require_once("papercite_options.php");
+require_once("lib/BibTeX2CSL.php");
+require_once("csl/CiteProc.php");
 
   /**
    * Get string with author name(s) and make regex of it.
@@ -868,6 +869,10 @@ class Papercite {
 
     // Convert (also set the citation key)
     $bib2tpl = new BibtexConverter($options, $main, $bibtexEntryTemplate);
+    // FIXME!!!
+    $cslfile = papercite::getDataFile("csl/style/ieee.csl");
+    $csldata = file_get_contents($cslfile[0]);
+    $bib2tpl->cslproc = new citeproc($csldata);
     $bib2tpl->setGlobal("WP_PLUGIN_URL", WP_PLUGIN_URL);
     $bib2tpl->setGlobal("PAPERCITE_DATA_URL", Papercite::getCustomDataDirectory());
 

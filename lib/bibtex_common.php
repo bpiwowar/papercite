@@ -31,9 +31,14 @@ class PaperciteBibtexCreators {
     function toCSL() {
         // dropping-particle, non-dropping-particle
         $authors = array();
-        foreach($this->creators as $c) 
-            $authors[] = array("given" => $c["firstname"], "family" => $c["surname"],
-            "suffix" => $c["suffix"]);
+        foreach($this->creators as $c)  {
+            $author = new stdClass();
+            $author->given = $c["firstname"];
+            $author->family = $c["surname"];
+            $author->suffix = $c["suffix"];
+            $authors[] = $author;
+        }
+            
         return $authors;
     }
 }
