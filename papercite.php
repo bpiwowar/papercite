@@ -210,7 +210,7 @@ class Papercite {
       	    $data = get_post_custom_values("papercite_" . substr($biburi, 9));
       	    if ($data) $data = $data[0];
       	}
-    	else if (preg_match_all('#^(ftp|http)s?://#', $biburi) == 1) {
+    	else if (preg_match('#^(ftp|http)s?://#', $biburi) == 1) {
     	  $bibFile = $this->getCached($biburi, $timeout);
     	} else {
     	  $bibFile = $this->getDataFile("bib/$biburi");
@@ -402,7 +402,9 @@ class Papercite {
     case "bibtex":
       // --- Filter the data
       $entries = $this->getData($options["file"], $options["timeout"]);
-      if (!$entries) return "<span style='color: red'>[Could not find the bibliography file(s)]</span>";
+      if (!$entries) 
+          return "<span style='color: red'>[Could not find the bibliography file(s)".
+              (current_user_can("edit_post") ? " with name [".htmlspecialchars($options["file"])."]" : "") ."</span>";
  
       if (array_key_exists('key', $options)) {
     	// Select only specified entries
@@ -456,7 +458,8 @@ class Papercite {
 	// bibshow / bibcite commands
     case "bibshow":
      $data = $this->getData($options["file"]);
-      if (!$data) return "<span style='color: red'>[Could not find the bibliography file(s)]</span>";
+      if (!$data) return "<span style='color: red'>[Could not find the bibliography file(s)".
+          (current_user_can("edit_post") ? " with name [".htmlspecialchars($options["file"])."]" : "") ."</span>";
 
       // TODO: replace this by a method call
       $refs = array("__DB__" => Array());
