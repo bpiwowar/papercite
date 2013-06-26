@@ -489,7 +489,7 @@ class Papercite {
           $this->process($generated_bibshow);
           unset($generated_bibshow);
         } else {
-          return "[<span title=\"Unkown reference: $options[key]\">?</span>]";
+          return "[<span title=\"Unknown reference: $options[key]\">?</span>]";
         }
       }
 
