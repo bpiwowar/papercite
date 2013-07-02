@@ -338,6 +338,39 @@ class Papercite {
         
     return $a;
   } 
+  
+  /**
+   * Get string with author name(s) and make regex of it.
+   * String with author or a list of authors (passed as parameter to papercite) in the following format:
+   * -a1|a2|..|an 	- publications including at least one of these authors
+   * -a1&a2&..&an  	- publications including all of these authors
+   * 
+   * @param unknown $authors - string parsed from papercite after tag: "author="
+   */
+  function _build_authors_regex($authors){
+  	if(empty($authors)){
+  		return $authors;
+  	}else if(!is_string){
+  		echo "Warning: cannot parse option \"authors\", this is specified by string!<br>";// probably useless..
+  		return $authors;
+  	// string contains both: & and | => this is not supported
+  	}else if(preg_match('/^(?=.*\|)(?=.*\&)/i', $authors)){
+  		echo "ERROR: multiple conditions not supported so far: use only \& or \| between authors<br>";
+  		return $authors;
+  	// if string contains & between authors: build regex, in all other cases return the same (| is supported directly by bip2tpl)
+  	}else if(preg_match('/\&/i', $authors)){
+  		// so we want to translate e.g. this: 'nahodil&kadlecek' to this string: '^(?=.*nahodil)(?=.*kadle)'
+  		$connect = ')(?=.*';
+  		$start ='^(?=.*';
+  		$end = ')';
+  
+  		$reg = preg_replace("/\&/i",$connect, $authors);
+  		$reg = $start.$reg.$end;
+  		return $reg;
+  	}
+  	return $authors;
+  }
+  
 
   /**
    * Main entry point: Handles a match in the post
@@ -387,12 +420,17 @@ class Papercite {
 	$options["group"] = "year";
 	$options["group_order"] = "desc";
     }
+    
+    // convert list of authors into regex
+    $aut_regex = $this->_build_authors_regex($options["author"]);
 
     $tplOptions = array(
 			"anonymous-whole" => true, // for compatibility in the output
 			"group" => $options["group"], "group_order" => $options["group_order"], 
 			"sort" => $options["sort"], "order" => $options["order"],
-			"key_format" => $options["key_format"]);
+			"key_format" => $options["key_format"],
+    		// filtering authors and entrytype goes here
+    		"only" => array('author' => $aut_regex, 'entrytype' => $options["type"]));
     $data = null;
 
     // --- Process the commands ---

@@ -98,7 +98,18 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 2. With the bibtex command
 
 == Changelog ==
-
+	
+  * Added support for these additional filtering commands to bibtex command, examples are:
+		-author=name
+		-author=name1|name2|name3
+		-author=name1&name2&name3
+		-type=inproceedings
+		
+	* Known issues/limitations:
+		-filtering by authors is based on simple search for substrings in "niceauthors". Therefore it can match also authors whose name is substring of some other name (e.g. name "Su").
+			Note: It should be fairly simple to correct the regex pattern in bibtex_converter.php->_filter method.
+		-filtering is case sensitive in names which start with diacritics (e.g. Řehoř, Šimon..)
+		
   * Fixed bug #48 (URL as source not working anymore with PHP < 5.4)
   * Fix problems with ignored booktitle in books (harvard and ieee styles) - fixes issue #45
   * Fix for newlines by L. Murray (issues #26 and #35)
