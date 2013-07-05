@@ -68,6 +68,8 @@ function papercite_admin_init(){
   add_settings_section('papercite_choices', 'Options', 'papercite_choices_text', 'papercite');
   add_settings_field('bibtex_parser', 'Bibtex parser', 'papercite_bibtex_parser', 'papercite', 'papercite_choices');
   add_settings_field('use_db', 'Database', 'papercite_use_db', 'papercite', 'papercite_choices');
+  add_settings_field('auto_bibshow', 'Auto bibshow', 'papercite_auto_bibshow', 'papercite', 'papercite_choices');
+  add_settings_field('skip_for_post_lists', 'Skip for post lists', 'papercite_skip_for_post_lists', 'papercite', 'papercite_choices');
 }
 
 function papercite_section_text() {
@@ -176,6 +178,16 @@ function papercite_use_db() {
   
 }
 
+function papercite_auto_bibshow() {
+  $options = $GLOBALS["papercite"]->options;
+  echo "<input id='papercite_auto_bibshow' name='papercite_options[auto_bibshow]' type='checkbox' value='1' " . checked(true, $options['auto_bibshow'], false) . " /><p>This will automatically insert [bibshow] (with default settings) when an unexpected [bibcite] is found.</p>";
+}
+
+function papercite_skip_for_post_lists() {
+  $options = $GLOBALS["papercite"]->options;
+  echo "<input id='papercite_skip_for_post_lists' name='papercite_options[skip_for_post_lists]' type='checkbox' value='1' " . checked(true, $options['skip_for_post_lists'], false) . " /><p>This will skip papercite processing when displaying a list of posts or pages. [bibcite] and [bibshow] tags will be stripped.</p>";
+}
+
 function papercite_set(&$options, &$input, $name) {
   if (array_key_exists($name, $input)) {
     $options[$name] = trim($input[$name]);
@@ -188,7 +200,9 @@ function papercite_options_validate($input) {
   $options = get_option('papercite_options');
 
   $options['use_db'] = $input['use_db'] == "yes";
-      
+  $options['auto_bibshow'] = $input['auto_bibshow'] == "1";
+  $options['skip_for_post_lists'] = $input['skip_for_post_lists'] == "1";
+
   $options['file'] = trim($input['file']);
   $options['timeout'] = trim($input["timeout"]);
   
