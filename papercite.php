@@ -112,11 +112,11 @@ class Papercite {
   static $bibtex_parsers = array("pear" => "Pear parser", "osbib" => "OSBiB parser");
 
   // Names of the options that can be set
-  static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", "use_db");
+  static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", "use_db", "auto_bibshow", "skip_for_post_lists");
 
   static $default_options = 
 	array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
-	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "pear", "use_db" => false);
+	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "pear", "use_db" => false, "auto_bibshow" => false, "skip_for_post_lists" => false);
   /**
    * Init is called before the first callback
    */
@@ -482,8 +482,16 @@ class Papercite {
 
       // Just cite
     case "bibcite":
-      if (sizeof($this->bibshows) == 0)  
-	      return "[<span title=\"Unkown reference: $options[key]\">?</span>]";
+      if (sizeof($this->bibshows) == 0) {
+        if ($options["auto_bibshow"]) {
+          // Automatically insert [bibshow] because of unexpected [bibcite]
+          $generated_bibshow = array('[bibshow]', 'bibshow');
+          $this->process($generated_bibshow);
+          unset($generated_bibshow);
+        } else {
+          return "[<span title=\"Unknown reference: $options[key]\">?</span>]";
+        }
+      }
 
       $keys = preg_split("/,/",$options["key"]);
       $cites = &$this->cites[sizeof($this->cites)-1];      
@@ -663,6 +671,11 @@ function &papercite_cb($myContent) {
   }
     
   //  print "<div style='border: 1pt solid blue'>";  print(nl2br(htmlentities($myContent)));  print "</div>";
+
+  // (0) Skip processing on this page?
+  if ($papercite->options['skip_for_post_lists'] && !is_single() && !is_page()) {
+    return preg_replace("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/", '', $myContent);
+  }
 
   // (1) First phase - handles everything but bibcite keys
   $text = preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/",
