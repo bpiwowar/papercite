@@ -52,7 +52,7 @@
 <property name="dateRangeSameMonth" value="1"/>
 
 <format types="proceedings unpublished misc">
-@?author@@author@, @;@@?title@&lt;span style=&quot;font-style: italic&quot;&gt;@title@&lt;/span&gt;@;@@?address@@address@: @;@@?publisher@@publisher@@;@@?year@, @year@@;@.
+@?author@@author@, @;@@?title@&lt;span style=&quot;font-style: italic&quot;&gt;@title@&lt;/span&gt;@;@@?howpublished@, @howpublished@@;@ @?address@@address@: @;@@?publisher@@publisher@@;@@?note@, @note@@;@@?month@, @month@@;@@?year@, @year@@;@.
 </format>
 
 <format types="book">
