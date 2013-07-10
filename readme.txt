@@ -98,6 +98,55 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 2. With the bibtex command
 
 == Changelog ==
+
+-------------------------------------------- bibfilter - interactive filtering  @author Jaroslav Vitku
+* Added support for interactive filtering by means of new command "bibfilter"
+	-bibfilter command adds small html form where user can choose from authors and publication types (see screenshots)
+	-bibfilter does this:
+		-displays simple form
+		-reads data from the form (what is selected)
+		-alters parameters (author & type) according to data from the form in the original command
+		-passes this modified command as "bibtex" for further processing
+	-Example of use:
+		-[bibfilter group=year group_order=desc author=Nahodil|Vítků menutypes=INCOLLECTION-In_Collection|MASTERSTHESIS-PhD/Diploma/Bachelor_Thesis sortauthors=0] 
+	
+	-bibfilter uses the same parameters as bibtex command, with these modifications:
+	
+		- author=surname1|surname2|surname3 
+			-the same for bibtex
+			-these author names are added into the html form
+
+		- sortauthors=1
+			-sort authors alphabetically in the form?
+		
+		- menutypes=INPROCEEDINGS-In_Proceedings|MASTERSTHESIS-PhD/Diploma/Bachelor_Thesis
+			-define types of publications which will be in the form 
+			-menu item: [string used for filtering]-[what is displayed in menu]
+			-char "_" is replaced by whitespace in menu
+	
+	
+* note: if no selection is made in form, bibtex parameters are not rewritten, this means that you can combine both commands as follows: 
+				-if no filter for type is made, bibtex command is called with e.g. type=INPROCEEDINGS|INCOLLECTIONS
+				-the same for authors, the parameter "author" defines:
+					-all authors for bibfilter menu
+					-all authors for bibtex command
+					
+* Known limitations:
+	-note: sorting names in the form does not work with Czech diacritics very well, (e.g. Šafář, Řasa..)
+	
+-------------------------------------------- bibtex modification - filtering @author Jaroslav Vitku
+* Added support for these additional filtering commands to bibtex command, examples are:
+		-author=name
+		-author=name1|name2|name3
+		-author=name1&name2&name3
+		-type=inproceedings
+		
+	* Known issues/limitations:
+		-filtering by authors is based on simple search for substrings in "niceauthors". Therefore it can match also authors whose name is substring of some other name (e.g. name "Su").
+			Note: It should be fairly simple to correct the regex pattern in bibtex_converter.php->_filter method.
+		-filtering is case sensitive in names which start with diacritics (e.g. Řehoř, Šimon..)
+		
+---------------------------------------------
 	
   * Added support for these additional filtering commands to bibtex command, examples are:
 		-author=name
