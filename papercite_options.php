@@ -180,12 +180,12 @@ function papercite_use_db() {
 
 function papercite_auto_bibshow() {
   $options = $GLOBALS["papercite"]->options;
-  echo "<input id='papercite_auto_bibshow' name='papercite_options[auto_bibshow]' type='checkbox' value='1' " . checked(true, $options['auto_bibshow'], false) . " /><p>This will automatically insert [bibshow] (with default settings) when an unexpected [bibcite] is found.</p>";
+  echo "<input id='papercite_auto_bibshow' name='papercite_options[auto_bibshow]' type='checkbox' value='1' " . checked(true, $options['auto_bibshow'], false) . " /> This will automatically insert [bibshow] (with default settings) when an unexpected [bibcite] is found.";
 }
 
 function papercite_skip_for_post_lists() {
   $options = $GLOBALS["papercite"]->options;
-  echo "<input id='papercite_skip_for_post_lists' name='papercite_options[skip_for_post_lists]' type='checkbox' value='1' " . checked(true, $options['skip_for_post_lists'], false) . " /><p>This will skip papercite processing when displaying a list of posts or pages. [bibcite] and [bibshow] tags will be stripped.</p>";
+  echo "<input id='papercite_skip_for_post_lists' name='papercite_options[skip_for_post_lists]' type='checkbox' value='1' " . checked(true, $options['skip_for_post_lists'], false) . " /> This will skip papercite processing when displaying a list of posts or pages. [bibcite] and [bibshow] tags will be stripped.";
 }
 
 function papercite_set(&$options, &$input, $name) {
