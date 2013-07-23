@@ -338,6 +338,39 @@ class Papercite {
         
     return $a;
   } 
+  
+  /**
+   * Get string with author name(s) and make regex of it.
+   * String with author or a list of authors (passed as parameter to papercite) in the following format:
+   * -a1|a2|..|an 	- publications including at least one of these authors
+   * -a1&a2&..&an  	- publications including all of these authors
+   * 
+   * @param unknown $authors - string parsed from papercite after tag: "author="
+   */
+  function _build_authors_regex($authors){
+  	if(empty($authors)){
+  		return $authors;
+  	}else if(!is_string){
+  		echo "Warning: cannot parse option \"authors\", this is specified by string!<br>";// probably useless..
+  		return $authors;
+  	// string contains both: & and | => this is not supported
+  	}else if(preg_match('/^(?=.*\|)(?=.*\&)/i', $authors)){
+  		echo "ERROR: multiple conditions not supported so far: use only \& or \| between authors<br>";
+  		return $authors;
+  	// if string contains & between authors: build regex, in all other cases return the same (| is supported directly by bip2tpl)
+  	}else if(preg_match('/\&/i', $authors)){
+  		// so we want to translate e.g. this: 'nahodil&kadlecek' to this string: '^(?=.*nahodil)(?=.*kadle)'
+  		$connect = ')(?=.*';
+  		$start ='^(?=.*';
+  		$end = ')';
+  
+  		$reg = preg_replace("/\&/i",$connect, $authors);
+  		$reg = $start.$reg.$end;
+  		return $reg;
+  	}
+  	return $authors;
+  }
+  
 
   /**
    * Main entry point: Handles a match in the post
@@ -387,17 +420,30 @@ class Papercite {
 	$options["group"] = "year";
 	$options["group_order"] = "desc";
     }
+    
+    // convert list of authors into regex
+    $aut_regex = $this->_build_authors_regex($options["author"]);
 
     $tplOptions = array(
 			"anonymous-whole" => true, // for compatibility in the output
 			"group" => $options["group"], "group_order" => $options["group_order"], 
 			"sort" => $options["sort"], "order" => $options["order"],
-			"key_format" => $options["key_format"]);
+			"key_format" => $options["key_format"],
+    		// filtering authors and entrytype goes here
+    		"only" => array('author' => $aut_regex, 'entrytype' => $options["type"]));
     $data = null;
 
     // --- Process the commands ---
     switch($command) {
+    	
+    // display form, convert bibfilter to bibtex command and recursivelly call the same;-)
+    case "bibfilter":
+    	// this should return hmtl form and new command composed of (modified) $options_pairs
+    	$converted = convertAddForm($options_pairs);
+    	$variable = $converted[1];
+    	return $converted[0]." ".$this->process($variable);
 
+    	
        // bibtex command: 
     case "bibtex":
       // --- Filter the data
@@ -623,6 +669,107 @@ class Papercite {
     return str_replace("\t", '  ', trim($r["text"]));
   }
 }
+// -------------------- Bibfilter command support
+
+
+/**
+ * This does two things:
+ * -dynamically creates html form based on parameters (author and menutype)
+ * -rebuilds command which is then sent as the bibtex command
+ *
+ * @param unknown $pairs pairs in the same format as bibtex uses
+ * @return multitype:string returns command to be passes to bibtex
+ */
+function convertAddForm($pairs){
+	// create form with custom types and authors
+
+	generateForm($pairs, $authors, $types);
+
+	// if the form is empty, just rebuild the command to: bibtex
+	if (empty ( $_POST )) {
+		$out = array("",rebuildCommand($pairs,"",""));
+		return $out;
+		// if something is selected, rebuild command with filtered data according to the selection
+	}else{
+		$out = array("",rebuildCommand($pairs,$_POST['only_author'],$_POST['only_entrytype']));
+		return $out;
+	}
+}
+
+
+
+/**
+ * Provide options_pairs and two parameters: $author and $type (got from form selection),
+ * the same array as is passed to process() method is rebuilt with potentially new values.
+ *
+ * @param unknown $options_pairs pairs obtained from process method
+ * @param unknown $author author to be filtered, if empty, the original values are left intact
+ * @param unknown $type type of publication to be displayed, if empty, original value remains
+ */
+function rebuildCommand($options_pairs, $author, $type){
+
+	$out = "";
+	$typefound = 0;
+	// for author and type, check if is overwritten by selection form, ignore the rest (no-changes)
+	foreach($options_pairs as $x) {
+
+		if($x[1]=="author"){
+			if(empty($author)){
+				$out = 	$out.$x[0]." ";
+			}else{
+				$out = $out."author=".$author." ";
+			}
+				
+		}else if($x[1] == "type"){
+			$typefound =1;
+			if(empty($type)){
+				$out = $out.$x[0]." ";
+			}else{
+				$out = $out."type=".$type." ";
+			}
+			// menutypes and sortauthors should not be passed to bibtex command
+		}else if($x[1] != "menutypes" && $x[1] != "sortauthors"){
+			$out = $out.$x[0];
+		}
+	}
+	// if type not given in bibfilter command, add the filtered value
+	if($typefound==0 && !empty($type)){
+		$out = $out."type=".$type." ";
+	}
+	// compose the command to the required format
+	$out0 = "[bibtex ".$out."]";
+	$out1 = "bibtex";
+	$out2 = $out;
+	$oo = array($out0,$out1,$out2);
+	return $oo;
+}
+
+/**
+ * Generate form, use javascript to fill authors and types into selectors 
+ * @param unknown $pairs used originally in papercite
+ * @return string returns nothing, html is just directly added
+ */
+function generateForm($pairs){
+
+	$sortmenu = 0;
+
+	foreach($pairs as $x) {
+		if($x[1]=="author"){
+			// pass list of authors separated by | .. to the form
+			$authors = $x[2];
+		}else if($x[1]=="menutypes"){
+			// types of publicaitons separated by |
+			// value and text are separated by "-" and all "_" are replaced by space
+			$types = $x[2];
+		}else if($x[1]=="sortauthors"){
+			$sortmenu = $x[2];
+		}
+	}
+	require_once 'bibfilterForm.html';
+	return "";
+}
+
+
 
 
 // -------------------- Interface with WordPress
@@ -678,7 +825,7 @@ function &papercite_cb($myContent) {
   }
 
   // (1) First phase - handles everything but bibcite keys
-  $text = preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/",
+  $text = preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex|bibfilter)(?:\s+([^[]+))?]/",
 				array($papercite, "process"), $myContent);
 
   // (2) Handles missing bibshow tags
