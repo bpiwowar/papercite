@@ -11,9 +11,10 @@
 */
 
 
-/*  Copyright 2012  Benjamin Piwowarski  (email : benjamim@bpiwowar.net)
+/*  Copyright 2012-13  Benjamin Piwowarski  (email : benjamim@bpiwowar.net)
 
     Contributors:
+    - Michael Schreifels: auto-bibshow and no processing in post lists options
     - Stefan Aiche: group by year option
     - Łukasz Radliński: bug fixes & handling polish characters
     - Some parts of the code come from bib2html (version 0.9.3) written by
