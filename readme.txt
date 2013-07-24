@@ -100,6 +100,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 == Changelog ==
 
   * Added two new options: auto-bibshow and skip display in post lists (thanks to Michael Schreifels)
+  * Fixed quite a few PHP warnings
   * Fixed bug #48 (URL as source not working anymore with PHP < 5.4)
   * Fix problems with ignored booktitle in books (harvard and ieee styles) - fixes issue #45
   * Fix for newlines by L. Murray (issues #26 and #35)

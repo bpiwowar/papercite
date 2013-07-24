@@ -20,7 +20,7 @@ class BibtexCreators {
     $this->creators = &$creators;
   }
   function count() {
-    return sizeof($creators);
+    return sizeof($this->creators);
   }
 }
 
@@ -97,12 +97,13 @@ class BibTexEntries {
 		}
 		else
 		{
-			do
+            $line = null;
+			while($this->currentLine < count($this->bibtexString))
 			{
 				$line = trim($this->bibtexString[$this->currentLine]);
 				$this->currentLine++;
+                if ($line) break;
 			}
-			while($this->currentLine < count($this->bibtexString) && !$line);
 			return $line;
 		}
 	}
@@ -507,7 +508,7 @@ class BibTexEntries {
 		       $pString, 0, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE) as $v) {
 
       // delimiter
-      $c = $pString[$v[1] - 1];
+      $c = $v[1] > 0 ? $pString[$v[1] - 1] : "";
       
       // Add the current string unless it is a brace and we are not in math mode
       if (($in_maths &&  ($c == '}' || $c == '{')) || $c == '$') 
@@ -571,7 +572,7 @@ class BibTexEntries {
     if (in_array('pages', array_keys($ret))) {
       $matches = array();
       if (preg_match("/^\s*(\d+)(?:\s*--?\s*(\d+))?\s*$/", $ret['pages'], $matches)) {
-	$ret['pages'] = new BibtexPages($matches[1], $matches[2]);
+	$ret['pages'] = new BibtexPages($matches[1], sizeof($matches) > 2 ? $matches[2] : "");
       }
     }
 

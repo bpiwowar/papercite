@@ -253,8 +253,9 @@ class BibtexConverter
    * This function do some pre-processing on the entries
    */
   function _pre_process(&$data) {
+      $id = 0;
     foreach ( $data as &$entry ) {
-      $entry['firstauthor'] = $entry['author']->authors[0]["surname"];
+      $entry['firstauthor'] = isset($entry['author']->authors) ? $entry['author']->authors[0]["surname"] : "";
       $entry['entryid'] = $id++;
     }
   }
@@ -429,7 +430,7 @@ class BibtexConverter
 	preg_match("/^(#?[\w]+)(?:([~=><])([^@]+))?$/", $test, $matches);
 	$value = $this->_get_value($matches[1]);
 	//print "<div>Compares $value ($matches[1]) [$matches[2]] $matches[3]</div>";
-	switch($matches[2])
+	switch(sizeof($matches) > 2 ? $matches[2] : "")
 	  {
 	  case "":
 	    $condition = $value ? true : false;
@@ -441,10 +442,10 @@ class BibtexConverter
 	    $condition = preg_match("/$matches[3]/",$value);
 	    break;
 	  case ">":
-	    $condition =  (float)$value > (float)$match[3];
+	    $condition =  (float)$value > (float)$matches[3];
 	    break;
 	  case "<":
-	    $condition =  (float)$value < (float)$match[3];
+	    $condition =  (float)$value < (float)$matches[3];
 	    break;
 	  default:
 	    $condition = false;
@@ -542,7 +543,7 @@ class BibtexConverter
     }
 
     // --- If we have an entry
-    if ($this->_entry && array_key_exists($name, $this->_entry))
+    if (isset($this->_entry) && array_key_exists($name, $this->_entry))
 	$v = $this->_entry[$name];
     
 
