@@ -128,6 +128,42 @@ This is a bibliography stored in the <code>papercite_data</code> custom field:
 
 <div class="code">[bibtex file=custom://data]</div>
 
+
+<h3>Filtering mode</h3>
+
+<p>The <code>bibfilter</code> command adds small html form where user can choose from authors and publication types. It does:</p>
+<ul>
+    <li>displays simple form</li>
+	<li>reads data from the form (what is selected)</li>
+	<li>alters parameters (author & type) according to data from the form in the original command</li>
+	<li>passes this modified command as "bibtex" for further processing</li>
+</ul>
+	
+<p>Example of use:<br/>
+		<code>[bibfilter group=year group_order=desc author=Nahodil|Vítků menutypes=INCOLLECTION-In_Collection|MASTERSTHESIS-PhD/Diploma/Bachelor_Thesis sortauthors=0]</code>
+    </p>
+	
+<p>bibfilter uses the same parameters as bibtex command, with these modifications:</p>
+	
+<ul>
+<li><code>author=surname1|surname2|surname3</code>: these author names are added into the html form</li>
+<li><code>sortauthors=0/1</code>: sort authors alphabetically in the form if equal to 1</li>
+<li>menutypes=INPROCEEDINGS-In_Proceedings|MASTERSTHESIS-PhD/Diploma/Bachelor_Thesis
+			-define types of publications which will be in the form 
+			-menu item: [string used for filtering]-[what is displayed in menu]
+			-char "_" is replaced by whitespace in menu</li>
+</ul>
+	
+	
+<p><b>note</b>: if no selection is made in form, bibtex parameters are not rewritten, this means that you can combine both commands as follows: 
+				-if no filter for type is made, bibtex command is called with e.g. type=INPROCEEDINGS|INCOLLECTIONS
+				-the same for authors, the parameter "author" defines:
+					-all authors for bibfilter menu
+					-all authors for bibtex command
+					
+<p><b>Known limitations</b>:  sorting names in the form does not work with Czech diacritics very well, (e.g. Šafář, Řasa..)</p>
+	
+
 <h3>Citation mode</h3>
 
 The second way of using this plug-in (new to papercite), is to use bibcite and bibshow commands
@@ -190,11 +226,34 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
     <li><code>template</code>: How to format the publication. At a
   global level, <code class="goptions">bibshow_template</code> and <code
   class="goptions">bibcite_template</code> are used to distinguish
-  between the template used respectively for <code>bibshow</code> and <code>bibcite</code></li>
+  between the templates used respectively for <code>bibshow</code> and <code>bibcite</code></li>
     <li><code class="goptions">format</code>: Template used to
   format one BibTeX entry</li>
   </ul>
 
+  <p>Filtering options</p>
+  
+  <ul>
+      <li>The publication type can be fitered using <code>allow</code> and <code>deny</code>.</li>
+      <li>Publications can be filtered by author using the following syntax: <code>author=name</code>, 
+          <code>author=name1|name2|name3</code>, or <code>author=name1&name2&name3</code>.
+          Filtering can match also authors whose name is substring of some other name (e.g. name "Su").
+  		  and is case sensitive in names which start with diacritics (e.g. Řehoř, Šimon..)
+      </li>
+</li>
+  </ul>
+  * Added support for these additional filtering commands to bibtex command, examples are:
+  		-author=name
+  		-author=name1|name2|name3
+  		-author=name1&name2&name3
+  		-type=inproceedings
+		
+  	* Known issues/limitations:
+  		-filtering by authors is based on simple search for substrings in "niceauthors". Therefore it can match also authors whose name is substring of some other name (e.g. name "Su").
+  			Note: It should be fairly simple to correct the regex pattern in bibtex_converter.php->_filter method.
+  		-filtering is case sensitive in names which start with diacritics (e.g. Řehoř, Šimon..)
+  
+  
   <p>Grouping and order options</p>
   <ul>
     <li><code>group</code>: How to group publications</li>
@@ -273,7 +332,7 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
     href="http://lmazy.verrech.net/bib2tpl/templates/">bib2tpl</a>. In order
     to create a bib2tpl template, templates and formats are merged:
     in the template, <code>@#entry@</code> is replaced by the content
-    of the format file. This allows to decouple the formatting of
+    of the format file. This This to decouple the formatting of
     entries with the formatting of the full bibliography.
     </p>
 

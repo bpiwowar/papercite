@@ -373,6 +373,19 @@ class Papercite {
   }
   
 
+  // Get the options to forward to bib2tpl
+  function getBib2TplOptions($options) {
+      $aut_regex = $this->_build_authors_regex($options["author"]);
+
+      return array(
+  			"anonymous-whole" => true, // for compatibility in the output
+  			"group" => $options["group"], "group_order" => $options["group_order"], 
+  			"sort" => $options["sort"], "order" => $options["order"],
+  			"key_format" => $options["key_format"],
+      		// filtering authors and entrytype goes here
+      		"only" => array('author' => $aut_regex, 'entrytype' => $options["type"]));
+  }
+  
   /**
    * Main entry point: Handles a match in the post
    */
@@ -397,10 +410,15 @@ class Papercite {
     // Get all the options pairs and store them
     // in the $options array
     $options_pairs = array();
-    preg_match_all("/\s*(?:([\w-_]+)=(\S+))(\s+|$)/", $matches[2], $options_pairs, PREG_SET_ORDER);
+    preg_match_all("/\s*([\w-_]+)=(?:([^\"]\S*)|\"([^\"]+)\")(?:\s+|$)/", $matches[2], $options_pairs, PREG_SET_ORDER);
+    
+    // print "<pre>";
+    // print htmlentities(print_r($options_pairs,true));
+    // print "</pre>";
 
-    // Set preferences, by order of increasing priority
-    // (0) Set in
+    // ---Set preferences
+    // by order of increasing priority
+    // (0) Set in the shortcode
     // (1) From the preferences
     // (2) From the custom fields
     // (3) From the general options
@@ -410,29 +428,31 @@ class Papercite {
     // Gets the options from the command
     foreach($options_pairs as $x) {
       if ($x[1] == "template") {
-	// Special case of template: should overwrite the corresponding command template
-	$options["${command}_$x[1]"] = $x[2];
+          // Special case of template: should overwrite the corresponding command template
+          $options["${command}_$x[1]"] = $x[2].$x[3];
       } else
-	$options[$x[1]] = $x[2];
+      $options[$x[1]] = $x[2].$x[3];
     }
 
-    // --- Compatibility issues
+    // --- Compatibility issues: handling old syntax
     if (array_key_exists("groupByYear", $options) && (strtoupper($options["groupByYear"]) == "TRUE")) {
-	$options["group"] = "year";
-	$options["group_order"] = "desc";
+        $options["group"] = "year";
+        $options["group_order"] = "desc";
     }
     
-    // convert list of authors into regex
-    $aut_regex = $this->_build_authors_regex($options["author"]);
-
-    $tplOptions = array(
-			"anonymous-whole" => true, // for compatibility in the output
-			"group" => $options["group"], "group_order" => $options["group_order"], 
-			"sort" => $options["sort"], "order" => $options["order"],
-			"key_format" => $options["key_format"],
-    		// filtering authors and entrytype goes here
-    		"only" => array('author' => $aut_regex, 'entrytype' => $options["type"]));
     $data = null;
+    
+    return $this->processCommand($command, $options);
+    
+    }
+
+
+    /** Process a parsed command
+     * @param $command The command (shortcode)
+     * @options The options of the command
+     */
+    function processCommand($command, $options) {
+        global $wpdb, $papercite_table_name;
 
     // --- Process the commands ---
     switch($command) {
@@ -440,7 +460,7 @@ class Papercite {
     // display form, convert bibfilter to bibtex command and recursivelly call the same;-)
     case "bibfilter":
     	// this should return hmtl form and new command composed of (modified) $options_pairs
-    	$converted = convertAddForm($options_pairs);
+    	$converted = Papercite::convertAddForm($options);
     	$variable = $converted[1];
     	return $converted[0]." ".$this->process($variable);
 
@@ -500,7 +520,7 @@ class Papercite {
   }
   
       
-      return  $this->showEntries($result, $tplOptions, false, $options["bibtex_template"], $options["format"], "bibtex");
+      return  $this->showEntries($result, $this->getBib2TplOptions($options), false, $options["bibtex_template"], $options["format"], "bibtex");
 
 	// bibshow / bibcite commands
     case "bibshow":
@@ -521,7 +541,7 @@ class Papercite {
         	}
       }
 
-      $this->bibshow_tpl_options[] = $tplOptions;
+      $this->bibshow_tpl_options[] = $this->getBib2TplOptions($options);
       $this->bibshow_options[] = $options;
       array_push($this->bibshows, $refs);
       $this->cites[] = array();
@@ -669,107 +689,109 @@ class Papercite {
     // Process text in order to avoid some unexpected WordPress formatting 
     return str_replace("\t", '  ', trim($r["text"]));
   }
-}
-// -------------------- Bibfilter command support
+  
+  
+  
+    // -------------------- Bibfilter command support
 
 
-/**
- * This does two things:
- * -dynamically creates html form based on parameters (author and menutype)
- * -rebuilds command which is then sent as the bibtex command
- *
- * @param unknown $pairs pairs in the same format as bibtex uses
- * @return multitype:string returns command to be passes to bibtex
- */
-function convertAddForm($pairs){
-	// create form with custom types and authors
+    /**
+     * This does two things:
+     * -dynamically creates html form based on parameters (author and menutype)
+     * -rebuilds command which is then sent as the bibtex command
+     *
+     * @param unknown $pairs pairs in the same format as bibtex uses
+     * @return multitype:string returns command to be passes to bibtex
+     */
+    static function convertAddForm($options){
+    	// create form with custom types and authors
+    	Papercite::generateForm($pairs, $authors, $types);
 
-	generateForm($pairs, $authors, $types);
-
-	// if the form is empty, just rebuild the command to: bibtex
-	if (empty ( $_POST )) {
-		$out = array("",rebuildCommand($pairs,"",""));
-		return $out;
-		// if something is selected, rebuild command with filtered data according to the selection
-	}else{
-		$out = array("",rebuildCommand($pairs,$_POST['only_author'],$_POST['only_entrytype']));
-		return $out;
-	}
-}
-
+    	// if the form is empty, just rebuild the command to: bibtex
+    	if (empty ( $_POST )) {
+    		$out = array("", Papercite::rebuildCommand($options,"",""));
+    		return $out;
+    		// if something is selected, rebuild command with filtered data according to the selection
+    	}else{
+    		$out = array("", Papercite::rebuildCommand($options,$_POST['only_author'],$_POST['only_entrytype']));
+    		return $out;
+    	}
+    }
 
 
-/**
- * Provide options_pairs and two parameters: $author and $type (got from form selection),
- * the same array as is passed to process() method is rebuilt with potentially new values.
- *
- * @param unknown $options_pairs pairs obtained from process method
- * @param unknown $author author to be filtered, if empty, the original values are left intact
- * @param unknown $type type of publication to be displayed, if empty, original value remains
- */
-function rebuildCommand($options_pairs, $author, $type){
 
-	$out = "";
-	$typefound = 0;
-	// for author and type, check if is overwritten by selection form, ignore the rest (no-changes)
-	foreach($options_pairs as $x) {
+    /**
+     * Provide options_pairs and two parameters: $author and $type (got from form selection),
+     * the same array as is passed to process() method is rebuilt with potentially new values.
+     *
+     * @param unknown $options_pairs pairs obtained from process method
+     * @param unknown $author author to be filtered, if empty, the original values are left intact
+     * @param unknown $type type of publication to be displayed, if empty, original value remains
+     */
+    static function rebuildCommand($options, $author, $type){
 
-		if($x[1]=="author"){
-			if(empty($author)){
-				$out = 	$out.$x[0]." ";
-			}else{
-				$out = $out."author=".$author." ";
-			}
+    	$out = "";
+    	$typefound = 0;
+    	// for author and type, check if is overwritten by selection form, ignore the rest (no-changes)
+    	foreach($options as $x) {
+
+    		if($x[1]=="author"){
+    			if(empty($author)){
+    				$out = 	$out.$x[0]." ";
+    			}else{
+    				$out = $out."author=".$author." ";
+    			}
 				
-		}else if($x[1] == "type"){
-			$typefound =1;
-			if(empty($type)){
-				$out = $out.$x[0]." ";
-			}else{
-				$out = $out."type=".$type." ";
-			}
-			// menutypes and sortauthors should not be passed to bibtex command
-		}else if($x[1] != "menutypes" && $x[1] != "sortauthors"){
-			$out = $out.$x[0];
-		}
-	}
-	// if type not given in bibfilter command, add the filtered value
-	if($typefound==0 && !empty($type)){
-		$out = $out."type=".$type." ";
-	}
-	// compose the command to the required format
-	$out0 = "[bibtex ".$out."]";
-	$out1 = "bibtex";
-	$out2 = $out;
-	$oo = array($out0,$out1,$out2);
-	return $oo;
+    		}else if($x[1] == "type"){
+    			$typefound =1;
+    			if(empty($type)){
+    				$out = $out.$x[0]." ";
+    			}else{
+    				$out = $out."type=".$type." ";
+    			}
+    			// menutypes and sortauthors should not be passed to bibtex command
+    		}else if($x[1] != "menutypes" && $x[1] != "sortauthors"){
+    			$out = $out.$x[0];
+    		}
+    	}
+    	// if type not given in bibfilter command, add the filtered value
+    	if($typefound==0 && !empty($type)){
+    		$out = $out."type=".$type." ";
+    	}
+    	// compose the command to the required format
+    	$out0 = "[bibtex ".$out."]";
+    	$out1 = "bibtex";
+    	$out2 = $out;
+    	$oo = array($out0,$out1,$out2);
+    	return $oo;
+    }
+
+    /**
+     * Generate form, use javascript to fill authors and types into selectors 
+     * @param unknown $pairs used originally in papercite
+     * @return string returns nothing, html is just directly added
+     */
+    static function generateForm($pairs){
+
+    	$sortmenu = 0;
+
+    	foreach($pairs as $x) {
+    		if($x[1]=="author"){
+    			// pass list of authors separated by | .. to the form
+    			$authors = $x[2];
+    		}else if($x[1]=="menutypes"){
+    			// types of publicaitons separated by |
+    			// value and text are separated by "-" and all "_" are replaced by space
+    			$types = $x[2];
+    		}else if($x[1]=="sortauthors"){
+    			$sortmenu = $x[2];
+    		}
+    	}
+    	require 'bibfilterForm.html';
+    	return "";
+    }
+
 }
-
-/**
- * Generate form, use javascript to fill authors and types into selectors 
- * @param unknown $pairs used originally in papercite
- * @return string returns nothing, html is just directly added
- */
-function generateForm($pairs){
-
-	$sortmenu = 0;
-
-	foreach($pairs as $x) {
-		if($x[1]=="author"){
-			// pass list of authors separated by | .. to the form
-			$authors = $x[2];
-		}else if($x[1]=="menutypes"){
-			// types of publicaitons separated by |
-			// value and text are separated by "-" and all "_" are replaced by space
-			$types = $x[2];
-		}else if($x[1]=="sortauthors"){
-			$sortmenu = $x[2];
-		}
-	}
-	require_once 'bibfilterForm.html';
-	return "";
-}
-
 
 
 

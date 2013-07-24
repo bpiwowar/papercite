@@ -1,3 +1,15 @@
+<!-- 
+
+@author Jaroslav Vitku
+
+Purpose:
+       We do not have MASTERSTHESIS, but we have Diploma and Bachelor Theses, these will be stored as MASTERSTHESIS
+
+Changes:
+       -MASTERTHESIS and PHDTHESIS are separated
+       -field NOTE added on multiple places (for ISBN number or thesis supervisor)
+
+-->
 <formats>
 
 <property name="titleCapitalization" value="0"/>
