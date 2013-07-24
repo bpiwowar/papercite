@@ -117,14 +117,14 @@ class Papercite {
 
   static $default_options = 
 	array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
-	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "pear", "use_db" => false, "auto_bibshow" => false, "skip_for_post_lists" => false);
+	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "pear", "use_db" => false, "auto_bibshow" => false, "skip_for_post_lists" => false, "group_order" => "");
   /**
    * Init is called before the first callback
    */
   function init() {
 
     // Get general preferences & page wise preferences
-    if (!$this->options) {
+    if (!isset($this->options)) {
       $this->options =  papercite::$default_options;
       $pOptions = &get_option('papercite_options');
 
@@ -192,10 +192,14 @@ class Papercite {
     }
   }
 
+  static function array_get($array, $key, $defaultValue) {
+      return array_key_exists($key, $array) ? $array[$key] : $defaultValue;
+  }
+ 
   /**
    * Get the bibtex data from an URI
    */
-  function &getData($biburis, $timeout = 3600) {
+  function getData($biburis, $timeout = 3600) {
       global $wpdb, $papercite_table_name;
 
     
@@ -206,8 +210,11 @@ class Papercite {
 
       // (1) Get the context
       $data = FALSE;
-      if (!$this->cache[$biburi]) {
+      $stringedFile = false;
+      
+      if (!Papercite::array_get($this->cache, $biburi, false)) {
       	if (strpos($biburi, "custom://") === 0) {
+            $stringedFile = true;
       	    $data = get_post_custom_values("papercite_" . substr($biburi, 9));
       	    if ($data) $data = $data[0];
       	}
@@ -282,7 +289,7 @@ class Papercite {
                 }
 	        }
 	        if ($code !== FALSE) { 
-	            $statement = $wpdb->prepare("INSERT INTO $papercite_table_name(url, bibtexid, entrytype) VALUES(%s,%s,%s)", "ts://".$biburi, "", $fileTS);
+	            $statement = $wpdb->prepare("REPLACE INTO $papercite_table_name(url, bibtexid, entrytype) VALUES(%s,%s,%s)", "ts://".$biburi, "", $fileTS);
 	            $code = $wpdb->query($statement);
 	        } 
         }
@@ -291,7 +298,7 @@ class Papercite {
       }
 
       // Add to the list
-      if ($this->cache[$biburi]) 
+      if (Papercite::array_get($this->cache, $biburi, false)) 
 	      $result[$biburi] = $this->cache[$biburi];
     }
     
@@ -306,6 +313,7 @@ class Papercite {
   // Get the subset of keys present in the entries
   static function getEntriesByKey(&$entries, &$keys) {
       global $wpdb, $papercite_table_name;
+        $n = 0;
         $a = array();
         $dbs = array();  
         $found = array();      
@@ -394,7 +402,6 @@ class Papercite {
     $debug = false;
 
     $post = null;
-    //print(get_post($post)->post_modified_gmt);
 
     // --- Initialisation ---
     
@@ -410,7 +417,7 @@ class Papercite {
     // Get all the options pairs and store them
     // in the $options array
     $options_pairs = array();
-    preg_match_all("/\s*([\w-_]+)=(?:([^\"]\S*)|\"([^\"]+)\")(?:\s+|$)/", $matches[2], $options_pairs, PREG_SET_ORDER);
+    preg_match_all("/\s*([\w-_]+)=(?:([^\"]\S*)|\"([^\"]+)\")(?:\s+|$)/", sizeof($matches) > 2 ? $matches[2] : "", $options_pairs, PREG_SET_ORDER);
     
     // print "<pre>";
     // print htmlentities(print_r($options_pairs,true));
@@ -482,8 +489,8 @@ class Papercite {
     	$result = papercite::getEntriesByKey($entries, $keys);
       } else {
 	// Based on the entry types
-	$allow = $options["allow"];
-	$deny = $options["deny"];
+	$allow = Papercite::array_get($options, "allow", "");
+	$deny = Papercite::array_get($options, "deny", "");
     $allow = $allow ? split(",",$allow) : Array();
     $deny =  $deny ? split(",", $deny) : Array();
 
@@ -568,7 +575,7 @@ class Papercite {
     	if ($returns) $returns .= ", ";
 
     	// First, get the corresponding entry
-    	$num = $cites[$key];
+    	$num = Papercite::array_get($cites, $key, false);
 
     	  // Did we already cite this?
     	  if (!$num) {
@@ -627,7 +634,7 @@ class Papercite {
     // (might be re-ordered latter)
     foreach($cites as $key => &$cite) {
         // Search
-        if (!$data[$key] && $dbs) {
+        if ((!isset($data[$key]) || !$data[$key]) && $dbs) {
             $val = $wpdb->get_var($wpdb->prepare("SELECT data FROM $papercite_table_name WHERE $dbs and bibtexid=%s", $key));
             if ($val !== FALSE) {               
                 $refs[$cite[0]] = maybe_unserialize($val);
