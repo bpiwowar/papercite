@@ -546,10 +546,22 @@ class BibTexEntries {
    * @return array The representation of the entry or false if there is a problem
    */
   static function _postProcessing(&$ret) {
-    // Process accents
-    foreach($ret as $key => &$value)
-      if ($key != "entrytype" && $key != "bibtex" && $key != "cite")
-	BibTexEntries::process_accents($value);
+    // First post processing: Process accents, transform bibtex types
+    foreach($ret as $key => &$value) {
+        switch($key) {
+            case "bibtex": 
+            case "cite":
+                break;
+            
+            case "entrytype":
+                if ($value == "conference")
+                     $value = "inproceedings";
+                break;
+            
+            default:
+                BibTexEntries::process_accents($value);
+        }
+    }
 
     // Remove braces and handles capitalization
     foreach(array("title","booktitle") as $f)
