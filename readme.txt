@@ -40,7 +40,7 @@ are also available from the HTML.
 * Easy output customisation with the use of two templates: one for each entry, one for the list of entries
 * Auto-detection of PDF files based on the BibTeX key (or on the PDF entry)
 * Citation mode: use references in the text and print the citations at the end of a block, page or post
-
+* Form to let the user dynamically filter the entries
 
 **Documentation can be found from within WordPress plugin list (click on
 the documentation link)**. You can see the documentation of the plugin
