@@ -421,7 +421,8 @@ class Papercite {
             "group_order" => $options["group_order"], 
   			"sort" => $options["sort"], 
             "order" => $options["order"],
-  			"key_format" => $options["key_format"]
+  			"key_format" => $options["key_format"],
+            "limit" => papercite::array_get($options, "limit", 0)
       );
   }
   

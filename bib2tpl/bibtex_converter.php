@@ -131,7 +131,9 @@ class BibtexConverter
 
       'lang' => 'en',
 
-      'key_format' => 'numeric'
+      'key_format' => 'numeric',
+      
+      'limit' => 0
     );
 
     // Overwrite specified options
@@ -385,6 +387,9 @@ class BibtexConverter
 
     // The data to be processed
     $this->_data = &$data;
+    
+    // The count
+    $this->count = 0;
 
     // "If-then-else" stack
     $this->_ifs = array(true);
@@ -502,7 +507,11 @@ class BibtexConverter
     // --- Full entry loop
     if ($match[1] == "#fullentry") {
       $entries = "";
+      $limit = $this->_options["limit"];
       foreach($this->_group as &$entry) {
+          if ($limit > 0 && $limit <= $this->count)
+              break;
+          $this->count++;
         $this->_entry = $entry;
         $entries .= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $this->full_entry_tpl);
       }
