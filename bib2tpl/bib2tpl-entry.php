@@ -322,7 +322,7 @@ class BibtexEntryFormat {
       $firstName = stripslashes($creator['firstname']);
     else if($creator['firstname']) // Initial only of first name.  'firstname' field may actually have several 'firstnames'
       {
-        $fn = split(" ", stripslashes($creator['firstname']));
+        $fn = preg_split("- -", stripslashes($creator['firstname']));
         $firstTime = TRUE;
         foreach($fn as $name)
           {

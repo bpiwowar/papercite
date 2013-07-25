@@ -201,7 +201,6 @@ class BibtexConverter
   function display(&$data)
   {
     $this->_pre_process($data);
-    $data = $this->_filter($data); // filter according to array of options keyed as: 'only'
     $data = $this->_group($data);
     $data = $this->_sort($data);
     $this->_post_process($data);
@@ -231,18 +230,13 @@ class BibtexConverter
 
     $id = 0;
     foreach ( $data as $entry ) {
-    	
-    	// search for authors in formatted string
-    	$niceauthors = $this->_entry_template->niceAuthors($entry['author']->creators);
-    	
-    	// filter authors
-    	if(	(empty($this->_options['only']['author'])
-    			|| preg_match('/'.$this->_options['only']['author'].'/i', $niceauthors))
-    	
-    		// filter entry types
-    		&& (empty($this->_options['only']['entrytype'])
-    				|| preg_match('/'.$this->_options['only']['entrytype'].'/i',$entry['entrytype'])) ){
- 	
+      if (    (   empty($this->_options['only']['author'])
+               || preg_match('/'.$this->_options['only']['author'].'/i',
+                             $this->_entry_template->niceAuthors($entry['author'])))
+           && (   empty($this->_options['only']['entrytype'])
+               || preg_match('/'.$this->_options['only']['entrytype'].'/i',
+                             $entry['entrytype'])) )
+      {
         $entry['year'] = empty($entry['year']) ? '0000' : $entry['year'];
         if ( empty($this->_options['lang']['entrytypes'][$entry['entrytype']]) )
         {
@@ -251,6 +245,7 @@ class BibtexConverter
         $result[] = $entry;
       }
     }
+
     return $result;
   }
 
@@ -519,7 +514,7 @@ class BibtexConverter
     if ($match[1] == "#entry") {
         if ($this->_entry["entrytype"]) {
           $type = $this->_entry["entrytype"];
-          $entryTpl = &$this->_entry_template->get($type);
+          $entryTpl = $this->_entry_template->get($type);
           //print "<div><b>$type</b>: ". htmlentities($entryTpl). "</div>";
           $t=  preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $entryTpl) . $match[2];
         }

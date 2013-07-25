@@ -31,15 +31,8 @@
    */
 
 require_once 'PEAR.php' ;
+require_once 'creators.php';
 
-class BibtexCreators {
-  function BibtexCreators(&$creators) {
-    $this->creators = &$creators;
-  }
-  function count() {
-    return sizeof($creators);
-  }
-}
 
 class BibtexPages {
   function BibtexPages($start, $end) {
@@ -729,20 +722,7 @@ class Structures_BibTex
      * @return array the extracted authors
      */
     function _extractAuthors($authors) {
-      // Use OSBib way of parsing authors
-      require_once("PARSECREATORS.php");
-      $parseCreators = new PARSECREATORS();
-      $creators = $parseCreators->parse($authors);
-      foreach($creators as &$cArray) {
-	$cArray = array(
-			"surname" => trim($cArray[2]),
-			"firstname" => trim($cArray[0]),
-			"initials" => trim($cArray[1]),
-			"prefix" => trim($cArray[3])
-			);
-	unset($cArray);
-      }
-      return new BibtexCreators($creators);
+      return BibtexCreators::parse($authors);
     }
 
     /**
