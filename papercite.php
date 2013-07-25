@@ -247,7 +247,12 @@ class Papercite {
   static function array_get($array, $key, $defaultValue) {
       return array_key_exists($key, $array) ? $array[$key] : $defaultValue;
   }
- 
+  
+  static function startsWith($haystack, $needle)
+  {
+      return !strncmp($haystack, $needle, strlen($needle));
+  }
+  
   /**
    * Get the bibtex data from an URI
    */
@@ -256,29 +261,38 @@ class Papercite {
 
     
     // Loop over the different given URIs
+    $bibFile = false;
     $array = explode(",", $biburis);
     $result = array();
+
     foreach($array as $biburi) {
 
       // (1) Get the context
       $data = FALSE;
       $stringedFile = false;
+      $custom_prefix = "custom://";
       
+      // Handles custom:// by adding the post number
+      if (papercite::startsWith($biburi, $custom_prefix)) {
+          $stringedFile = true;
+          $key =  substr($biburi, strlen($custom_prefix));
+          $biburi = "post://" . get_the_ID() . "/" . $key;
+   	      $data = get_post_custom_values("papercite_$key");
+   	      if ($data) $data = $data[0];
+      }
+
       if (!Papercite::array_get($this->cache, $biburi, false)) {
-      	if (strpos($biburi, "custom://") === 0) {
-            $stringedFile = true;
-      	    $data = get_post_custom_values("papercite_" . substr($biburi, 9));
-      	    if ($data) $data = $data[0];
-      	}
-    	else if (preg_match('#^(ftp|http)s?://#', $biburi) == 1) {
+    	if ($stringedFile) {
+    	    // do nothing
+    	} else if (preg_match('#^(ftp|http)s?://#', $biburi) == 1) {
     	  $bibFile = $this->getCached($biburi, $timeout);
     	} else {
     	  $bibFile = $this->getDataFile("bib/$biburi");
     	}
-
+      
+    
 	if ($data === FALSE && !($bibFile && file_exists($bibFile[0])))
 	  continue;	
-
 
 	// (2) Parse the BibTeX
 	if ($data || file_exists($bibFile[0])) {
@@ -330,6 +344,7 @@ class Papercite {
 	      $this->checkFiles($entry, array(array("pdf", "pdf")));
 	    }
 	    
+    
 	    // Save to DB
 	    if (!$stringedFile && $this->useDb()) {
 	        // First delete everything

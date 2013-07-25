@@ -108,6 +108,9 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+  * @conference is now properly handled as @inproceedings (issue #53)
+  * Option to limit the number of papers output by bibtex (issue #50)
+  * More accents handled (issue #51)
   * Added support for interactive filtering by means of new command (bibfilter). Thanks to Jaroslav Vítků
   * Added support for these additional filtering commands to bibtex command (author and type)
   * Added two new options: auto-bibshow and skip display in post lists (thanks to Michael Schreifels)
