@@ -26,8 +26,10 @@
 global $wpdb;
 global $papercite_db_version;
 global $papercite_table_name;
+global $papercite_table_name_url;
 $papercite_table_name = $GLOBALS["wpdb"]->prefix . "plugin_papercite";
-$papercite_db_version = "1.3";
+$papercite_table_name_url = $papercite_table_name . "_url";
+$papercite_db_version = "1.7";
 
 
 function papercite_msg_upgraded() {
@@ -35,31 +37,50 @@ function papercite_msg_upgraded() {
 }
 
 function papercite_install($force = false) {
-    global $wpdb, $papercite_db_version, $papercite_table_name;
+    global $wpdb, $papercite_db_version, $papercite_table_name, $papercite_table_name_url;
 
      $installed_ver = get_option( "papercite_db_version" );
      if ($force || $installed_ver != $papercite_db_version) {
-         $exists =  sizeof($wpdb->get_col("SHOW TABLES LIKE '$papercite_table_name'")) == 1;
          
+         if (!empty($installed_ver) && version_compare($installed_ver, "1.4") < 0) {
+ 	        $wpdb->query($wpdb->prepare("DROP TABLE $papercite_table_name"));
+         } 
+          
+         require(ABSPATH . 'wp-admin/includes/upgrade.php');
+
          $sql = "CREATE TABLE $papercite_table_name (
-             url VARCHAR(300) CHARSET ASCII NOT NULL,  
+             urlid INT UNSIGNED NOT NULL,  
              bibtexid VARCHAR(200) CHARSET ASCII NOT NULL,
              entrytype VARCHAR(80) CHARSET ASCII NOT NULL,
              year SMALLINT,
              data TEXT NOT NULL,
-             PRIMARY KEY id (url, bibtexid),
+             PRIMARY KEY id (urlid, bibtexid),
              INDEX year (year),
              INDEX entrytype (entrytype)
           ) DEFAULT CHARACTER SET $wpdb->charset";
           
-        // Install / upgrade
-         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-         
+               
          ob_start();
          $wpdb->show_errors(true);
          dbDelta($sql, true);
          $output = ob_get_contents();
          ob_end_clean();
+         
+         if ($wpdb->last_result !== FALSE) {
+             $sql = "CREATE TABLE $papercite_table_name_url (
+                 urlid INT UNSIGNED NOT NULL AUTO_INCREMENT,  
+                 url VARCHAR(300) CHARSET ASCII NOT NULL,
+                 ts BIGINT UNSIGNED NOT NULL,
+                 PRIMARY KEY id (urlid),
+                 UNIQUE KEY url (url)
+              ) DEFAULT CHARACTER SET $wpdb->charset";
+          
+             ob_start();
+             $wpdb->show_errors(true);
+             dbDelta($sql, true);
+             $output = ob_get_contents();
+             ob_end_clean();
+         }
          
          if ($wpdb->last_result !== FALSE) {
              // Set the current version
@@ -74,7 +95,6 @@ function papercite_install($force = false) {
 }
 
 papercite_install();
-
 
 
 

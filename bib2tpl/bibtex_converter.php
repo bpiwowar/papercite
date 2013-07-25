@@ -514,7 +514,7 @@ class BibtexConverter
     if ($match[1] == "#entry") {
         if ($this->_entry["entrytype"]) {
           $type = $this->_entry["entrytype"];
-          $entryTpl = &$this->_entry_template->get($type);
+          $entryTpl = $this->_entry_template->get($type);
           //print "<div><b>$type</b>: ". htmlentities($entryTpl). "</div>";
           $t=  preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $entryTpl) . $match[2];
         }

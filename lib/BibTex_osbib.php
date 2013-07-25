@@ -11,18 +11,7 @@
  */
 
 require_once("UTF8.php");
-
-/**
- * A list of creators (e.g., authors, editors)
- */
-class BibtexCreators {
-  function BibtexCreators(&$creators) {
-    $this->creators = &$creators;
-  }
-  function count() {
-    return sizeof($this->creators);
-  }
-}
+require_once("creators.php");
 
 /**
  * A page range
@@ -595,21 +584,8 @@ class BibTexEntries {
    * @param string $entry The entry with the authors
    * @return array the extracted authors
    */
-  function _extractAuthors($authors) {
-    // Use OSBib way of parsing authors
-    require_once("PARSECREATORS.php");
-    $parseCreators = new PARSECREATORS();
-    $creators = $parseCreators->parse($authors);
-    foreach($creators as &$cArray) {
-      $cArray = array(
-		      "surname" => trim($cArray[2]),
-		      "firstname" => trim($cArray[0]),
-		      "initials" => trim($cArray[1]),
-		      "prefix" => trim($cArray[3])
-		      );
-      unset($cArray);
-    }
-    return new BibtexCreators($creators);
+  static function _extractAuthors($authors) {
+      return BibtexCreators::parse($authors);
   }
 
 } // end class BibTexEntries
