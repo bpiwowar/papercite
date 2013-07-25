@@ -108,6 +108,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.5.1 =
+  * The journal field was not parsed with OSBiB (issue #59)
 = 0.5.0 =
   * @conference is now properly handled as @inproceedings (issue #53)
   * Option to limit the number of papers output by bibtex (issue #50)

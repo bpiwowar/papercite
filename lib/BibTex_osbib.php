@@ -564,7 +564,7 @@ class BibTexEntries {
     }
 
     // Remove braces and handles capitalization
-    foreach(array("title","booktitle") as $f)
+    foreach(array("title","booktitle", "journal") as $f)
       if (in_array($f, array_keys($ret))) 
 	$ret[$f] = BibTexEntries::formatTitle($ret[$f]);
     
