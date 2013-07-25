@@ -128,6 +128,37 @@ This is a bibliography stored in the <code>papercite_data</code> custom field:
 
 <div class="code">[bibtex file=custom://data]</div>
 
+
+<h3>Filtering mode</h3>
+
+<p>The <code>bibfilter</code> command adds small html form where user can choose from authors and publication types. It does:</p>
+<ul>
+    <li>displays simple form</li>
+	<li>reads data from the form (what is selected)</li>
+	<li>alters parameters (author & type) according to data from the form in the original command</li>
+	<li>passes this modified command as "bibtex" for further processing</li>
+</ul>
+	
+<p>Example of use:<br/>
+		<code>[bibfilter group=year group_order=desc author=Nahodil|Vítků allow=incollection,mastersthesis sortauthors=0]</code>
+    </p>
+	
+<p>bibfilter uses the same parameters as bibtex command, with these modifications:</p>
+	
+<ul>
+<li><code>sortauthors=0/1</code>: sort authors alphabetically in the form if equal to 1</li>
+</ul>
+	
+	
+<p><b>note</b>: if no selection is made in form, bibtex parameters are not rewritten, this means that you can combine both commands as follows: 
+				-if no filter for type is made, bibtex command is called with e.g. type=INPROCEEDINGS|INCOLLECTIONS
+				-the same for authors, the parameter "author" defines:
+					-all authors for bibfilter menu
+					-all authors for bibtex command
+					
+<p><b>Known limitations</b>:  sorting names in the form does not work with Czech diacritics very well, (e.g. Šafář, Řasa..)</p>
+	
+
 <h3>Citation mode</h3>
 
 The second way of using this plug-in (new to papercite), is to use bibcite and bibshow commands
@@ -141,9 +172,14 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
 
   <div class="code">[/bibshow]</div>
 
-  <p>If the <code>[/bibshow]</code> shortcode is not present, then the
-  bibliography is automatically displayed at the end of the page/post.
-
+  <div>Remarks:</div>
+  <ul>
+  <li>If the <code>[/bibshow]</code> shortcode is not present, then the
+  bibliography is automatically displayed at the end of the page/post.</li>
+  <li>If the option is set, the <code>[bibshow]</code> tag can be automatically added when a <code>[bibcite]</code>
+      is encountered. In this case, a default bibtex file should be given in the options.</li>
+  </ul>
+  
 <a name="options"></a><h2><code>bibshow</code> and <code>bibtex</code> options</h2>
 
 <p> Here are the list of options that can be given to papercite.</p>
@@ -185,11 +221,26 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
     <li><code>template</code>: How to format the publication. At a
   global level, <code class="goptions">bibshow_template</code> and <code
   class="goptions">bibcite_template</code> are used to distinguish
-  between the template used respectively for <code>bibshow</code> and <code>bibcite</code></li>
+  between the templates used respectively for <code>bibshow</code> and <code>bibcite</code></li>
     <li><code class="goptions">format</code>: Template used to
   format one BibTeX entry</li>
   </ul>
 
+  <p>Filtering options</p>
+  
+  <ul>
+      <li>The publication type can be fitered using <code>allow</code> and <code>deny</code>.</li>
+      <li>Publications can be filtered by author using the following syntax: <code>author=name</code>, 
+          <code>author=name1|name2|name3</code>, or <code>author=name1&name2&name3</code>.
+          Filtering can match also authors whose name is substring of some other name (e.g. name "Su").
+  		  and is case sensitive in names which start with diacritics (e.g. Řehoř, Šimon..)
+      </li>
+      <li>The number of items to be displayed can be limited with the <code>limit</code> argument. Its value, if greater
+          than 0, gives the maximum number of items to be displayed</li>
+</li>
+  </ul>
+	 
+ 
   <p>Grouping and order options</p>
   <ul>
     <li><code>group</code>: How to group publications</li>
@@ -268,7 +319,7 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
     href="http://lmazy.verrech.net/bib2tpl/templates/">bib2tpl</a>. In order
     to create a bib2tpl template, templates and formats are merged:
     in the template, <code>@#entry@</code> is replaced by the content
-    of the format file. This allows to decouple the formatting of
+    of the format file. This This to decouple the formatting of
     entries with the formatting of the full bibliography.
     </p>
 

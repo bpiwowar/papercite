@@ -11,18 +11,7 @@
  */
 
 require_once("UTF8.php");
-
-/**
- * A list of creators (e.g., authors, editors)
- */
-class BibtexCreators {
-  function BibtexCreators(&$creators) {
-    $this->creators = &$creators;
-  }
-  function count() {
-    return sizeof($creators);
-  }
-}
+require_once("creators.php");
 
 /**
  * A page range
@@ -97,12 +86,13 @@ class BibTexEntries {
 		}
 		else
 		{
-			do
+            $line = null;
+			while($this->currentLine < count($this->bibtexString))
 			{
 				$line = trim($this->bibtexString[$this->currentLine]);
 				$this->currentLine++;
+                if ($line) break;
 			}
-			while($this->currentLine < count($this->bibtexString) && !$line);
 			return $line;
 		}
 	}
@@ -455,8 +445,8 @@ class BibTexEntries {
 				       "A" => "Â", "E" => "Ê", "I" => "Î", "O" => "Ô", "U" => "Û"),
 			  '.' => array("z" => "ż", 
 				       "Z" => "Ż"),
-			  '~' => array("n" => "ñ", "o" => "õ",
-				       "N" => "Ñ", "O" => "Õ"),
+			  '~' => array("a" => "ã", "n" => "ñ", "o" => "õ",
+				           "A" => "Ã", "N" => "Ñ", "O" => "Õ"),
 			  "a" => array("a" => "å", "e" => "æ",
 				       "A" => "Å", "E" => "Æ"),
 			  'c' => 'ç',
@@ -507,7 +497,7 @@ class BibTexEntries {
 		       $pString, 0, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE) as $v) {
 
       // delimiter
-      $c = $pString[$v[1] - 1];
+      $c = $v[1] > 0 ? $pString[$v[1] - 1] : "";
       
       // Add the current string unless it is a brace and we are not in math mode
       if (($in_maths &&  ($c == '}' || $c == '{')) || $c == '$') 
@@ -556,10 +546,22 @@ class BibTexEntries {
    * @return array The representation of the entry or false if there is a problem
    */
   static function _postProcessing(&$ret) {
-    // Process accents
-    foreach($ret as $key => &$value)
-      if ($key != "entrytype" && $key != "bibtex" && $key != "cite")
-	BibTexEntries::process_accents($value);
+    // First post processing: Process accents, transform bibtex types
+    foreach($ret as $key => &$value) {
+        switch($key) {
+            case "bibtex": 
+            case "cite":
+                break;
+            
+            case "entrytype":
+                if ($value == "conference")
+                     $value = "inproceedings";
+                break;
+            
+            default:
+                BibTexEntries::process_accents($value);
+        }
+    }
 
     // Remove braces and handles capitalization
     foreach(array("title","booktitle") as $f)
@@ -571,7 +573,7 @@ class BibTexEntries {
     if (in_array('pages', array_keys($ret))) {
       $matches = array();
       if (preg_match("/^\s*(\d+)(?:\s*--?\s*(\d+))?\s*$/", $ret['pages'], $matches)) {
-	$ret['pages'] = new BibtexPages($matches[1], $matches[2]);
+	$ret['pages'] = new BibtexPages($matches[1], sizeof($matches) > 2 ? $matches[2] : "");
       }
     }
 
@@ -594,21 +596,8 @@ class BibTexEntries {
    * @param string $entry The entry with the authors
    * @return array the extracted authors
    */
-  function _extractAuthors($authors) {
-    // Use OSBib way of parsing authors
-    require_once("PARSECREATORS.php");
-    $parseCreators = new PARSECREATORS();
-    $creators = $parseCreators->parse($authors);
-    foreach($creators as &$cArray) {
-      $cArray = array(
-		      "surname" => trim($cArray[2]),
-		      "firstname" => trim($cArray[0]),
-		      "initials" => trim($cArray[1]),
-		      "prefix" => trim($cArray[3])
-		      );
-      unset($cArray);
-    }
-    return new BibtexCreators($creators);
+  static function _extractAuthors($authors) {
+      return BibtexCreators::parse($authors);
   }
 
 } // end class BibTexEntries

@@ -131,7 +131,9 @@ class BibtexConverter
 
       'lang' => 'en',
 
-      'key_format' => 'numeric'
+      'key_format' => 'numeric',
+      
+      'limit' => 0
     );
 
     // Overwrite specified options
@@ -253,8 +255,9 @@ class BibtexConverter
    * This function do some pre-processing on the entries
    */
   function _pre_process(&$data) {
+      $id = 0;
     foreach ( $data as &$entry ) {
-      $entry['firstauthor'] = $entry['author']->authors[0]["surname"];
+      $entry['firstauthor'] = isset($entry['author']->authors) ? $entry['author']->authors[0]["surname"] : "";
       $entry['entryid'] = $id++;
     }
   }
@@ -384,6 +387,9 @@ class BibtexConverter
 
     // The data to be processed
     $this->_data = &$data;
+    
+    // The count
+    $this->count = 0;
 
     // "If-then-else" stack
     $this->_ifs = array(true);
@@ -429,7 +435,7 @@ class BibtexConverter
 	preg_match("/^(#?[\w]+)(?:([~=><])([^@]+))?$/", $test, $matches);
 	$value = $this->_get_value($matches[1]);
 	//print "<div>Compares $value ($matches[1]) [$matches[2]] $matches[3]</div>";
-	switch($matches[2])
+	switch(sizeof($matches) > 2 ? $matches[2] : "")
 	  {
 	  case "":
 	    $condition = $value ? true : false;
@@ -441,10 +447,10 @@ class BibtexConverter
 	    $condition = preg_match("/$matches[3]/",$value);
 	    break;
 	  case ">":
-	    $condition =  (float)$value > (float)$match[3];
+	    $condition =  (float)$value > (float)$matches[3];
 	    break;
 	  case "<":
-	    $condition =  (float)$value < (float)$match[3];
+	    $condition =  (float)$value < (float)$matches[3];
 	    break;
 	  default:
 	    $condition = false;
@@ -501,7 +507,11 @@ class BibtexConverter
     // --- Full entry loop
     if ($match[1] == "#fullentry") {
       $entries = "";
+      $limit = $this->_options["limit"];
       foreach($this->_group as &$entry) {
+          if ($limit > 0 && $limit <= $this->count)
+              break;
+          $this->count++;
         $this->_entry = $entry;
         $entries .= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $this->full_entry_tpl);
       }
@@ -513,7 +523,7 @@ class BibtexConverter
     if ($match[1] == "#entry") {
         if ($this->_entry["entrytype"]) {
           $type = $this->_entry["entrytype"];
-          $entryTpl = &$this->_entry_template->get($type);
+          $entryTpl = $this->_entry_template->get($type);
           //print "<div><b>$type</b>: ". htmlentities($entryTpl). "</div>";
           $t=  preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $entryTpl) . $match[2];
         }
@@ -542,7 +552,7 @@ class BibtexConverter
     }
 
     // --- If we have an entry
-    if ($this->_entry && array_key_exists($name, $this->_entry))
+    if (isset($this->_entry) && array_key_exists($name, $this->_entry))
 	$v = $this->_entry[$name];
     
 

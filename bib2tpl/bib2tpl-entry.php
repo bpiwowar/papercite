@@ -1,5 +1,7 @@
 <?php
 
+require_once(dirname(__FILE__) . "/../lib/UTF8.php");
+
 /**
  * This class is an entry format
  * @author Benjamin Piwowarski
@@ -33,7 +35,7 @@ class BibtexEntryFormat {
       foreach(preg_split("#\\s+#",$att["types"]) as $type) {
 	$this->formats[$type] = &$this->format;
       }
-    } else if (!is_null($this->format)) {
+    } else if (isset($this->format) && !is_null($this->format)) {
       $this->format .= "<$name";
       foreach($att as $name => $value) {
 	$this->format .= " $name='".  htmlspecialchars($value) ."'";
@@ -48,13 +50,13 @@ class BibtexEntryFormat {
     if ($name == "format") {
       $this->format = preg_replace("#[\n\r]+#"," ",$this->format);
       unset($this->format);
-    } else if (!is_null($this->format)) {
+    } else if (isset($this->format) && !is_null($this->format)) {
       $this->format .= "</$name>";
     }
   }
 
   function characters(&$parser, &$data) {
-    if (!is_null($this->format))
+    if (isset($this->format) && !is_null($this->format))
       $this->format .= $data;
   }
 
@@ -194,14 +196,18 @@ class BibtexEntryFormat {
      * Keep only some elements in array if we've exceeded $moreThan
      */
     $etAl = FALSE;
-    if($style[$limit] && (sizeof($cArray) > $style[$moreThan]))
-      {
-        array_splice($cArray, $style[$limit]);
-        if(isset($style[$italics]))
-          $etAl = "<span style='font-style: italic'>" . $style[$abbreviation] . "</span>";
-        else
-          $etAl = $style[$abbreviation];
-      }
+    
+    // TODO: $limit is never set!
+    // if (!isset($limit)) $limit = 1000;
+    // 
+    // if(isset($style[$limit]) && $style[$limit] && (sizeof($cArray) > $style[$moreThan]))
+    //   {
+    //     array_splice($cArray, $style[$limit]);
+    //     if(isset($style[$italics]))
+    //       $etAl = "<span style='font-style: italic'>" . $style[$abbreviation] . "</span>";
+    //     else
+    //       $etAl = $style[$abbreviation];
+    //   }
 
     /**
      * add delimiters
@@ -252,7 +258,8 @@ class BibtexEntryFormat {
 
     $prefix = $creator['prefix'] ? trim(stripslashes($creator['prefix'])) . ' ' : '';
     
-    $style = $this->properties[$first ? "primaryCreatorFirstStyle" : "primaryCreatorOtherStyle"];
+    $key = $first ? "primaryCreatorFirstStyle" : "primaryCreatorOtherStyle";
+    $style = isset($this->properties[$key]) ? $this->properties[$key] : -1;
 
     if($style == 0) // Joe Bloggs
       {
@@ -315,17 +322,17 @@ class BibtexEntryFormat {
       $firstName = stripslashes($creator['firstname']);
     else if($creator['firstname']) // Initial only of first name.  'firstname' field may actually have several 'firstnames'
       {
-        $fn = split(" ", stripslashes($creator['firstname']));
+        $fn = preg_split("- -", stripslashes($creator['firstname']));
         $firstTime = TRUE;
         foreach($fn as $name)
           {
             if($firstTime)
               {
-                $firstNameInitialMake = mb_strtoupper(mb_substr(trim($name), 0, 1));
+                $firstNameInitialMake = UTF8::utf8_strtoupper(UTF8::utf8_substr(trim($name), 0, 1));
                 $firstTime = FALSE;
               }
             else
-              $initials[] = mb_strtoupper(mb_substr(trim($name), 0, 1));
+              $initials[] = UTF8::utf8_strtoupper(UTF8::utf8_substr(trim($name), 0, 1));
           }
         if(isset($initials))
           {

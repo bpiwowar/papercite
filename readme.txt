@@ -1,8 +1,8 @@
 === Plugin Name ===
 Contributors: bpiwowar
-Tags: formatting, bibtex
+Tags: formatting, bibtex, bibliography
 Requires at least: 3.0
-Tested up to: 3.5
+Tested up to: 3.5.2
 Stable tag: 0.4.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -31,13 +31,12 @@ are also available from the HTML.
 
 *Filtering and grouping*:
 
-* Possibility of filtering the bibtex entries based on their type (allow, deny)
-* Possibility to access the single bibtex entry source code to enable copy&paste (toggle-enabled visualization)
-* Possibility of editing the bibtex file directly from the wordpress administration page
+* Filtering on publication type and authors
 * Publications can be grouped and sorted in various ways
 
 *Output*:
 
+* Access the single bibtex entry source code to enable copy&paste (toggle-enabled visualization)
 * Easy output customisation with the use of two templates: one for each entry, one for the list of entries
 * Auto-detection of PDF files based on the BibTeX key (or on the PDF entry)
 * Citation mode: use references in the text and print the citations at the end of a block, page or post
@@ -49,6 +48,15 @@ as installed on my site <a href="http://www.bpiwowar.net/wp-content/plugins/pape
 
 To report bugs or request features, please go to 
 https://github.com/bpiwowar/papercite
+
+*Contributors*:
+
+* B. Piwowarski (main developper)
+* Jaroslav Vítků: Filtering by author and type; form to filter publications
+* Michael Schreifels: auto-bibshow and no processing in post lists options
+* Stefan Aiche: group by year option
+* Łukasz Radliński: bug fixes & handling polish characters
+* Some parts of the code come from bib2html (version 0.9.3) written by Sergio Andreozzi.
 
 == Installation ==
 
@@ -96,9 +104,18 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 1. With the bibshow & bibcite commands
 2. With the bibtex command
+3. The bibfilter command
 
 == Changelog ==
 
+= 0.5.0 =
+  * @conference is now properly handled as @inproceedings (issue #53)
+  * Option to limit the number of papers output by bibtex (issue #50)
+  * More accents handled (issue #51)
+  * Added support for interactive filtering by means of new command (bibfilter). Thanks to Jaroslav Vítků
+  * Added support for these additional filtering commands to bibtex command (author and type)
+  * Added two new options: auto-bibshow and skip display in post lists (thanks to Michael Schreifels)
+  * Fixed quite a few PHP warnings
 = 0.4.5 =
   * Fixed bug #48 (URL as source not working anymore with PHP < 5.4)
 = 0.4.4 =

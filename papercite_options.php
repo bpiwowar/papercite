@@ -68,6 +68,8 @@ function papercite_admin_init(){
   add_settings_section('papercite_choices', 'Options', 'papercite_choices_text', 'papercite');
   add_settings_field('bibtex_parser', 'Bibtex parser', 'papercite_bibtex_parser', 'papercite', 'papercite_choices');
   add_settings_field('use_db', 'Database', 'papercite_use_db', 'papercite', 'papercite_choices');
+  add_settings_field('auto_bibshow', 'Auto bibshow', 'papercite_auto_bibshow', 'papercite', 'papercite_choices');
+  add_settings_field('skip_for_post_lists', 'Skip for post lists', 'papercite_skip_for_post_lists', 'papercite', 'papercite_choices');
 }
 
 function papercite_section_text() {
@@ -134,7 +136,7 @@ function papercite_use_db() {
 
 
   require_once(dirname(__FILE__) . "/papercite_db.php");
-  global $papercite_table_name, $wpdb;
+  global $papercite_table_name_url, $wpdb;
 
   $exists =  sizeof($wpdb->get_col("SHOW TABLES LIKE '$papercite_table_name'")) == 1;
  
@@ -144,9 +146,9 @@ function papercite_use_db() {
 
   if ($exists) {
     // Display some information
-    print "<div class='papercite_info'>" . $wpdb->get_var("SELECT count(*) FROM $papercite_table_name WHERE not URL like 'ts://%'") . " entries in the database</div>";
+    print "<div class='papercite_info'>" . $wpdb->get_var("SELECT count(*) FROM $papercite_table_name") . " entries in the database</div>";
     print "<div class='papercite_info'>Cached bibtex files: " . 
-      implode(", ", $wpdb->get_col("SELECT substr(URL,6) from $papercite_table_name WHERE URL like 'ts://%'")) . "</div>";
+      implode(", ", $wpdb->get_col("SELECT url from $papercite_table_name_url")) . "</div>";
   }
 
   echo "<input type='radio' id='papercite_use_db' " . ($option ? " checked='checked' " : "") . " value='yes' name='papercite_options[use_db]' /> Yes ";
@@ -176,6 +178,16 @@ function papercite_use_db() {
   
 }
 
+function papercite_auto_bibshow() {
+  $options = $GLOBALS["papercite"]->options;
+  echo "<input id='papercite_auto_bibshow' name='papercite_options[auto_bibshow]' type='checkbox' value='1' " . checked(true, $options['auto_bibshow'], false) . " /> This will automatically insert [bibshow] (with default settings) when an unexpected [bibcite] is found.";
+}
+
+function papercite_skip_for_post_lists() {
+  $options = $GLOBALS["papercite"]->options;
+  echo "<input id='papercite_skip_for_post_lists' name='papercite_options[skip_for_post_lists]' type='checkbox' value='1' " . checked(true, $options['skip_for_post_lists'], false) . " /> This will skip papercite processing when displaying a list of posts or pages. [bibcite] and [bibshow] tags will be stripped.";
+}
+
 function papercite_set(&$options, &$input, $name) {
   if (array_key_exists($name, $input)) {
     $options[$name] = trim($input[$name]);
@@ -188,7 +200,9 @@ function papercite_options_validate($input) {
   $options = get_option('papercite_options');
 
   $options['use_db'] = $input['use_db'] == "yes";
-      
+  $options['auto_bibshow'] = $input['auto_bibshow'] == "1";
+  $options['skip_for_post_lists'] = $input['skip_for_post_lists'] == "1";
+
   $options['file'] = trim($input['file']);
   $options['timeout'] = trim($input["timeout"]);
   
@@ -200,4 +214,34 @@ function papercite_options_validate($input) {
   return $options;
 }
 
+function papercite_bibtype2string($type) {
+    switch($type) {
+        case "article":     
+            return __("Journal/magazine article", "papercite");
+
+        case "conference":
+        case "inproceedings":
+            return __("Paper in conference proceedings", "papercite");
+        
+        case "manual": 
+            return __("Technical documentation", "papercite");
+
+        case "mastersthesis": 
+            return __("Master's thesis", "papercite");
+
+        case "phdthesis": 
+            return __("Ph.D. thesis", "papercite");
+
+        case "proceedings": 
+            return __("Conference proceedings", "papercite");
+
+        case "techreport": 
+            return __("Technical report", "papercite");
+
+        case "incollection": 
+            return __("Book chapter", "papercite");
+        
+        default: return __(ucfirst($type), "papercite");
+    }
+}
 ?>
