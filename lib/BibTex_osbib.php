@@ -11,7 +11,7 @@
  */
 
 require_once("UTF8.php");
-require_once("creators.php");
+require_once("bibtex_common.php");
 
 /**
  * A page range

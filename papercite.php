@@ -58,7 +58,7 @@ include("papercite_options.php");
       		echo "Warning: cannot parse option \"authors\", this is specified by string!<br>";// probably useless..
             // string contains both: & and | => this is not supported
       	} else {
-            require_once(dirname(__FILE__) . "/lib/creators.php");
+            require_once(dirname(__FILE__) . "/lib/bibtex_common.php");
             foreach(preg_split("-\\|-", $authors) as $conjonction) {
                 $this->filters[] = BibtexCreators::parse($conjonction);
             }
