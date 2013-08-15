@@ -108,7 +108,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
-= HEAD =
+= 0.5.2 =
   * Unparseable year field causes database issues (issue #63)
 = 0.5.1 =
   * The journal field was not parsed with OSBiB (issue #59)
