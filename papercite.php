@@ -22,7 +22,10 @@
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
+    the Free Software Foundation; either version 2 of the License,                $year = is_numeric($value["year"]) ? intval($value["year"]) : -1;
+	            $statement = $wpdb->prepare("REPLACE $papercite_table_name(urlid, bibtexid, entrytype, year, data) VALUES (%s,%s,%s,%s,%s)", 
+	                            $oldurlid, $value["cite"], $value["entrytype"], $year, maybe_serialize($value));
+ or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -361,8 +364,9 @@ class Papercite {
 
 	        $code = true;
 	        foreach($this->cache[$biburi] as &$value) {
+                $year = is_numeric($value["year"]) ? intval($value["year"]) : -1;
 	            $statement = $wpdb->prepare("REPLACE $papercite_table_name(urlid, bibtexid, entrytype, year, data) VALUES (%s,%s,%s,%s,%s)", 
-	                            $oldurlid, $value["cite"], $value["entrytype"], $value["year"], maybe_serialize($value));
+	                            $oldurlid, $value["cite"], $value["entrytype"], $year, maybe_serialize($value));
 	            $code = $wpdb->query($statement);
 	            if ($code === FALSE) {
 	                break;
