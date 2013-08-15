@@ -12,6 +12,8 @@ cite papers.
 
 == Description ==
 
+**To report bugs or request features, please go to https://github.com/bpiwowar/papercite**
+
 papercite format bibtex entries as HTML so they can be inserted in
 WordPress pages and posts. The input data is a bibtex file (either
 local or remote) and entries can be formatted by default using various 
@@ -46,8 +48,6 @@ are also available from the HTML.
 the documentation link)**. You can see the documentation of the plugin
 as installed on my site <a href="http://www.bpiwowar.net/wp-content/plugins/papercite/documentation/index.html">here</a>. 
 
-To report bugs or request features, please go to 
-https://github.com/bpiwowar/papercite
 
 *Contributors*:
 
@@ -108,6 +108,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= HEAD =
   * Unparseable year field causes database issues (issue #63)
   * The journal field was not parsed with OSBiB (issue #59)
   * @conference is now properly handled as @inproceedings (issue #53)
