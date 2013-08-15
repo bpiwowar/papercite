@@ -1,6 +1,8 @@
 <html>
 <head>
 <title>Papercite documentation</title>
+<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+
 <style>
 div.code {
 border: 1px solid black;
@@ -34,6 +36,18 @@ color: red;
     font-weight: bold;
     border-left: 2px solid red;
     padding: 3px;
+}
+
+div.warning {
+   background-image: url('../img/warning.png');
+   background-repeat: no-repeat;
+   background-position: 3px 5px;
+   background-color: #eee;
+
+   min-height: 50px;
+   border: 1px dashed red;
+   padding: 10px 10px 10px 70px;
+   font-weight: bold;
 }
 
 </style>
@@ -80,6 +94,10 @@ denoted <b><code>$DATA</code></b> in this document. This folder is either
   PDF file should have be named <b>KEY</b><code>.pdf</code> where <b>KEY</b> is the
   bibtex key in lowercase, where <code>:</code> and <code>/</code> have been replaced by <code>-</code>.</li>
 </ol>
+
+<div class="warning">
+    Do not customize the files directly in the main plugin folder: when updating the plug-in, the full <code>papercite</code> plugin folder will be replaced by the new version.<br/> <u>Use the <code>papercite-data</code> folder</u>.
+</div>
 
 <a name="bibtex_entries"></a><h2>BibTex entries</h2>
 

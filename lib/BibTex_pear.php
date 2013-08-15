@@ -31,7 +31,7 @@
    */
 
 require_once 'PEAR.php' ;
-require_once 'creators.php';
+require_once 'bibtex_common.php';
 
 
 class BibtexPages {
