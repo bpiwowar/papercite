@@ -65,6 +65,7 @@ div.warning {
   <li><a href="#usage">Usage</a>: describes the two ways to use papercite</li>
   <li><a href="#options">Options</a>
   <ol>
+      <li><a href="#bibtex_options">bibtex/bibfilter options</a></li>
     <li><a href="#global_options">Global options</a></li>
     <li><a href="#local_options">Local options</a></li>
     </ol>
@@ -158,7 +159,7 @@ This is a bibliography stored in the <code>papercite_data</code> custom field:
 </ul>
 	
 <p>Example of use:<br/>
-		<code>[bibfilter group=year group_order=desc author=Nahodil|Vítků allow=incollection,mastersthesis sortauthors=0]</code>
+		<div class="code">[bibfilter group=year group_order=desc author=Nahodil|Vítků allow=incollection,mastersthesis sortauthors=0]</div>
     </p>
 	
 <p>bibfilter uses the same parameters as bibtex command, with these modifications:</p>
@@ -244,6 +245,8 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
   format one BibTeX entry</li>
   </ul>
 
+  <a name="bibtex_options"></a><h2><code>bibtex</code> specific options</h2>
+
   <p>Filtering options</p>
   
   <ul>
@@ -255,7 +258,15 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
       </li>
       <li>The number of items to be displayed can be limited with the <code>limit</code> argument. Its value, if greater
           than 0, gives the maximum number of items to be displayed</li>
-</li>
+      </li>
+      <li>
+          Any bibtex field can be filtered using <code>filter:<em>NAME</em></code> where <code>NAME</code> is replaced by
+          the corresponding bibtex field. The value of the attribute is a PHP regular expression (see <a href="http://www.php.net/manual/pcre.pattern.php">the PHP documentation on PCRE</a>) that should match the field value. For example, the following will select all the publications with the word "evaluation" in it (case insensitive):
+          <div class="code">
+              [bibtex filter:title="/evaluation/i"]
+          </div>
+          
+      </li>
   </ul>
 	 
  

@@ -468,7 +468,7 @@ class Papercite {
     // Get all the options pairs and store them
     // in the $options array
     $options_pairs = array();
-    preg_match_all("/\s*([\w-_]+)=(?:([^\"]\S*)|\"([^\"]+)\")(?:\s+|$)/", sizeof($matches) > 2 ? $matches[2] : "", $options_pairs, PREG_SET_ORDER);
+    preg_match_all("/\s*([\w-:_]+)=(?:([^\"]\S*)|\"([^\"]+)\")(?:\s+|$)/", sizeof($matches) > 2 ? $matches[2] : "", $options_pairs, PREG_SET_ORDER);
     
     // print "<pre>";
     // print htmlentities(print_r($options_pairs,true));
@@ -482,14 +482,22 @@ class Papercite {
     // (3) From the general options
     // $this->options has already processed the steps 0-2
     $options = $this->options;
-
+    $options["filters"] = Array();
+        
     foreach($options_pairs as $x) {
       $value = $x[2] . (sizeof($x) > 3 ? $x[3] : "");
       
-      if ($x[1] == "template") {
+      if ($x[1] == "template") 
+      {
           // Special case of template: should overwrite the corresponding command template
           $options["${command}_$x[1]"] = $value;
-      } else {
+      } 
+      else if (Papercite::startsWith($x[1], "filter:")) 
+      {
+          $options["filters"][substr($x[1],7)] = $value;
+      }
+      else 
+      {
           $options[$x[1]] = $value;
       }
     }
@@ -600,6 +608,19 @@ class Papercite {
     }
   }
 
+  /** Returns true if the all the regular expression filters are matched */
+  static function userFiltersMatch($filters, $entry) 
+  {
+      foreach($filters as $fieldname => $regexp) 
+      {
+          $v = array_key_exists($fieldname, $entry) ? $entry[$fieldname] : "";
+          if (!preg_match($regexp, $v))
+          {
+              return false;              
+          }
+      }      
+      return true;
+  }
 
   /** Get entries fullfilling a condition (bibtex & bibfilter) */
   function getEntries($options) {
@@ -639,7 +660,7 @@ class Papercite {
       	    else
         	    foreach($outer as &$entry) {
         	      $t = &$entry["entrytype"];
-        	      if ((sizeof($allow)==0 || in_array($t, $allow)) && (sizeof($deny)==0 || !in_array($t, $deny)) && $author_matcher->matches($entry)) {
+        	      if ((sizeof($allow)==0 || in_array($t, $allow)) && (sizeof($deny)==0 || !in_array($t, $deny)) && $author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry)) {
             		$result[] = $entry;
         	      }
               }
@@ -661,7 +682,7 @@ class Papercite {
               $rows = $wpdb->get_col($st);
               if ($rows) foreach($rows as $data) {
                   $entry = maybe_unserialize($data);
-                  if ($author_matcher->matches($entry))
+                  if ($author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry))
                       $result[] = $entry;
               }
           }

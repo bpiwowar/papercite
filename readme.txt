@@ -24,16 +24,17 @@ are also available from the HTML.
 
 * Stored into a WordPress folder (with multi-site support);
 * An URL (e.g., from citeulike.org and bibsonomy.org);
-* (Since 0.4.1) A custom field when local to a post/page
+* A custom field when local to a post/page
 
 *Efficiency*:
 
-* (Since 0.4.0) *Database backend* to speed up the processing by caching the bibtex entries for big BibTeX files.
+* *Database backend* to speed up the processing by caching the bibtex entries for big BibTeX files.
 * Fast OsBiB-based parser
 
 *Filtering and grouping*:
 
 * Filtering on publication type and authors
+* Regular expression filtering on any type
 * Publications can be grouped and sorted in various ways
 
 *Output*:
@@ -109,6 +110,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 == Changelog ==
 
 = HEAD =
+  * Any field can now be used for filters (issue #62)
   * Unparseable year field causes database issues (issue #63)
   * The journal field was not parsed with OSBiB (issue #59)
   * @conference is now properly handled as @inproceedings (issue #53)
