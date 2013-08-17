@@ -22,10 +22,7 @@
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License,                $year = is_numeric($value["year"]) ? intval($value["year"]) : -1;
-	            $statement = $wpdb->prepare("REPLACE $papercite_table_name(urlid, bibtexid, entrytype, year, data) VALUES (%s,%s,%s,%s,%s)", 
-	                            $oldurlid, $value["cite"], $value["entrytype"], $year, maybe_serialize($value));
- or
+    the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -162,11 +159,11 @@ class Papercite {
   static $bibtex_parsers = array("pear" => "Pear parser", "osbib" => "OSBiB parser");
 
   // Names of the options that can be set
-  static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", "use_db", "auto_bibshow", "skip_for_post_lists");
+  static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", "use_db", "auto_bibshow", "skip_for_post_lists", "process_titles");
 
   static $default_options = 
 	array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
-	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "pear", "use_db" => false, "auto_bibshow" => false, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600);
+	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "pear", "use_db" => false, "auto_bibshow" => false, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true);
   /**
    * Init is called before the first callback
    */
@@ -183,9 +180,12 @@ class Papercite {
       $pOptions = get_option('papercite_options');
 
       // Use preferences if set to override default values
-      if (is_array($pOptions)) {
-    	foreach(self::$option_names as &$name) {
-    	  if (array_key_exists($name, $pOptions) && !empty($pOptions[$name])) {
+      if (is_array($pOptions)) 
+      {
+    	foreach(self::$option_names as &$name) 
+        {
+    	  if (array_key_exists($name, $pOptions) && $pOptions[$name] !== "") 
+          {
     	    $this->options[$name] = $pOptions[$name];
     	  }
     	}
@@ -259,9 +259,11 @@ class Papercite {
   /**
    * Get the bibtex data from an URI
    */
-  function getData($biburis, $timeout = 3600) {
+  function getData($biburis, $options) {
       global $wpdb, $papercite_table_name, $papercite_table_name_url;
 
+     $timeout = $options["timeout"];
+     $processtitles = $options["process_titles"];
     
     // Loop over the different given URIs
     $bibFile = false;
@@ -296,6 +298,9 @@ class Papercite {
     
 	if ($data === FALSE && !($bibFile && file_exists($bibFile[0])))
 	  continue;	
+    
+    // Customize URIs depending on parsing options
+    $biburi .= $processtitles ? "#pt=1" : "#pt=0";
 
 	// (2) Parse the BibTeX
 	if ($data || file_exists($bibFile[0])) {
@@ -322,7 +327,7 @@ class Papercite {
 	  if (!empty($data)) {
 	    switch($this->options["bibtex_parser"]) {
 	    case "pear": // Pear parser
-	      $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true));
+	      $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true, 'processTitles' => $processtitles));
 	      $this->_parser->loadString($data);
 	      $stat = $this->_parser->parse();
 	      
@@ -332,6 +337,7 @@ class Papercite {
 
 	    default: // OSBiB parser
 	      $parser = new BibTexEntries();
+          $parser->processTitles($processtitles);
 	      if (!$parser->parse($data)) {
 		$this->cache[$biburi] = false;
 		continue;
@@ -537,7 +543,7 @@ class Papercite {
 
 	// bibshow / bibcite commands
     case "bibshow":
-     $data = $this->getData($options["file"]);
+     $data = $this->getData($options["file"], $options);
       if (!$data) return "<span style='color: red'>[Could not find the bibliography file(s)".
           (current_user_can("edit_post") ? " with name [".htmlspecialchars($options["file"])."]" : "") ."</span>";
 
@@ -627,7 +633,7 @@ class Papercite {
       global $wpdb, $papercite_table_name;
       
       // --- Filter the data
-      $entries = $this->getData($options["file"], $options["timeout"]);
+      $entries = $this->getData($options["file"], $options);
       if (!$entries) 
           return "<span style='color: red'>[Could not find the bibliography file(s)".
               (current_user_can("edit_post") ? " with name [".htmlspecialchars($options["file"])."]" : "") ."</span>";
