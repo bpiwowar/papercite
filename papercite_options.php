@@ -205,7 +205,7 @@ function papercite_ajax_clear_db() {
 
     $out = ob_get_contents();
     ob_end_clean();
-    print json_encode(Array($result ? 0 : 1, $out]));
+    print json_encode(Array($result ? 0 : 1, $out));
 	die(); 
 }
 
