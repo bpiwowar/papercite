@@ -30,8 +30,18 @@ function papercite_create_menu() {
   add_options_page('Custom Papercite Page', 'Papercite plug-in', 'manage_options', 'papercite', 'papercite_options_page');
 }
 
+function papercite_checked_files_cell($key, $folder, $ext)
+{
+    return "<tr>"
+    . "<td><input name='papercite_options[checked_files_key][] type='text' value='".htmlspecialchars($key)."'/></td>"
+    . "<td><input name='papercite_options[checked_files_folder][] type='text' value='".htmlspecialchars($folder)."'/></td>"
+    . "<td><input name='papercite_options[checked_files_ext][] type='text'  value='".htmlspecialchars($ext)."'/></td>"
+    . "<td><span class='papercite_checked_files'>-</span><span class='papercite_checked_files'>+</span></td></tr>";
+}
 
 function papercite_options_page() {
+  wp_enqueue_script( 'json2' );
+  wp_enqueue_script( 'jquery-ui-dialog' );
 ?>
   <div>
     <h2>Papercite options</h2>
@@ -39,14 +49,60 @@ function papercite_options_page() {
     Options related to the papercite plugin.
     
     <form action="options.php" method="post">
+
     <?php settings_fields('papercite_options'); ?>
     <?php do_settings_sections('papercite'); ?>
+    <input type='hidden' name='papercite_options[form]' value='1'>
     
     <input name="Submit" type="submit" value="<?php esc_attr_e('Save Changes'); ?>" />
     </form>
     </div>
 
-<?php
+  <script type="text/javascript" >
+  jQuery("#papercite_create_db").click(function() {
+    var data = {
+      action: 'papercite_create_db'
+    };
+
+    jQuery.post(ajaxurl, data, function(response) {
+        var r = JSON.parse(response);
+        var d = jQuery("<div style='background:white; border: 1px solid black; padding: 3px; margin: 3px; '></div>");
+        if (r[0] == 0) {
+          d.html("Table created").dialog({modal: true});
+          jQuery("#papercite_db_nok").hide();
+          jQuery("#papercite_db_ok").show();
+        } else d.html(r[1]).dialog({modal: true});
+    });
+  });
+
+  jQuery("#papercite_clear_db").click(function() {
+    var data = {
+      action: 'papercite_clear_db'
+    };
+
+    jQuery.post(ajaxurl, data, function(response) {
+        var r = JSON.parse(response);
+        var d = jQuery("<div style='background:white; border: 1px solid black; padding: 3px; margin: 3px; '></div>");
+        if (r[1] == "") {
+          d.html("Cache cleared").dialog({modal: true});
+        } else d.html("Error: " + r[1]).dialog({modal: true});
+    });
+  });
+
+  jQuery(document).on("click", "span.papercite_checked_files", function() {
+    var cell = jQuery(this).parents().eq(1);
+    if (this.textContent == "+") 
+    {
+      cell.parent().append(<?php print json_encode(papercite_checked_files_cell("","","")); ?>);
+    }
+    else if (this.textContent == "-")
+    {
+      cell.remove();
+    }
+  });
+  
+  </script>
+  <?php
 }
 
 // add the admin settings and such
@@ -71,6 +127,7 @@ function papercite_admin_init(){
   add_settings_field('auto_bibshow', 'Auto bibshow', 'papercite_auto_bibshow', 'papercite', 'papercite_choices');
   add_settings_field('skip_for_post_lists', 'Skip for post lists', 'papercite_skip_for_post_lists', 'papercite', 'papercite_choices');
   add_settings_field('process_titles', 'Process titles', 'papercite_process_titles', 'papercite', 'papercite_choices');
+  add_settings_field('checked_files', 'Checked files', 'papercite_checked_files', 'papercite', 'papercite_choices');
 }
 
 function papercite_section_text() {
@@ -182,42 +239,6 @@ function papercite_use_db() {
   echo "<input type='radio' id='papercite_use_db' " . ($option ? " checked='checked' " : "") . " value='yes' name='papercite_options[use_db]' /> Yes ";
   echo "<input type='radio' id='papercite_use_db' " . (!$option ? " checked='checked' " : "") . "value='no' name='papercite_options[use_db]' /> No";
   
-  wp_enqueue_script( 'json2' );
-  wp_enqueue_script( 'jquery-ui-dialog' );
-  ?>
-  <script type="text/javascript" >
-  jQuery("#papercite_create_db").click(function() {
-  	var data = {
-  		action: 'papercite_create_db'
-  	};
-
-  	jQuery.post(ajaxurl, data, function(response) {
-  	    var r = JSON.parse(response);
-  	    var d = jQuery("<div style='background:white; border: 1px solid black; padding: 3px; margin: 3px; '></div>");
-  	    if (r[0] == 0) {
-  	      d.html("Table created").dialog({modal: true});
-  	      jQuery("#papercite_db_nok").hide();
-  	      jQuery("#papercite_db_ok").show();
-        } else d.html(r[1]).dialog({modal: true});
-  	});
-  });
-  jQuery("#papercite_clear_db").click(function() {
-  	var data = {
-  		action: 'papercite_clear_db'
-  	};
-
-  	jQuery.post(ajaxurl, data, function(response) {
-  	    var r = JSON.parse(response);
-  	    var d = jQuery("<div style='background:white; border: 1px solid black; padding: 3px; margin: 3px; '></div>");
-  	    if (r[1] == "") {
-  	      d.html("Cache cleared").dialog({modal: true});
-        } else d.html("Error: " + r[1]).dialog({modal: true});
-  	});
-  });
-  
-  </script>
-  <?php
-  
 }
 
 function papercite_auto_bibshow() {
@@ -233,6 +254,16 @@ function papercite_skip_for_post_lists() {
 function papercite_process_titles() {
   $options = $GLOBALS["papercite"]->options;
   echo "<input id='papercite_process_titles' name='papercite_options[process_titles]' type='checkbox' value='1' " . checked(true, $options['process_titles'], false) . " /> This will process the title fields (title, booktitle) as BibTeX, that is, lowercasing everything which is not between braces.";  
+} 
+
+function papercite_checked_files() 
+{
+  $options = $GLOBALS["papercite"]->options["checked_files"];
+  print "<table class='papercite_checked_files'><thead><th>Key</th><th>Folder</th><th>Extension</th><th><span class='papercite_checked_files'>+</span></th></thead>";
+  foreach($options as $x) 
+  {
+    print papercite_checked_files_cell($x[0], $x[1], $x[2]);
+  }
 } 
 
 
@@ -253,6 +284,22 @@ function papercite_options_validate($input) {
 
   $options['file'] = trim($input['file']);
   $options['timeout'] = trim($input["timeout"]);
+
+  if (array_key_exists('form', $input)) 
+  {
+    $a = Array();
+    for($i = 0; $i < sizeof($input["checked_files_ext"]); $i++) 
+    {
+      $key = $input["checked_files_key"][$i];
+      $folder = $input["checked_files_folder"][$i];
+      $ext = $input["checked_files_ext"][$i];
+      if (!empty($key) && !empty($folder) && !empty($ext))
+      {
+        $a[] = Array($key, $folder, $ext);
+      }
+    }
+    $options['checked_files'] = &$a;
+  }
   
   papercite_set($options, $input, "bibshow_template");
   papercite_set($options, $input, "bibtex_template");

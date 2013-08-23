@@ -159,11 +159,15 @@ class Papercite {
   static $bibtex_parsers = array("pear" => "Pear parser", "osbib" => "OSBiB parser");
 
   // Names of the options that can be set
-  static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", "use_db", "auto_bibshow", "skip_for_post_lists", "process_titles");
+  static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", 
+    "use_db", "auto_bibshow", "skip_for_post_lists", "process_titles", "checked_files");
 
+  // Default value of options
   static $default_options = 
 	array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
-	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "pear", "use_db" => false, "auto_bibshow" => false, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true);
+	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "pear", "use_db" => false,
+        "auto_bibshow" => false, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true,
+        "checked_files" => array(array("pdf", "pdf", "pdf")));
   /**
    * Init is called before the first callback
    */
@@ -178,7 +182,6 @@ class Papercite {
     if (!isset($this->options)) {
       $this->options =  papercite::$default_options;
       $pOptions = get_option('papercite_options');
-
       // Use preferences if set to override default values
       if (is_array($pOptions)) 
       {
@@ -207,6 +210,15 @@ class Papercite {
   }
 
   
+  static function getCustomDataDirectory() {
+    $url = WP_CONTENT_URL;
+    if (is_multisite()) {
+      $subpath = '/blogs.dir/'. $wpdb->blogid . "/files";
+      $url .= $subpath;
+    }
+    return $url . "/papercite-data";
+  }
+
   /**
    * Check the different paths where papercite data can be stored
    * and return the first match, starting by the preferred ones
@@ -234,13 +246,13 @@ class Papercite {
 
   /** 
    * Check if a matching file exists, and add it to the bibtex if so
-   * @param The key
-   * @param 
+   * @param $entry key
+   * @param $types An array of couples (folder, extension)
    */
   function checkFiles(&$entry, $types) {
     $id = strtolower(preg_replace("@[/:]@", "-", $entry["cite"]));
     foreach($types as &$type) {
-      $file = papercite::getDataFile("$type[0]/$id.$type[1]");
+      $file = papercite::getDataFile("$type[1]/$id.$type[2]");
       if ($file) {
 	      $entry[$type[0]] =  $file[1];
       }
@@ -350,7 +362,7 @@ class Papercite {
 
 	    // --- Add custom fields
 	    foreach($this->cache[$biburi] as &$entry) {
-	      $this->checkFiles($entry, array(array("pdf", "pdf")));
+        $this->checkFiles($entry, $this->options["checked_files"]);
 	    }
 	    
     
@@ -777,6 +789,7 @@ class Papercite {
     // Convert (also set the citation key)
     $bib2tpl = new BibtexConverter($options, $main, $bibtexEntryTemplate);
     $bib2tpl->setGlobal("WP_PLUGIN_URL", WP_PLUGIN_URL);
+    $bib2tpl->setGlobal("PAPERCITE_DATA_URL", Papercite::getCustomDataDirectory());
     $r =  $bib2tpl->display($refs);
 
     // If we need to get the citation key back

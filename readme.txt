@@ -110,6 +110,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 == Changelog ==
 
 = HEAD =
+  * Option to add new files detectors (beyond pdf) - issue #38
   * Option to control title processing (issue #54)
   * Any field can now be used for filters (issue #62)
   * Unparseable year field causes database issues (issue #63)
