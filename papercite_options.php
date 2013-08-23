@@ -259,7 +259,7 @@ function papercite_process_titles() {
 function papercite_checked_files() 
 {
   $options = $GLOBALS["papercite"]->options["checked_files"];
-  print "<table class='papercite_checked_files'><thead><th>Key</th><th>Folder</th><th>Extension</th><th><span class='papercite_checked_files'>+</span></th></thead>";
+  print "<table class='papercite_checked_files'><thead><th>Field</th><th>Folder</th><th>Extension</th><th><span class='papercite_checked_files'>+</span></th></thead>";
   foreach($options as $x) 
   {
     print papercite_checked_files_cell($x[0], $x[1], $x[2]);

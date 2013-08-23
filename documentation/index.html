@@ -62,6 +62,7 @@ div.warning {
   <li><a href="#data_structure">File data structure</a></li>
   <li><a href="#bibtex_entries">BibTex entries</a>: how to store BibTeX entries, how special bibtex fields
   are used</li>
+  <li><a href="#attached_files">Attached files</a>: how files associated to one bibtex entry can be detected</li>
   <li><a href="#usage">Usage</a>: describes the two ways to use papercite</li>
   <li><a href="#options">Options</a>
   <ol>
@@ -84,7 +85,7 @@ denoted <b><code>$DATA</code></b> in this document. This folder is either
   <li>Within the folder <code>$DATA</code>, the subfolders
   <ul>
     <li><code>bib</code> contains your bibtex files</li>
-    <li><code>pdf</code> contains your pdf files</li>
+    <li><code>pdf</code> contains your pdf files (<em>by default, but this can be customized</em>)</li>
     <li><code>tpl</code> contains your custom templates</li>
     <li><code>format</code> contains your custom entry formats</li>
     </ul>
@@ -113,9 +114,27 @@ BibTex files can be stored:
          will use the data in the <code>papercite_<b>data</b></code> custom field</li>
 </ul>
 
-<h3>Special fields</h3>
-When available, the <code>pdf</code> field is used to determine the location of the pdf file. This location can be
-a valid URL or a path relative to the pdf folder.
+<a name="attached_files"></a><h2>Attached files</h2>
+
+Files associated to one BibTeX entry can be automatically detected.  
+ To match a bibtex entry with a file, the file should have be named <code><b>FOLDER</b>/<b>KEY</b>.<b>EXT</b></code> where 
+ <dl>
+ <dt>FOLDER</dt><dd> is a custom folder name</dt>
+ <dt>KEY</dt><dd> is the
+  bibtex key in lowercase, where <code>:</code> and <code>/</code> have been replaced by <code>-</code></dd>
+  <dt>EXT</dt><dd> is a custom extension (e.g. pdf, ppt)</dd>
+  </dl>
+
+  The URL of the matched file wil be stored in the field <code>FIELD</code> of the bibtex entry, and will
+  be available by templates. For example, this can be inserted to display a link to a presentation:
+  <pre>
+    @?ppt@ &lt;a href="@ppt@" title='Download PPT' class='papercite_pdf'&lt;img src='@PAPERCITE_DATA_URL@/img/ppt.png' alt="[ppt]"/&gt;&lt;/a&gt; @;@ 
+  </pre>
+
+  The <code>FIELD</code>, <code>FOLDER</code> and <code>EXT</code> can all be set in the preferences. Papercite will process
+  the list of such triplets, and will set the bibtex field to the <b>last</b> matched file (if any).
+
+
 
 <a name="usage"></a><h2>Usages</h2>
 
