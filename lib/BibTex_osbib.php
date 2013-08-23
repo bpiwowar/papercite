@@ -38,6 +38,15 @@ class BibTexEntries {
 
   var $preamble = array();
   var $strings = array();
+  
+  function __construct() {
+      $this->_processTitles = true; 
+  }
+  
+  function processTitles($flag) 
+  {
+      $this->_processTitles = $flag;
+  }
 
   function parse(&$s) {
     $this->preamble = $this->strings = $this->data = $this->undefinedStrings = array();
@@ -51,7 +60,7 @@ class BibTexEntries {
     $this->extractEntries();
     $this->returnArrays();
     foreach($this->data as &$entry) 
-      BibTexEntries::_postProcessing($entry);
+      $this->_postProcessing($entry);
     
     return true;
   }
@@ -483,7 +492,7 @@ class BibTexEntries {
 
 
   /** Format the title by preserving capitalisation */
-  static function formatTitle($pString, $delimitLeft = '{', $delimitRight = '}')
+  function formatTitle($pString, $delimitLeft = '{', $delimitRight = '}')
   {
     $in_maths = false;
     $brace_level = 0;
@@ -522,7 +531,11 @@ class BibTexEntries {
       if ($in_maths || $brace_level > 0)
 	$newString .= $v[0];
       else
-	$newString .= $start ? UTF8::utf8_ucfirst( UTF8::utf8_strtolower($v[0]) ) : UTF8::utf8_strtolower($v[0]);
+	$newString .= 
+          $this->_processTitles ? 
+          ($start ? UTF8::utf8_ucfirst( UTF8::utf8_strtolower($v[0]) ) : UTF8::utf8_strtolower($v[0]))
+          : 
+          $v[0];
 
       $start = false;
 
@@ -545,7 +558,7 @@ class BibTexEntries {
    * @param string $entry The entry
    * @return array The representation of the entry or false if there is a problem
    */
-  static function _postProcessing(&$ret) {
+   function _postProcessing(&$ret) {
     // First post processing: Process accents, transform bibtex types
     foreach($ret as $key => &$value) {
         switch($key) {
@@ -566,7 +579,7 @@ class BibTexEntries {
     // Remove braces and handles capitalization
     foreach(array("title","booktitle", "journal") as $f)
       if (in_array($f, array_keys($ret))) 
-	$ret[$f] = BibTexEntries::formatTitle($ret[$f]);
+	$ret[$f] = $this->formatTitle($ret[$f]);
     
     
     // Handling pages

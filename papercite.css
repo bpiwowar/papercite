@@ -21,3 +21,15 @@
 .papercite_info {
   color: #555;
 }
+
+span.papercite_checked_files 
+{
+	padding: 5px;
+	margin: 5px;
+	border: 1px solid black;
+	font-size: 150%;
+	cursor: pointer;
+	background: #eee;
+	color: red;
+	border-radius: 3px;
+}

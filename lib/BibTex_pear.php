@@ -184,6 +184,7 @@ class Structures_BibTex
             'wordWrapCut'       => 0,
             'removeCurlyBraces' => false,
             'extractAuthors'    => true,
+            'processTitles'     => true
         );
         foreach ($options as $option => $value) {
             $test = $this->setOption($option, $value);
@@ -265,7 +266,7 @@ class Structures_BibTex
       $this->_oldpos = 0;
       return true; // For compatibility with loadFile
     }
-
+    
     /**
      * Parses what is stored in content and clears the content if the parsing is successfull.
      *

@@ -22,10 +22,7 @@
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License,                $year = is_numeric($value["year"]) ? intval($value["year"]) : -1;
-	            $statement = $wpdb->prepare("REPLACE $papercite_table_name(urlid, bibtexid, entrytype, year, data) VALUES (%s,%s,%s,%s,%s)", 
-	                            $oldurlid, $value["cite"], $value["entrytype"], $year, maybe_serialize($value));
- or
+    the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -162,11 +159,15 @@ class Papercite {
   static $bibtex_parsers = array("pear" => "Pear parser", "osbib" => "OSBiB parser");
 
   // Names of the options that can be set
-  static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", "use_db", "auto_bibshow", "skip_for_post_lists");
+  static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", 
+    "use_db", "auto_bibshow", "skip_for_post_lists", "process_titles", "checked_files");
 
+  // Default value of options
   static $default_options = 
 	array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
-	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "pear", "use_db" => false, "auto_bibshow" => false, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600);
+	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "pear", "use_db" => false,
+        "auto_bibshow" => false, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true,
+        "checked_files" => array(array("pdf", "pdf", "pdf")));
   /**
    * Init is called before the first callback
    */
@@ -181,11 +182,13 @@ class Papercite {
     if (!isset($this->options)) {
       $this->options =  papercite::$default_options;
       $pOptions = get_option('papercite_options');
-
       // Use preferences if set to override default values
-      if (is_array($pOptions)) {
-    	foreach(self::$option_names as &$name) {
-    	  if (array_key_exists($name, $pOptions) && !empty($pOptions[$name])) {
+      if (is_array($pOptions)) 
+      {
+    	foreach(self::$option_names as &$name) 
+        {
+    	  if (array_key_exists($name, $pOptions) && $pOptions[$name] !== "") 
+          {
     	    $this->options[$name] = $pOptions[$name];
     	  }
     	}
@@ -207,6 +210,15 @@ class Papercite {
   }
 
   
+  static function getCustomDataDirectory() {
+    $url = WP_CONTENT_URL;
+    if (is_multisite()) {
+      $subpath = '/blogs.dir/'. $wpdb->blogid . "/files";
+      $url .= $subpath;
+    }
+    return $url . "/papercite-data";
+  }
+
   /**
    * Check the different paths where papercite data can be stored
    * and return the first match, starting by the preferred ones
@@ -234,13 +246,13 @@ class Papercite {
 
   /** 
    * Check if a matching file exists, and add it to the bibtex if so
-   * @param The key
-   * @param 
+   * @param $entry key
+   * @param $types An array of couples (folder, extension)
    */
   function checkFiles(&$entry, $types) {
     $id = strtolower(preg_replace("@[/:]@", "-", $entry["cite"]));
     foreach($types as &$type) {
-      $file = papercite::getDataFile("$type[0]/$id.$type[1]");
+      $file = papercite::getDataFile("$type[1]/$id.$type[2]");
       if ($file) {
 	      $entry[$type[0]] =  $file[1];
       }
@@ -259,9 +271,11 @@ class Papercite {
   /**
    * Get the bibtex data from an URI
    */
-  function getData($biburis, $timeout = 3600) {
+  function getData($biburis, $options) {
       global $wpdb, $papercite_table_name, $papercite_table_name_url;
 
+     $timeout = $options["timeout"];
+     $processtitles = $options["process_titles"];
     
     // Loop over the different given URIs
     $bibFile = false;
@@ -296,6 +310,9 @@ class Papercite {
     
 	if ($data === FALSE && !($bibFile && file_exists($bibFile[0])))
 	  continue;	
+    
+    // Customize URIs depending on parsing options
+    $biburi .= $processtitles ? "#pt=1" : "#pt=0";
 
 	// (2) Parse the BibTeX
 	if ($data || file_exists($bibFile[0])) {
@@ -322,7 +339,7 @@ class Papercite {
 	  if (!empty($data)) {
 	    switch($this->options["bibtex_parser"]) {
 	    case "pear": // Pear parser
-	      $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true));
+	      $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true, 'processTitles' => $processtitles));
 	      $this->_parser->loadString($data);
 	      $stat = $this->_parser->parse();
 	      
@@ -332,6 +349,7 @@ class Papercite {
 
 	    default: // OSBiB parser
 	      $parser = new BibTexEntries();
+          $parser->processTitles($processtitles);
 	      if (!$parser->parse($data)) {
 		$this->cache[$biburi] = false;
 		continue;
@@ -344,7 +362,7 @@ class Papercite {
 
 	    // --- Add custom fields
 	    foreach($this->cache[$biburi] as &$entry) {
-	      $this->checkFiles($entry, array(array("pdf", "pdf")));
+        $this->checkFiles($entry, $this->options["checked_files"]);
 	    }
 	    
     
@@ -468,7 +486,7 @@ class Papercite {
     // Get all the options pairs and store them
     // in the $options array
     $options_pairs = array();
-    preg_match_all("/\s*([\w-_]+)=(?:([^\"]\S*)|\"([^\"]+)\")(?:\s+|$)/", sizeof($matches) > 2 ? $matches[2] : "", $options_pairs, PREG_SET_ORDER);
+    preg_match_all("/\s*([\w-:_]+)=(?:([^\"]\S*)|\"([^\"]+)\")(?:\s+|$)/", sizeof($matches) > 2 ? $matches[2] : "", $options_pairs, PREG_SET_ORDER);
     
     // print "<pre>";
     // print htmlentities(print_r($options_pairs,true));
@@ -482,14 +500,22 @@ class Papercite {
     // (3) From the general options
     // $this->options has already processed the steps 0-2
     $options = $this->options;
-
+    $options["filters"] = Array();
+        
     foreach($options_pairs as $x) {
       $value = $x[2] . (sizeof($x) > 3 ? $x[3] : "");
       
-      if ($x[1] == "template") {
+      if ($x[1] == "template") 
+      {
           // Special case of template: should overwrite the corresponding command template
           $options["${command}_$x[1]"] = $value;
-      } else {
+      } 
+      else if (Papercite::startsWith($x[1], "filter:")) 
+      {
+          $options["filters"][substr($x[1],7)] = $value;
+      }
+      else 
+      {
           $options[$x[1]] = $value;
       }
     }
@@ -529,7 +555,7 @@ class Papercite {
 
 	// bibshow / bibcite commands
     case "bibshow":
-     $data = $this->getData($options["file"]);
+     $data = $this->getData($options["file"], $options);
       if (!$data) return "<span style='color: red'>[Could not find the bibliography file(s)".
           (current_user_can("edit_post") ? " with name [".htmlspecialchars($options["file"])."]" : "") ."</span>";
 
@@ -600,13 +626,26 @@ class Papercite {
     }
   }
 
+  /** Returns true if the all the regular expression filters are matched */
+  static function userFiltersMatch($filters, $entry) 
+  {
+      foreach($filters as $fieldname => $regexp) 
+      {
+          $v = array_key_exists($fieldname, $entry) ? $entry[$fieldname] : "";
+          if (!preg_match($regexp, $v))
+          {
+              return false;              
+          }
+      }      
+      return true;
+  }
 
   /** Get entries fullfilling a condition (bibtex & bibfilter) */
   function getEntries($options) {
       global $wpdb, $papercite_table_name;
       
       // --- Filter the data
-      $entries = $this->getData($options["file"], $options["timeout"]);
+      $entries = $this->getData($options["file"], $options);
       if (!$entries) 
           return "<span style='color: red'>[Could not find the bibliography file(s)".
               (current_user_can("edit_post") ? " with name [".htmlspecialchars($options["file"])."]" : "") ."</span>";
@@ -639,7 +678,7 @@ class Papercite {
       	    else
         	    foreach($outer as &$entry) {
         	      $t = &$entry["entrytype"];
-        	      if ((sizeof($allow)==0 || in_array($t, $allow)) && (sizeof($deny)==0 || !in_array($t, $deny)) && $author_matcher->matches($entry)) {
+        	      if ((sizeof($allow)==0 || in_array($t, $allow)) && (sizeof($deny)==0 || !in_array($t, $deny)) && $author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry)) {
             		$result[] = $entry;
         	      }
               }
@@ -661,7 +700,7 @@ class Papercite {
               $rows = $wpdb->get_col($st);
               if ($rows) foreach($rows as $data) {
                   $entry = maybe_unserialize($data);
-                  if ($author_matcher->matches($entry))
+                  if ($author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry))
                       $result[] = $entry;
               }
           }
@@ -750,6 +789,7 @@ class Papercite {
     // Convert (also set the citation key)
     $bib2tpl = new BibtexConverter($options, $main, $bibtexEntryTemplate);
     $bib2tpl->setGlobal("WP_PLUGIN_URL", WP_PLUGIN_URL);
+    $bib2tpl->setGlobal("PAPERCITE_DATA_URL", Papercite::getCustomDataDirectory());
     $r =  $bib2tpl->display($refs);
 
     // If we need to get the citation key back
