@@ -109,6 +109,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.5.4 =
+  * Incompatibility with PHP version < 5.4
 = 0.5.2 =
   * Option to add new files detectors (beyond pdf) - issue #38
   * Option to control title processing (issue #54)
