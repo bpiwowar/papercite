@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== papercite ===
 Contributors: bpiwowar
 Tags: formatting, bibtex, bibliography
 Requires at least: 3.0

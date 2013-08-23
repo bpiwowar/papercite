@@ -1,9 +1,9 @@
-# Plugin Name #
+# papercite #
 **Contributors:** bpiwowar  
 **Tags:** formatting, bibtex, bibliography  
 **Requires at least:** 3.0  
 **Tested up to:** 3.5.2  
-**Stable tag:** HEAD  
+**Stable tag:** 0.5.2  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -104,23 +104,25 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 ## Screenshots ##
 
 ### 1. With the bibshow & bibcite commands ###
-![1. With the bibshow & bibcite commands](http://s.wordpress.org/extend/plugins/plugin-name/screenshot-1.png)
+![1. With the bibshow & bibcite commands](http://s.wordpress.org/extend/plugins/papercite/screenshot-1.png)
 
 ### 2. With the bibtex command ###
-![2. With the bibtex command](http://s.wordpress.org/extend/plugins/plugin-name/screenshot-2.png)
+![2. With the bibtex command](http://s.wordpress.org/extend/plugins/papercite/screenshot-2.png)
 
 ### 3. The bibfilter command ###
-![3. The bibfilter command](http://s.wordpress.org/extend/plugins/plugin-name/screenshot-3.png)
+![3. The bibfilter command](http://s.wordpress.org/extend/plugins/papercite/screenshot-3.png)
 
 
 ## Changelog ##
 
-### HEAD ###
+### 0.5.2 ###
   * Option to add new files detectors (beyond pdf) - issue #38
   * Option to control title processing (issue #54)
   * Any field can now be used for filters (issue #62)
   * Unparseable year field causes database issues (issue #63)
+### 0.5.1 ###
   * The journal field was not parsed with OSBiB (issue #59)
+### 0.5.0 ###
   * @conference is now properly handled as @inproceedings (issue #53)
   * Option to limit the number of papers output by bibtex (issue #50)
   * More accents handled (issue #51)
@@ -128,13 +130,20 @@ subfolders tpl (citation list rendering) and format (entry rendering).
   * Added support for these additional filtering commands to bibtex command (author and type)
   * Added two new options: auto-bibshow and skip display in post lists (thanks to Michael Schreifels)
   * Fixed quite a few PHP warnings
+### 0.4.5 ###
   * Fixed bug #48 (URL as source not working anymore with PHP < 5.4)
+### 0.4.4 ###
   * Fix problems with ignored booktitle in books (harvard and ieee styles) - fixes issue #45
   * Fix for newlines by L. Murray (issues #26 and #35)
   * Handles for URL types (issue #41, A. Dyck)
+### 0.4.3 ###
   * Maintenance mode plugins support (bug #39)
   * Support for PHP 5.4 (bug #37)
   * Improved accent support - bug #36 (josemmoya)
+### 0.4.2 ###
+  * Fixes fatal error in PHP 5.4 (bug #37)
+  * Improved accent support - bug #36 (josemmoya)
+### 0.4.1 ###
   * Post/page BibTeX entries from custom fields
   * Bug fixes and information for database backend
 ### 0.4.0 ###
