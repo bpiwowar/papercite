@@ -901,12 +901,12 @@ function papercite_init() {
   global $papercite;
 
   if (function_exists('wp_enqueue_script')) {
-    wp_register_script('papercite', get_bloginfo('wpurl') . '/wp-content/plugins/papercite/js/papercite.js', array('jquery'));
+    wp_register_script('papercite', plugins_url('papercite/js/papercite.js'), array('jquery'));
     wp_enqueue_script('papercite');
-  } 
+  }
 
   // Register and enqueue the stylesheet
-  wp_register_style('papercite_css', WP_PLUGIN_URL . '/papercite/papercite.css' );
+  wp_register_style('papercite_css', plugins_url('papercite/papercite.css'));
   wp_enqueue_style('papercite_css');
 
   // Initialise the object
