@@ -165,7 +165,7 @@ class Papercite {
   // Default value of options
   static $default_options = 
 	array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
-	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "pear", "use_db" => false,
+	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "osbib", "use_db" => false,
         "auto_bibshow" => false, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true,
         "checked_files" => array(array("pdf", "pdf", "pdf")));
   /**

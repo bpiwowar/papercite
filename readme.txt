@@ -110,6 +110,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+  * OSBib parser is now the default
+  * Handles non-standard plugin folder
 = 0.5.4 =
   * Incompatibility with PHP version < 5.4
 = 0.5.2 =
