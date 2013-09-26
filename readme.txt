@@ -110,6 +110,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+  * Improved the speed of the OSBib parser (issue #68)
 = 0.5.5 =
   * OSBib parser is now the default
   * Handles non-standard plugin folder

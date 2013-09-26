@@ -26,6 +26,45 @@ class BibtexPages {
   }
 }
 
+/** Incremental way of finding the closing delimiter */
+class IncrementalClosingDelimiter {
+	function __construct($delimitEnd) {
+		$this->delimitEnd = $delimitEnd;
+		$this->reset();
+	}
+
+	function reset() {
+		$this->openquote = 0;
+		$this->bracelevel = 0;
+		$this->total_length = 0;
+		$this->found = -1;
+	}
+
+	function find($val) {
+		if ($this->found >= 0)
+			return $this->found;
+
+		$i = $j = 0; 
+		$length = strlen($val);
+		while ($i < $length)
+		{
+			// a '"' found at brace level 0 defines a value such as "ss{\"o}ss"
+			if ($val[$i] == '"' && !$this->bracelevel)
+				$this->openquote = !$this->openquote;
+			elseif ($val[$i] == '{')
+				$this->bracelevel++;
+			elseif ($val[$i] == '}')
+				$this->bracelevel--;
+			if ( $val[$i] == $this->delimitEnd && !$this->openquote && !$this->bracelevel ) {
+				$this->found = $i + $this->total_length;
+				return $this->found;
+			}
+			$i++;
+		}
+		$this->total_length += $length;
+		return 0;
+	}
+};
 
 /**
  * A set of bibtex entries
@@ -274,9 +313,11 @@ class BibTexEntries {
 //    to simply escape with \": Quotes must be placed inside braces. 
 	function closingDelimiter($val,$delimitEnd)
 	{
-//  echo "####>$delimitEnd $val<BR>";
+		$time_start = microtime(true);
 		$openquote = $bracelevel = $i = $j = 0; 
-		while ($i < strlen($val))
+		$l = strlen($val);
+		// echo "<div>Searching {$delimitEnd} in string of length {$l} </div>";
+		while ($i < $l)
 		{
 			// a '"' found at brace level 0 defines a value such as "ss{\"o}ss"
 			if ($val[$i] == '"' && !$bracelevel)
@@ -285,11 +326,15 @@ class BibTexEntries {
 				$bracelevel++;
 			elseif ($val[$i] == '}')
 				$bracelevel--;
-			if ( $val[$i] == $delimitEnd && !$openquote && !$bracelevel )
+			if ( $val[$i] == $delimitEnd && !$openquote && !$bracelevel ) {
+				// echo "<div>FOUND IT $i /".((microtime(true)-$time_start)*1000)."</div>";
 				return $i;
+			}
 			$i++;
 		}
 // echo "--> $bracelevel, $openquote";
+		// echo "<pre>" . htmlentities($val) . "</pre>";
+		// echo "<div style='color: red'>NOT FOUND/".((microtime(true)-$time_start)*1000)."</div>";
 		return 0;
 	}
 
@@ -324,6 +369,8 @@ class BibTexEntries {
 // find an entry. Before that sign, and after an entry, everything is considered a comment! 
 	function extractEntries()
 	{
+		$brace_closing = new IncrementalClosingDelimiter('}');
+		$parenthesis_closing = new IncrementalClosingDelimiter(')');
 		$inside = $possibleEntryStart = FALSE;
 		$entry="";
 		while($line=$this->getLine())
@@ -339,17 +386,27 @@ class BibTexEntries {
 				elseif(preg_match("/@.*([{(])/U", preg_quote($line), $matches))
 				{
 					$inside = TRUE;
-					if ($matches[1] == '{')
+					if ($matches[1] == '{') {
+						$detector = $brace_closing;
 						$delimitEnd = '}';
-					else
+					}
+					else {
+						$detector = $parenthesis_closing;
 						$delimitEnd = ')';
+					}
+					$detector->reset();
 					$possibleEntryStart = FALSE;
 				}
 			}
 			if ($inside)
 			{
-			  $entry .= ($entry ?  "\n" : "") . $line;
-				if ($j=$this->closingDelimiter($entry,$delimitEnd))
+			  $line = ($entry ?  "\n" : "") . $line;
+			  $j = $detector->find($line);
+			  $entry .= $line;
+			  // BP: remove this and closingDelimiter when sure this works perflectly
+			  // $j = $this->closingDelimiter($entry,$delimitEnd);
+			  // assert($j == $j2);
+				if ($j)
 				{
 					// all characters after the delimiter are thrown but the remaining 
 					// characters must be kept since they may start the next entry !!!
@@ -359,8 +416,11 @@ class BibTexEntries {
 					$entry = preg_replace('/\s\s+/', ' ', $entry);
 					$this->parseEntry($entry);
 					$entry = strchr($lastLine,"@");
-					if ($entry) 
+					if ($entry) {
 						$inside = TRUE;
+						$detector->reset();
+						$detector->find($entry);
+					}
 					else 
 						$inside = FALSE;
 				}

@@ -43,26 +43,26 @@ include("papercite_options.php");
   /**
    * Get string with author name(s) and make regex of it.
    * String with author or a list of authors (passed as parameter to papercite) in the following format:
-   * -a1|a2|..|an 	- publications including at least one of these authors
-   * -a1&a2&..&an  	- publications including all of these authors
+   * -a1|a2|..|an   - publications including at least one of these authors
+   * -a1&a2&..&an   - publications including all of these authors
    * 
    * @param unknown $authors - string parsed from papercite after tag: "author="
    */
   class PaperciteAuthorMatcher {
       function __construct($authors){
           // Each element of this array is alternative match
-  		$this->filters = Array();
+      $this->filters = Array();
 
-      	if (!isset($authors) || empty($authors)){
-      	} else if(!is_string($authors)){
-      		echo "Warning: cannot parse option \"authors\", this is specified by string!<br>";// probably useless..
+        if (!isset($authors) || empty($authors)){
+        } else if(!is_string($authors)){
+          echo "Warning: cannot parse option \"authors\", this is specified by string!<br>";// probably useless..
             // string contains both: & and | => this is not supported
-      	} else {
+        } else {
             require_once(dirname(__FILE__) . "/lib/bibtex_common.php");
             foreach(preg_split("-\\|-", $authors) as $conjonction) {
                 $this->filters[] = BibtexCreators::parse($conjonction);
             }
-      	}
+        }
       }
       
       function matches(&$entry) {
@@ -133,26 +133,26 @@ class Papercite {
       // not returned yet, grab new version
       // since wordpress 2.7, we can use the wp_remote_get function
       if (function_exists("wp_remote_get")) {
-	$body = wp_remote_retrieve_body(wp_remote_get($url));
-	if ($body) {
-	  $f=fopen($file,"wb");
-	  fwrite($f,$body);
-	  fclose($f);
-	} else return NULL;
+  $body = wp_remote_retrieve_body(wp_remote_get($url));
+  if ($body) {
+    $f=fopen($file,"wb");
+    fwrite($f,$body);
+    fclose($f);
+  } else return NULL;
       }
       else {
-	$f=fopen($file,"wb");
-	fwrite($f,file_get_contents($url));
-	fclose($f);
+  $f=fopen($file,"wb");
+  fwrite($f,file_get_contents($url));
+  fclose($f);
       }
-	
-	
+  
+  
       if (!$f) {
-	echo "Failed to write file " . $file . " - check directory permission according to your Web server privileges.";
-	return false;
+  echo "Failed to write file " . $file . " - check directory permission according to your Web server privileges.";
+  return false;
       }
     }
-	
+  
     return array($file, WP_PLUGIN_URL."/papercite/cache/$name.bib");
   }
 
@@ -164,8 +164,8 @@ class Papercite {
 
   // Default value of options
   static $default_options = 
-	array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
-	      "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "osbib", "use_db" => false,
+  array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
+        "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "osbib", "use_db" => false,
         "auto_bibshow" => false, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true,
         "checked_files" => array(array("pdf", "pdf", "pdf")));
   /**
@@ -185,13 +185,13 @@ class Papercite {
       // Use preferences if set to override default values
       if (is_array($pOptions)) 
       {
-    	foreach(self::$option_names as &$name) 
+      foreach(self::$option_names as &$name) 
         {
-    	  if (array_key_exists($name, $pOptions) && $pOptions[$name] !== "") 
+        if (array_key_exists($name, $pOptions) && $pOptions[$name] !== "") 
           {
-    	    $this->options[$name] = $pOptions[$name];
-    	  }
-    	}
+          $this->options[$name] = $pOptions[$name];
+        }
+      }
       }
 
       // Use custom field values
@@ -233,7 +233,7 @@ class Papercite {
       $subpath = '/blogs.dir/'. $wpdb->blogid . "/files/papercite-data/$relfile";
       $path = WP_CONTENT_DIR . $subpath;
       if (file_exists($path))
-	      return array($path, WP_CONTENT_URL.$subpath);
+        return array($path, WP_CONTENT_URL.$subpath);
     }
 
     if (file_exists(WP_CONTENT_DIR . "/papercite-data/$relfile"))
@@ -241,7 +241,7 @@ class Papercite {
 
     if (file_exists(WP_PLUGIN_DIR . "/papercite/$relfile"))
       return array(WP_PLUGIN_DIR . "/papercite/$relfile", WP_PLUGIN_URL . "/papercite/$relfile");
-	 
+   
   }
 
   /** 
@@ -254,7 +254,7 @@ class Papercite {
     foreach($types as &$type) {
       $file = papercite::getDataFile("$type[1]/$id.$type[2]");
       if ($file) {
-	      $entry[$type[0]] =  $file[1];
+        $entry[$type[0]] =  $file[1];
       }
     }
   }
@@ -294,32 +294,32 @@ class Papercite {
           $stringedFile = true;
           $key =  substr($biburi, strlen($custom_prefix));
           $biburi = "post://" . get_the_ID() . "/" . $key;
-   	      $data = get_post_custom_values("papercite_$key");
-   	      if ($data) $data = $data[0];
+          $data = get_post_custom_values("papercite_$key");
+          if ($data) $data = $data[0];
       }
 
       if (!Papercite::array_get($this->cache, $biburi, false)) {
-    	if ($stringedFile) {
-    	    // do nothing
-    	} else if (preg_match('#^(ftp|http)s?://#', $biburi) == 1) {
-    	  $bibFile = $this->getCached($biburi, $timeout);
-    	} else {
-    	  $bibFile = $this->getDataFile("bib/$biburi");
-    	}
+      if ($stringedFile) {
+          // do nothing
+      } else if (preg_match('#^(ftp|http)s?://#', $biburi) == 1) {
+        $bibFile = $this->getCached($biburi, $timeout);
+      } else {
+        $bibFile = $this->getDataFile("bib/$biburi");
+      }
       
     
-	if ($data === FALSE && !($bibFile && file_exists($bibFile[0])))
-	  continue;	
+  if ($data === FALSE && !($bibFile && file_exists($bibFile[0])))
+    continue; 
     
     // Customize URIs depending on parsing options
     $biburi .= $processtitles ? "#pt=1" : "#pt=0";
 
-	// (2) Parse the BibTeX
-	if ($data || file_exists($bibFile[0])) {
-	    if (!$data) {
-	        $fileTS = filemtime($bibFile[0]);
-	        
-        	// Check if we don't have the data in cache
+  // (2) Parse the BibTeX
+  if ($data || file_exists($bibFile[0])) {
+      if (!$data) {
+          $fileTS = filemtime($bibFile[0]);
+          
+          // Check if we don't have the data in cache
             if ($this->useDb()) {
                 $oldurlid = -1;
                 // We use entrytype as a timestamp
@@ -327,81 +327,81 @@ class Papercite {
                 if ($row) {
                     $oldurlid = $row->urlid;
                     if ($row->ts >= $fileTS) {
-                    	$result[$biburi] = $this->cache[$biburi] = array("__DB__", $row->urlid);
-                    	continue;
+                      $result[$biburi] = $this->cache[$biburi] = array("__DB__", $row->urlid);
+                      continue;
                     } 
                 }
             }
 
-    	    $data = file_get_contents($bibFile[0]);
+          $data = file_get_contents($bibFile[0]);
         } 
     
-	  if (!empty($data)) {
-	    switch($this->options["bibtex_parser"]) {
-	    case "pear": // Pear parser
-	      $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true, 'processTitles' => $processtitles));
-	      $this->_parser->loadString($data);
-	      $stat = $this->_parser->parse();
-	      
-	      if ( !$stat )  return  $this->cache[$biburi] = false;
-	      $this->cache[$biburi] = &$this->_parser->data;
-	      break;
+    if (!empty($data)) {
+      switch($this->options["bibtex_parser"]) {
+      case "pear": // Pear parser
+        $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true, 'processTitles' => $processtitles));
+        $this->_parser->loadString($data);
+        $stat = $this->_parser->parse();
+        
+        if ( !$stat )  return  $this->cache[$biburi] = false;
+        $this->cache[$biburi] = &$this->_parser->data;
+        break;
 
-	    default: // OSBiB parser
-	      $parser = new BibTexEntries();
+      default: // OSBiB parser
+        $parser = new BibTexEntries();
           $parser->processTitles($processtitles);
-	      if (!$parser->parse($data)) {
-		$this->cache[$biburi] = false;
-		continue;
-	      } else {
-		$this->cache[$biburi] = &$parser->data;
-	      }
-	      break;
-	    }
-	
+          if (!$parser->parse($data)) {
+            $this->cache[$biburi] = false;
+            continue;
+          } else {
+            $this->cache[$biburi] = &$parser->data;
+          }
+        break;
+      }
+  
 
-	    // --- Add custom fields
-	    foreach($this->cache[$biburi] as &$entry) {
+      // --- Add custom fields
+      foreach($this->cache[$biburi] as &$entry) {
         $this->checkFiles($entry, $this->options["checked_files"]);
-	    }
-	    
+      }
+      
     
-	    // Save to DB
-	    if (!$stringedFile && $this->useDb()) {
-	        // First delete everything
+      // Save to DB
+      if (!$stringedFile && $this->useDb()) {
+          // First delete everything
             if ($oldurlid >= 0) {
                 $wpdb->query($wpdb->prepare("DELETE FROM $papercite_table_name WHERE urlid=%d", $oldurlid));
-	            if ($code === FALSE) 
+              if ($code === FALSE) 
                     break;
             } else {
                 $code = $wpdb->query($wpdb->prepare("INSERT INTO $papercite_table_name_url(url, ts) VALUES (%s, 0)", $biburi));
-	            if ($code === FALSE) 
+              if ($code === FALSE) 
                     break;
                 $oldurlid = $wpdb->insert_id;
             }
 
-	        $code = true;
-	        foreach($this->cache[$biburi] as &$value) {
+          $code = true;
+          foreach($this->cache[$biburi] as &$value) {
                 $year = is_numeric($value["year"]) ? intval($value["year"]) : -1;
-	            $statement = $wpdb->prepare("REPLACE $papercite_table_name(urlid, bibtexid, entrytype, year, data) VALUES (%s,%s,%s,%s,%s)", 
-	                            $oldurlid, $value["cite"], $value["entrytype"], $year, maybe_serialize($value));
-	            $code = $wpdb->query($statement);
-	            if ($code === FALSE) {
-	                break;
+              $statement = $wpdb->prepare("REPLACE $papercite_table_name(urlid, bibtexid, entrytype, year, data) VALUES (%s,%s,%s,%s,%s)", 
+                              $oldurlid, $value["cite"], $value["entrytype"], $year, maybe_serialize($value));
+              $code = $wpdb->query($statement);
+              if ($code === FALSE) {
+                  break;
                 }
-	        }
-	        if ($code !== FALSE) { 
-	            $statement = $wpdb->prepare("REPLACE INTO $papercite_table_name_url(url, urlid, ts) VALUES(%s,%s,%s)", $biburi, $oldurlid, $fileTS);
-	            $code = $wpdb->query($statement);
-	        } 
+          }
+          if ($code !== FALSE) { 
+              $statement = $wpdb->prepare("REPLACE INTO $papercite_table_name_url(url, urlid, ts) VALUES(%s,%s,%s)", $biburi, $oldurlid, $fileTS);
+              $code = $wpdb->query($statement);
+          } 
         }
-	  }
-	}
+    }
+  }
       }
 
       // Add to the list
       if (Papercite::array_get($this->cache, $biburi, false)) 
-	      $result[$biburi] = $this->cache[$biburi];
+        $result[$biburi] = $this->cache[$biburi];
     }
     
     if (sizeof($result) == 0) return false;
@@ -422,13 +422,13 @@ class Papercite {
         foreach ($entries as $key => &$outer) {
           if (is_array($outer) && $outer[0] == "__DB__") $dbs[] = $outer[1];
           else foreach($outer as $entry) {
-        	if (in_array($entry["cite"], $keys)) {
-        	  $a[] = $entry;
-        	  $found[] = $entry["cite"];
-        	  $n = $n + 1;
-        	  // We found everything, early break
-        	  if ($n == sizeof($keys)) break;
-        	}
+          if (in_array($entry["cite"], $keys)) {
+            $a[] = $entry;
+            $found[] = $entry["cite"];
+            $n = $n + 1;
+            // We found everything, early break
+            if ($n == sizeof($keys)) break;
+          }
           }
           if ($n == sizeof($keys)) break;
         }
@@ -453,12 +453,12 @@ class Papercite {
   // Get the options to forward to bib2tpl
   function getBib2TplOptions($options) {
       return array(
-  			"anonymous-whole" => true, // for compatibility in the output
-  			"group" => $options["group"], 
+        "anonymous-whole" => true, // for compatibility in the output
+        "group" => $options["group"], 
             "group_order" => $options["group_order"], 
-  			"sort" => $options["sort"], 
+        "sort" => $options["sort"], 
             "order" => $options["order"],
-  			"key_format" => $options["key_format"],
+        "key_format" => $options["key_format"],
             "limit" => papercite::array_get($options, "limit", 0)
       );
   }
@@ -542,18 +542,18 @@ class Papercite {
 
     // --- Process the commands ---
     switch($command) {
-    	
+      
     // display form, convert bibfilter to bibtex command and recursivelly call the same;-)
     case "bibfilter":
-    	// this should return hmtl form and new command composed of (modified) $options_pairs
-    	return $this->bibfilter($options);
-    	
+      // this should return hmtl form and new command composed of (modified) $options_pairs
+      return $this->bibfilter($options);
+      
        // bibtex command: 
     case "bibtex":
       $result = $this->getEntries($options);
       return  $this->showEntries($result, $this->getBib2TplOptions($options), false, $options["bibtex_template"], $options["format"], "bibtex");
 
-	// bibshow / bibcite commands
+  // bibshow / bibcite commands
     case "bibshow":
      $data = $this->getData($options["file"], $options);
       if (!$data) return "<span style='color: red'>[Could not find the bibliography file(s)".
@@ -566,10 +566,10 @@ class Papercite {
           if (is_array($outer) && $outer[0] == "__DB__") 
               array_push($refs["__DB__"], $outer[1]);
           else
-        	foreach($outer as &$entry) {
-        	  $key = $entry["cite"];
-        	  $refs[$key] = &$entry;
-        	}
+          foreach($outer as &$entry) {
+            $key = $entry["cite"];
+            $refs[$key] = &$entry;
+          }
       }
 
       $this->bibshow_tpl_options[] = $this->getBib2TplOptions($options);
@@ -596,23 +596,23 @@ class Papercite {
       $returns = "";
 
       foreach($keys as $key) {
-    	if ($returns) $returns .= ", ";
+      if ($returns) $returns .= ", ";
 
-    	// First, get the corresponding entry
-    	$num = Papercite::array_get($cites, $key, false);
+      // First, get the corresponding entry
+      $num = Papercite::array_get($cites, $key, false);
 
-    	  // Did we already cite this?
-    	  if (!$num) {
-    	    // no, register this
-    	    $id = "BIBCITE%%" . $this->citesCounter . "%";
-    	    $this->citesCounter++;
-    	    $num = sizeof($cites);
-    	    $cites[$key] = array($num, $id);
-    	  } else {
-    	    // yes, just copy the id
-    	    $id =  $num[1];
-    	  }
-    	  $returns .= "$id";
+        // Did we already cite this?
+        if (!$num) {
+          // no, register this
+          $id = "BIBCITE%%" . $this->citesCounter . "%";
+          $this->citesCounter++;
+          $num = sizeof($cites);
+          $cites[$key] = array($num, $id);
+        } else {
+          // yes, just copy the id
+          $id =  $num[1];
+        }
+        $returns .= "$id";
 
       }
 
@@ -651,36 +651,36 @@ class Papercite {
               (current_user_can("edit_post") ? " with name [".htmlspecialchars($options["file"])."]" : "") ."</span>";
 
       if (array_key_exists('key', $options)) {
-    	// Select only specified entries
-    	$keys = preg_split("-,-", $options["key"]);
-    	$a = array();
-    	$n = 0;
+      // Select only specified entries
+      $keys = preg_split("-,-", $options["key"]);
+      $a = array();
+      $n = 0;
 
-    	$result = papercite::getEntriesByKey($entries, $keys);
+      $result = papercite::getEntriesByKey($entries, $keys);
         
         if (array_key_exists("allow", $options) || array_key_exists("deny", $options) || array_key_exists("author", $options)) {
             trigger_error("[papercite] Filtering by (key argument) is compatible with filtering by type or author (allow, deny, author arguments)", E_USER_ERROR);
         }
       } else {
-    	// Based on the entry types
-    	$allow = Papercite::array_get($options, "allow", "");
-    	$deny = Papercite::array_get($options, "deny", "");
+      // Based on the entry types
+      $allow = Papercite::array_get($options, "allow", "");
+      $deny = Papercite::array_get($options, "deny", "");
         $allow = $allow ? preg_split("-,-",$allow) : Array();
         $deny =  $deny ? preg_split("-,-", $deny) : Array();
         
-    	$author_matcher = new PaperciteAuthorMatcher(Papercite::array_get($options, "author", ""));
+      $author_matcher = new PaperciteAuthorMatcher(Papercite::array_get($options, "author", ""));
 
-    	  $result = array();
-    	  $dbs = array();
-    	  foreach($entries as $key => &$outer) {
-      	    if (is_array($outer) && $outer[0] == "__DB__")
-      	        $dbs[] = $outer[1];
-      	    else
-        	    foreach($outer as &$entry) {
-        	      $t = &$entry["entrytype"];
-        	      if ((sizeof($allow)==0 || in_array($t, $allow)) && (sizeof($deny)==0 || !in_array($t, $deny)) && $author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry)) {
-            		$result[] = $entry;
-        	      }
+        $result = array();
+        $dbs = array();
+        foreach($entries as $key => &$outer) {
+            if (is_array($outer) && $outer[0] == "__DB__")
+                $dbs[] = $outer[1];
+            else
+              foreach($outer as &$entry) {
+                $t = &$entry["entrytype"];
+                if ((sizeof($allow)==0 || in_array($t, $allow)) && (sizeof($deny)==0 || !in_array($t, $deny)) && $author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry)) {
+                $result[] = $entry;
+                }
               }
           }
 
@@ -749,9 +749,9 @@ class Papercite {
         } else 
             $refs[$cite[0]] = $data[$key];
         
-    	$refs[$cite[0]]["pKey"] = $cite[1];
-    	// just in case
-    	$refs[$cite[0]]["cite"] = $key;
+      $refs[$cite[0]]["pKey"] = $cite[1];
+      // just in case
+      $refs[$cite[0]]["cite"] = $key;
     }
     
     ksort($refs);
@@ -795,10 +795,10 @@ class Papercite {
     // If we need to get the citation key back
     if ($getKeys) {
       foreach($refs as &$group)
-    	foreach($group as &$ref) {
-    	  $this->keys[] = $ref["pKey"];
-    	  $this->keyValues[] = $ref["key"];
-    	}
+      foreach($group as &$ref) {
+        $this->keys[] = $ref["pKey"];
+        $this->keyValues[] = $ref["key"];
+      }
     }
 
     // Process text in order to avoid some unexpected WordPress formatting 
@@ -814,7 +814,7 @@ class Papercite {
      * @return multitype:string The output of the bibfilter shortcode
      */
     function bibfilter($options){
-    	// create form with custom types and authors
+      // create form with custom types and authors
         global $post;
         
         $selected_author = false;
@@ -824,10 +824,10 @@ class Papercite {
         $original_allow = Papercite::array_get($options, "allow", "");
         
         if (isset($_POST) && (papercite::array_get($_POST, "papercite_post_id", 0) == $post->ID)) {
-    		if (isset($_POST["papercite_author"]) && !empty($_POST["papercite_author"])) 
+        if (isset($_POST["papercite_author"]) && !empty($_POST["papercite_author"])) 
                 $selected_author = ($options["author"] = $_POST["papercite_author"]);        
             
-    		if (isset($_POST["papercite_allow"]) && !empty($_POST["papercite_allow"])) 
+        if (isset($_POST["papercite_allow"]) && !empty($_POST["papercite_allow"])) 
                 $selected_type = ($options["allow"] = $_POST["papercite_allow"]);
         
         }
@@ -838,11 +838,11 @@ class Papercite {
         ?>
         <form method="post">
             <input type="hidden" name="papercite_post_id" value="<?=$post->ID?>">
-        	<table style="border-top: solid 1px #eee; border-bottom: solid 1px #eee; width: 100%">
-        		<tr>
-        			<td>Authors:</td>
-        			<td><select name="papercite_author" id="papercite_author">
-        					<option value="">ALL</option>
+          <table style="border-top: solid 1px #eee; border-bottom: solid 1px #eee; width: 100%">
+            <tr>
+              <td>Authors:</td>
+              <td><select name="papercite_author" id="papercite_author">
+                  <option value="">ALL</option>
                             <?php
                             $authors = preg_split("#\s*\\|\s*#", $original_authors);
                             if (Papercite::array_get($options, "sortauthors", 0))
@@ -855,11 +855,11 @@ class Papercite {
                                 print ">$author</option>";
                             }
                             ?>
-        			</select></td>
+              </select></td>
                     
-        			<td>Type:</td>
-        			<td><select name="papercite_allow" id="papercite_type">
-        					<option value="">ALL</option>
+              <td>Type:</td>
+              <td><select name="papercite_allow" id="papercite_type">
+                  <option value="">ALL</option>
                             <?php
                             $types = preg_split("#\s*,\s*#", $original_allow);
                             foreach($types as $type) {
@@ -869,10 +869,10 @@ class Papercite {
                                 print ">" . papercite_bibtype2string($type) . "</option>";
                             }
                             ?>
-        			</select></td>
-        			<td><input type="submit" value="Filter" /></td>
-        		</tr>
-        	</table>
+              </select></td>
+              <td><input type="submit" value="Filter" /></td>
+            </tr>
+          </table>
         </form>
         
         <?php
@@ -938,7 +938,7 @@ function &papercite_cb($myContent) {
 
   // (1) First phase - handles everything but bibcite keys
   $text = preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex|bibfilter)(?:\s+([^[]+))?]/",
-				array($papercite, "process"), $myContent);
+        array($papercite, "process"), $myContent);
 
   // (2) Handles missing bibshow tags
   while (sizeof($papercite->bibshows) > 0)
@@ -962,7 +962,7 @@ function papercite_row_cb($data, $file) {
 add_filter('plugin_row_meta', 'papercite_row_cb',1,2);
 
 // --- Add the different handlers to WordPress ---
-add_action('init', 'papercite_init');	
+add_action('init', 'papercite_init'); 
 add_action('wp_head', 'papercite_head');
 add_filter('the_content', 'papercite_cb', -1);
 
