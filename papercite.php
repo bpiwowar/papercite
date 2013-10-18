@@ -837,7 +837,7 @@ class Papercite {
         ob_start();
         ?>
         <form method="post">
-            <input type="hidden" name="papercite_post_id" value="<?=$post->ID?>">
+            <input type="hidden" name="papercite_post_id" value="<?php echo $post->ID?>">
           <table style="border-top: solid 1px #eee; border-bottom: solid 1px #eee; width: 100%">
             <tr>
               <td>Authors:</td>
