@@ -440,7 +440,6 @@ class Papercite {
             foreach($unfound as &$v) $v = '"' . $wpdb->escape($v) . '"';
             $keylist = implode(",", $unfound);
             $st = "SELECT data FROM $papercite_table_name WHERE $dbs and bibtexid in ($keylist)";
-            print "<br>Entries by Key: $st";
             $val = $wpdb->get_col($st);
             if ($val !== FALSE) { 
                 foreach($val as &$data)              
