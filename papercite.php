@@ -440,6 +440,7 @@ class Papercite {
             foreach($unfound as &$v) $v = '"' . $wpdb->escape($v) . '"';
             $keylist = implode(",", $unfound);
             $st = "SELECT data FROM $papercite_table_name WHERE $dbs and bibtexid in ($keylist)";
+            print "<br>Entries by Key: $st";
             $val = $wpdb->get_col($st);
             if ($val !== FALSE) { 
                 foreach($val as &$data)              
@@ -643,7 +644,6 @@ class Papercite {
   /** Get entries fullfilling a condition (bibtex & bibfilter) */
   function getEntries($options) {
       global $wpdb, $papercite_table_name;
-      
       // --- Filter the data
       $entries = $this->getData($options["file"], $options);
       if (!$entries) 
@@ -697,7 +697,7 @@ class Papercite {
       
               // Retrieve and filter further
               $st = "SELECT data FROM $papercite_table_name WHERE $dbCond $denyCond $allowCond";
-              $rows = $wpdb->get_col($st);
+	      $rows = $wpdb->get_col($st);
               if ($rows) foreach($rows as $data) {
                   $entry = maybe_unserialize($data);
                   if ($author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry))
@@ -833,7 +833,6 @@ class Papercite {
         }
         
         $result = $this->getEntries($options);
-        
         ob_start();
         ?>
         <form method="post">
