@@ -570,7 +570,7 @@ class BibtexConverter
     if ($name != 'bibtex')
       // replace newlines with spaces, to avoid PHP converting them to <br/>
       $str = preg_replace("/[\r\n]+/", " ", $str);
-
+      $str = htmlspecialchars($str);
     return $str;
   }
 
