@@ -72,8 +72,9 @@ include("papercite_options.php");
               foreach($filter->creators as $author) {
                   $ok = false;
                   foreach($eAuthors->creators as $eAuthor) {
-                      if ($author["surname"] === $eAuthor["surname"]) {
-                          $ok = true;
+                      //surname has the surname filter, probably the bibtext author surname has more chars
+		      if(strpos($eAuthor['surname'],$author['surname']) !== False){
+			  $ok = true;
                           break;
                       }
                   }
@@ -696,12 +697,22 @@ class Papercite {
       
               // Retrieve and filter further
               $st = "SELECT data FROM $papercite_table_name WHERE $dbCond $denyCond $allowCond";
+		//print '<br>'.$st;
 	      $rows = $wpdb->get_col($st);
+                //print '<br>count: '.count($rows);
+                //print '<br>Results count: '.count($result);
+   
               if ($rows) foreach($rows as $data) {
                   $entry = maybe_unserialize($data);
+
+      		 if ($author_matcher->matches($entry))
+		    //print "._";
+
                   if ($author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry))
                       $result[] = $entry;
               }
+                //print '<br>Result after Rows? count: '.count($result);
+
           }
       }
           
