@@ -705,9 +705,6 @@ class Papercite {
               if ($rows) foreach($rows as $data) {
                   $entry = maybe_unserialize($data);
 
-      		 if ($author_matcher->matches($entry))
-		    //print "._";
-
                   if ($author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry))
                       $result[] = $entry;
               }
@@ -829,10 +826,16 @@ class Papercite {
         
         $selected_author = false;
         $selected_type = false;
-        
+
         $original_authors = Papercite::array_get($options, "author", "");
         $original_allow = Papercite::array_get($options, "allow", "");
-        
+ 
+	//set allow by default_allow
+	if(empty($_POST) && isset($options['default_allow'])){
+	        $selected_type = $options['default_allow'];	
+		$options['allow'] = $selected_type;
+	}
+       
         if (isset($_POST) && (papercite::array_get($_POST, "papercite_post_id", 0) == $post->ID)) {
         if (isset($_POST["papercite_author"]) && !empty($_POST["papercite_author"])) 
                 $selected_author = ($options["author"] = $_POST["papercite_author"]);        
@@ -841,7 +844,7 @@ class Papercite {
                 $selected_type = ($options["allow"] = $_POST["papercite_allow"]);
         
         }
-        
+
         $result = $this->getEntries($options);
         ob_start();
         ?>
