@@ -110,6 +110,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+  * Added support for Czech accents to osbib parser. Fixes #77. Thanks to mcapino.
   * Improved the speed of the OSBib parser (issue #68)
 = 0.5.5 =
   * OSBib parser is now the default
