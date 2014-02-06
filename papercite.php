@@ -160,13 +160,13 @@ class Papercite {
 
   // Names of the options that can be set
   static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", 
-    "use_db", "auto_bibshow", "skip_for_post_lists", "process_titles", "checked_files");
+    "use_db", "auto_bibshow", "use_media", "skip_for_post_lists", "process_titles", "checked_files");
 
   // Default value of options
   static $default_options = 
   array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
         "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "osbib", "use_db" => false,
-        "auto_bibshow" => false, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true,
+        "auto_bibshow" => false, "use_media" => false, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true,
         "checked_files" => array(array("pdf", "pdf", "pdf")));
   /**
    * Init is called before the first callback
@@ -227,6 +227,16 @@ class Papercite {
    */
   static function getDataFile($relfile) {
     global $wpdb; 
+
+    // Search for files in media
+    $posts = get_posts(array(
+      'name' => $relfile, 
+      'post_type' => 'attachment', 
+      // 'post_mime_type' => 'application/pdf' 'application/bibtex'
+      )
+    );
+    print "===$relfile===<br/>";
+    print_r($posts);
 
     // Multi-site case
     if (is_multisite()) {
@@ -958,6 +968,14 @@ function papercite_row_cb($data, $file) {
   return $data;
 }
 add_filter('plugin_row_meta', 'papercite_row_cb',1,2);
+
+// --- Add 
+function papercite_mime_types($mime_types){
+  // Adjust the $mime_types, which is an associative array where the key is extension and value is mime type.
+  $mime_types['bib'] = 'application/x-bibtex'; // Adding bibtex
+  return $mime_types;
+}
+add_filter('upload_mimes', 'papercite_mime_types', 1, 1);
 
 // --- Add the different handlers to WordPress ---
 add_action('init', 'papercite_init'); 

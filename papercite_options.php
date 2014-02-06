@@ -125,6 +125,7 @@ function papercite_admin_init(){
   add_settings_field('bibtex_parser', 'Bibtex parser', 'papercite_bibtex_parser', 'papercite', 'papercite_choices');
   add_settings_field('use_db', 'Database', 'papercite_use_db', 'papercite', 'papercite_choices');
   add_settings_field('auto_bibshow', 'Auto bibshow', 'papercite_auto_bibshow', 'papercite', 'papercite_choices');
+  add_settings_field('use_media', 'Use WordPress media files', 'papercite_use_media', 'papercite', 'papercite_choices');
   add_settings_field('skip_for_post_lists', 'Skip for post lists', 'papercite_skip_for_post_lists', 'papercite', 'papercite_choices');
   add_settings_field('process_titles', 'Process titles', 'papercite_process_titles', 'papercite', 'papercite_choices');
   add_settings_field('checked_files', 'Checked files', 'papercite_checked_files', 'papercite', 'papercite_choices');
@@ -246,6 +247,11 @@ function papercite_auto_bibshow() {
   echo "<input id='papercite_auto_bibshow' name='papercite_options[auto_bibshow]' type='checkbox' value='1' " . checked(true, $options['auto_bibshow'], false) . " /> This will automatically insert [bibshow] (with default settings) when an unexpected [bibcite] is found.";
 }
 
+function papercite_use_media() {
+  $options = $GLOBALS["papercite"]->options;
+  echo "<input id='papercite_use_media' name='papercite_options[use_media]' type='checkbox' value='1' " . checked(true, $options['use_media'], false) . " /> When checked, files from the WordPress media will be searched when looking for bibtex, PDFs, or other files.";
+}
+
 function papercite_skip_for_post_lists() {
   $options = $GLOBALS["papercite"]->options;
   echo "<input id='papercite_skip_for_post_lists' name='papercite_options[skip_for_post_lists]' type='checkbox' value='1' " . checked(true, $options['skip_for_post_lists'], false) . " /> This will skip papercite processing when displaying a list of posts or pages. [bibcite] and [bibshow] tags will be stripped.";
@@ -279,6 +285,7 @@ function papercite_options_validate($input) {
   $options = get_option('papercite_options');
   $options['use_db'] = $input['use_db'] == "yes";
   $options['auto_bibshow'] = $input['auto_bibshow'] == "1";
+  $options['use_media'] = $input['use_media'] == "1";
   $options['skip_for_post_lists'] = $input['skip_for_post_lists'] == "1";
   $options['process_titles'] = $input['process_titles'] == "1";
 
