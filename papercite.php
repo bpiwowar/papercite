@@ -167,7 +167,7 @@ class Papercite {
   array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
         "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "osbib", "use_db" => false,
         "auto_bibshow" => false, "use_media" => false, "use_files" => true, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true,
-        "checked_files" => array(array("pdf", "pdf", "pdf")));
+        "checked_files" => array(array("pdf", "pdf", "", "pdf", "application/pdf")));
   /**
    * Init is called before the first callback
    */
