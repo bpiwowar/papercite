@@ -23,6 +23,7 @@ are also available from the HTML.
 *Input*: Sources files are BibTex files that can be:
 
 * Stored into a WordPress folder (with multi-site support);
+* Stored media
 * An URL (e.g., from citeulike.org and bibsonomy.org);
 * A custom field when local to a post/page
 

@@ -2,7 +2,7 @@
 Contributors: bpiwowar
 Tags: formatting, bibtex, bibliography
 Requires at least: 3.0
-Tested up to: 3.6.0
+Tested up to: 3.8.1
 Stable tag: 0.5.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -110,6 +110,10 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+  * Handles accents with a space before the accentuated character. Fixes #70
+  * Added support for Czech accents to osbib parser. Fixes #77. Thanks to mcapino.
+  * Files can come from wordpress media (issue #76)
+  * Improved the speed of the OSBib parser (issue #68)
 = 0.5.5 =
   * OSBib parser is now the default
   * Handles non-standard plugin folder

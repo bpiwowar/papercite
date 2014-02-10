@@ -26,6 +26,45 @@ class BibtexPages {
   }
 }
 
+/** Incremental way of finding the closing delimiter */
+class IncrementalClosingDelimiter {
+	function __construct($delimitEnd) {
+		$this->delimitEnd = $delimitEnd;
+		$this->reset();
+	}
+
+	function reset() {
+		$this->openquote = 0;
+		$this->bracelevel = 0;
+		$this->total_length = 0;
+		$this->found = -1;
+	}
+
+	function find($val) {
+		if ($this->found >= 0)
+			return $this->found;
+
+		$i = $j = 0; 
+		$length = strlen($val);
+		while ($i < $length)
+		{
+			// a '"' found at brace level 0 defines a value such as "ss{\"o}ss"
+			if ($val[$i] == '"' && !$this->bracelevel)
+				$this->openquote = !$this->openquote;
+			elseif ($val[$i] == '{')
+				$this->bracelevel++;
+			elseif ($val[$i] == '}')
+				$this->bracelevel--;
+			if ( $val[$i] == $this->delimitEnd && !$this->openquote && !$this->bracelevel ) {
+				$this->found = $i + $this->total_length;
+				return $this->found;
+			}
+			$i++;
+		}
+		$this->total_length += $length;
+		return 0;
+	}
+};
 
 /**
  * A set of bibtex entries
@@ -274,9 +313,11 @@ class BibTexEntries {
 //    to simply escape with \": Quotes must be placed inside braces. 
 	function closingDelimiter($val,$delimitEnd)
 	{
-//  echo "####>$delimitEnd $val<BR>";
+		$time_start = microtime(true);
 		$openquote = $bracelevel = $i = $j = 0; 
-		while ($i < strlen($val))
+		$l = strlen($val);
+		// echo "<div>Searching {$delimitEnd} in string of length {$l} </div>";
+		while ($i < $l)
 		{
 			// a '"' found at brace level 0 defines a value such as "ss{\"o}ss"
 			if ($val[$i] == '"' && !$bracelevel)
@@ -285,11 +326,15 @@ class BibTexEntries {
 				$bracelevel++;
 			elseif ($val[$i] == '}')
 				$bracelevel--;
-			if ( $val[$i] == $delimitEnd && !$openquote && !$bracelevel )
+			if ( $val[$i] == $delimitEnd && !$openquote && !$bracelevel ) {
+				// echo "<div>FOUND IT $i /".((microtime(true)-$time_start)*1000)."</div>";
 				return $i;
+			}
 			$i++;
 		}
 // echo "--> $bracelevel, $openquote";
+		// echo "<pre>" . htmlentities($val) . "</pre>";
+		// echo "<div style='color: red'>NOT FOUND/".((microtime(true)-$time_start)*1000)."</div>";
 		return 0;
 	}
 
@@ -324,6 +369,8 @@ class BibTexEntries {
 // find an entry. Before that sign, and after an entry, everything is considered a comment! 
 	function extractEntries()
 	{
+		$brace_closing = new IncrementalClosingDelimiter('}');
+		$parenthesis_closing = new IncrementalClosingDelimiter(')');
 		$inside = $possibleEntryStart = FALSE;
 		$entry="";
 		while($line=$this->getLine())
@@ -339,17 +386,27 @@ class BibTexEntries {
 				elseif(preg_match("/@.*([{(])/U", preg_quote($line), $matches))
 				{
 					$inside = TRUE;
-					if ($matches[1] == '{')
+					if ($matches[1] == '{') {
+						$detector = $brace_closing;
 						$delimitEnd = '}';
-					else
+					}
+					else {
+						$detector = $parenthesis_closing;
 						$delimitEnd = ')';
+					}
+					$detector->reset();
 					$possibleEntryStart = FALSE;
 				}
 			}
 			if ($inside)
 			{
-			  $entry .= ($entry ?  "\n" : "") . $line;
-				if ($j=$this->closingDelimiter($entry,$delimitEnd))
+			  $line = ($entry ?  "\n" : "") . $line;
+			  $j = $detector->find($line);
+			  $entry .= $line;
+			  // BP: remove this and closingDelimiter when sure this works perflectly
+			  // $j = $this->closingDelimiter($entry,$delimitEnd);
+			  // assert($j == $j2);
+				if ($j)
 				{
 					// all characters after the delimiter are thrown but the remaining 
 					// characters must be kept since they may start the next entry !!!
@@ -359,8 +416,11 @@ class BibTexEntries {
 					$entry = preg_replace('/\s\s+/', ' ', $entry);
 					$this->parseEntry($entry);
 					$entry = strchr($lastLine,"@");
-					if ($entry) 
+					if ($entry) {
 						$inside = TRUE;
+						$detector->reset();
+						$detector->find($entry);
+					}
 					else 
 						$inside = FALSE;
 				}
@@ -423,45 +483,53 @@ class BibTexEntries {
 		return array($this->preamble, $this->strings, $this->data, $this->undefinedStrings);
 	}
 
+	/** Handles bibtex accents */
   static function process_accents(&$text) {
-    // Replace anything of the form (x, y are any character)
-    // {\x{y}}
-    // {\x{\i}}
-    // {\xy}
-    // \xy
-    // \x{y}
-    // \x{\i}
     $slash = '\\\\';
+
+    // {\x{y}}
     $text = preg_replace_callback("#\{$slash(.)\{(.)\}\}#", "BibTexEntries::_accents_cb", $text);
+
+    // {\x y}
+    $text = preg_replace_callback("#\{$slash(.)\s+(.)\}#", "BibTexEntries::_accents_cb", $text);
+
+    // {\x{\i}}
     $text = preg_replace_callback("#\{$slash(.)\{$slash(i)\}\}#", "BibTexEntries::_accents_cb", $text);
+
+    // {\xy}
     $text = preg_replace_callback("#\{$slash(.)(.)\}#", "BibTexEntries::_accents_cb", $text);
+    // \x{y}
     $text = preg_replace_callback("#$slash(.)\{(.)\}#", "BibTexEntries::_accents_cb", $text);
+    // \x{\i}
     $text = preg_replace_callback("#$slash(.)\{$slash(i)\}#", "BibTexEntries::_accents_cb", $text);
-    // When there are no braces, we require a non alphanumeric character
+
+    // -1- x is not alphanumeric
     $text = preg_replace_callback("#$slash([^a-zA-Z])(.)#", "BibTexEntries::_accents_cb", $text);
+    // -2- \xy followed by a non-alphanumeric character
     $text = preg_replace_callback("#$slash([a-zA-Z])(.)(?![a-zA-Z])#", "BibTexEntries::_accents_cb", $text);
-    //    $text = preg_replace_callback("#\\\\(?:['\"^`H~\.]|¨)\w|\\\\([LlcCoO]|ss|aa|AA|[ao]e|[OA]E|&)#", "BibTexEntries::_accents_cb", $text);
   }
 
   static $accents = array(
-			  "'" => array("a" => "á", "e" => "é", "i" => "í", "o" => "ó", "u" => "ú", "z" => "ź", "c" => "ć",
-                       "A" => "Á", "E" => "É", "I" => "Í", "O" => "Ó", "U" => "Ú", "Z" => "Ź"),
+			  "'" => array("a" => "á", "c" => "ć", "e" => "é", "i" => "í", "o" => "ó", "u" => "ú", "y" => "ý", "z" => "ź", 
+                       "A" => "Á", "C" => "Ć", "E" => "É", "I" => "Í", "O" => "Ó", "U" => "Ú", "Y" => "Ý", "Z" => "Ź"),
 			  "`" => array("a" => "à", "e" => "è", "i" => "ì", "o" => "ò", "u" => "ù",
 				       "A" => "À", "E" => "È", "I" => "Ì", "O" => "Ò", "U" => "Ù"),
 			  '"' => array("a" => "ä", "e" => "ë", "i" => "ï", "o" => "ö", "u" => "ü",
 				       "A" => "Ä", "E" => "Ë", "I" => "Ï", "O" => "Ö", "U" => "Ü"),
 			  '^' => array("a" => "â", "e" => "ê", "i" => "î", "o" => "ô", "u" => "û", 
 				       "A" => "Â", "E" => "Ê", "I" => "Î", "O" => "Ô", "U" => "Û"),
+			  'v' => array("c" => "č", "d" => "ď", "e" => "ě", "n" => "ň", "r" => "ř", "s" => "š", "t" => "ť", "z" => "ž", 
+			           "C" => "Č", "D" => "Ď", "E" => "Ě", "N" => "Ň", "R" => "Ř", "S" => "Š", "T" => "Ť", "Z" => "Ž"),			  	       
 			  '.' => array("z" => "ż", 
 				       "Z" => "Ż"),
 			  '~' => array("a" => "ã", "n" => "ñ", "o" => "õ",
 				           "A" => "Ã", "N" => "Ñ", "O" => "Õ"),
 			  "a" => array("a" => "å", "e" => "æ",
 				       "A" => "Å", "E" => "Æ"),
-			  'c' => 'ç',
-			  'C' => 'Ç',
-			  'o' => array("" => "ø", "e" => "œ"),
-			  'O' => ARRAY("" => "Ø", "E" => "Œ"),
+			  'c' => array("c" => 'ç', 'C' => 'Ç'),
+			  'o' => array("" => "ø", "e" => "œ", "u" => "ů", 
+			         "U" => "Ů"),
+			  'O' => array("" => "Ø", "E" => "Œ"),
 			  's' => array("s" => "ß"),
 			  'H' => array("o" => "ő", 
 				       "O" => "Ő"),

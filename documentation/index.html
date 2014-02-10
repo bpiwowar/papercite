@@ -75,6 +75,18 @@ div.warning {
 
 <a name="data_structure"></a><h2>Data structure</h2>
 
+<h3>Using the Media Library</h3>
+
+<p>It is possible to use the WordPress media library. In this case, the name of the file is controlled by the permalink. By default,
+the permalink is a processed version of the file name: the name is lowercased, extension is removed, etc. <b>Due to WordPress limitations, it is necessary to attach the media file to a post before being able to edit the permalink</b>.
+</p>
+
+
+<p>The matching process is determined by the papercite option page. See <a href="#attached_files">the help on attached files</a>.</p>
+
+<p>Note that bibtex files are matched using the same process, with <code>application/x-bibtex</code> as the mime-type and no suffix.</p>
+
+<h3>Using direct access to the WordPress files</h3>
 The data folder where all custom files (bibtex, PDF, templates) will be 
 denoted <b><code>$DATA</code></b> in this document. This folder is either
 <code>wp-content/papercite-data</code> or
@@ -116,22 +128,25 @@ BibTex files can be stored:
 
 <a name="attached_files"></a><h2>Attached files</h2>
 
-Files associated to one BibTeX entry can be automatically detected.  
- To match a bibtex entry with a file, the file should have be named <code><b>FOLDER</b>/<b>KEY</b>.<b>EXT</b></code> where 
- <dl>
- <dt>FOLDER</dt><dd> is a custom folder name</dt>
- <dt>KEY</dt><dd> is the
-  bibtex key in lowercase, where <code>:</code> and <code>/</code> have been replaced by <code>-</code></dd>
-  <dt>EXT</dt><dd> is a custom extension (e.g. pdf, ppt)</dd>
-  </dl>
+<p>
+  For each bibliographic entry, files can be automatically matched to retrieve e.g. the paper PDF, or the slides. 
 
-  The URL of the matched file wil be stored in the field <code>FIELD</code> of the bibtex entry, and will
+</p>
+
+  <div>First, the key of the bibtex entry is transformed - lowercased, and the characters <code>:</code> and <code>/</code> are replaced by <code>-</code>. The <b>field</b> determines the bibtex field that will be populated when matching. Then, 
+  <dl>
+    <dt>Filesystem matching<dt><dd>A file will match if it is contained in the <b>folder</b> and its name is  <b>[key]</b><b>[suffix]</b>.<b>extension</b></dd>
+    <dt>WordPress media matching<dt><dd>A file will match if its mime-type corresponds (or is empty) and its permalink name matches <b>[key]</b><b>[suffix]</b> </dd>
+  </dl>
+</div>
+
+  The URL of the matched file will be stored in the field <code>FIELD</code> of the bibtex entry, and will
   be available by templates. For example, this can be inserted to display a link to a presentation:
   <pre>
     @?ppt@ &lt;a href="@ppt@" title='Download PPT' class='papercite_pdf'&lt;img src='@PAPERCITE_DATA_URL@/img/ppt.png' alt="[ppt]"/&gt;&lt;/a&gt; @;@ 
   </pre>
 
-  The <code>FIELD</code>, <code>FOLDER</code> and <code>EXT</code> can all be set in the preferences. Papercite will process
+  The <code>FIELD</code>, <code>FOLDER</code>, <code>EXT</code> and mime-type can all be set in the preferences. Papercite will process
   the list of such triplets, and will set the bibtex field to the <b>last</b> matched file (if any).
 
 
