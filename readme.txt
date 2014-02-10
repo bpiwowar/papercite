@@ -110,6 +110,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+  * Handles accents with a space before the accentuated character. Fixes #70
   * Added support for Czech accents to osbib parser. Fixes #77. Thanks to mcapino.
   * Files can come from wordpress media (issue #76)
   * Improved the speed of the OSBib parser (issue #68)

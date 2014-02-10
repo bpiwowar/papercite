@@ -483,24 +483,30 @@ class BibTexEntries {
 		return array($this->preamble, $this->strings, $this->data, $this->undefinedStrings);
 	}
 
+	/** Handles bibtex accents */
   static function process_accents(&$text) {
-    // Replace anything of the form (x, y are any character)
-    // {\x{y}}
-    // {\x{\i}}
-    // {\xy}
-    // \xy
-    // \x{y}
-    // \x{\i}
     $slash = '\\\\';
+
+    // {\x{y}}
     $text = preg_replace_callback("#\{$slash(.)\{(.)\}\}#", "BibTexEntries::_accents_cb", $text);
+
+    // {\x y}
+    $text = preg_replace_callback("#\{$slash(.)\s+(.)\}#", "BibTexEntries::_accents_cb", $text);
+
+    // {\x{\i}}
     $text = preg_replace_callback("#\{$slash(.)\{$slash(i)\}\}#", "BibTexEntries::_accents_cb", $text);
+
+    // {\xy}
     $text = preg_replace_callback("#\{$slash(.)(.)\}#", "BibTexEntries::_accents_cb", $text);
+    // \x{y}
     $text = preg_replace_callback("#$slash(.)\{(.)\}#", "BibTexEntries::_accents_cb", $text);
+    // \x{\i}
     $text = preg_replace_callback("#$slash(.)\{$slash(i)\}#", "BibTexEntries::_accents_cb", $text);
-    // When there are no braces, we require a non alphanumeric character
+
+    // -1- x is not alphanumeric
     $text = preg_replace_callback("#$slash([^a-zA-Z])(.)#", "BibTexEntries::_accents_cb", $text);
+    // -2- \xy followed by a non-alphanumeric character
     $text = preg_replace_callback("#$slash([a-zA-Z])(.)(?![a-zA-Z])#", "BibTexEntries::_accents_cb", $text);
-    //    $text = preg_replace_callback("#\\\\(?:['\"^`H~\.]|¨)\w|\\\\([LlcCoO]|ss|aa|AA|[ao]e|[OA]E|&)#", "BibTexEntries::_accents_cb", $text);
   }
 
   static $accents = array(
@@ -520,8 +526,7 @@ class BibTexEntries {
 				           "A" => "Ã", "N" => "Ñ", "O" => "Õ"),
 			  "a" => array("a" => "å", "e" => "æ",
 				       "A" => "Å", "E" => "Æ"),
-			  'c' => 'ç',
-			  'C' => 'Ç',
+			  'c' => array("c" => 'ç', 'C' => 'Ç'),
 			  'o' => array("" => "ø", "e" => "œ", "u" => "ů", 
 			         "U" => "Ů"),
 			  'O' => array("" => "Ø", "E" => "Œ"),
