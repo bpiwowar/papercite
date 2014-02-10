@@ -30,12 +30,14 @@ function papercite_create_menu() {
   add_options_page('Custom Papercite Page', 'Papercite plug-in', 'manage_options', 'papercite', 'papercite_options_page');
 }
 
-function papercite_checked_files_cell($key, $folder, $ext)
+function papercite_checked_files_cell($key, $folder, $suffix, $ext, $mime)
 {
     return "<tr>"
     . "<td><input name='papercite_options[checked_files_key][] type='text' value='".htmlspecialchars($key)."'/></td>"
     . "<td><input name='papercite_options[checked_files_folder][] type='text' value='".htmlspecialchars($folder)."'/></td>"
+    . "<td><input name='papercite_options[checked_files_suffix][] type='text'  value='".htmlspecialchars($suffix)."'/></td>"
     . "<td><input name='papercite_options[checked_files_ext][] type='text'  value='".htmlspecialchars($ext)."'/></td>"
+    . "<td><input name='papercite_options[checked_files_mime][] type='text'  value='".htmlspecialchars($mime)."'/></td>"
     . "<td><span class='papercite_checked_files'>-</span><span class='papercite_checked_files'>+</span></td></tr>";
 }
 
@@ -93,7 +95,7 @@ function papercite_options_page() {
     var cell = jQuery(this).parents().eq(1);
     if (this.textContent == "+") 
     {
-      cell.parent().append(<?php print json_encode(papercite_checked_files_cell("","","")); ?>);
+      cell.parent().append(<?php print json_encode(papercite_checked_files_cell("","","","","")); ?>);
     }
     else if (this.textContent == "-")
     {
@@ -125,10 +127,13 @@ function papercite_admin_init(){
   add_settings_field('bibtex_parser', 'Bibtex parser', 'papercite_bibtex_parser', 'papercite', 'papercite_choices');
   add_settings_field('use_db', 'Database', 'papercite_use_db', 'papercite', 'papercite_choices');
   add_settings_field('auto_bibshow', 'Auto bibshow', 'papercite_auto_bibshow', 'papercite', 'papercite_choices');
-  add_settings_field('use_media', 'Use WordPress media files', 'papercite_use_media', 'papercite', 'papercite_choices');
   add_settings_field('skip_for_post_lists', 'Skip for post lists', 'papercite_skip_for_post_lists', 'papercite', 'papercite_choices');
   add_settings_field('process_titles', 'Process titles', 'papercite_process_titles', 'papercite', 'papercite_choices');
-  add_settings_field('checked_files', 'Checked files', 'papercite_checked_files', 'papercite', 'papercite_choices');
+
+
+  add_settings_section('papercite_files', 'Attached files', 'papercite_files_text', 'papercite');
+  add_settings_field('use_media', 'Methods', 'papercite_files_checkers', 'papercite', 'papercite_files');
+  add_settings_field('checked_files', 'Checked files', 'papercite_checked_files', 'papercite', 'papercite_files');
 }
 
 function papercite_section_text() {
@@ -138,6 +143,10 @@ function papercite_section_text() {
 
 function papercite_choices_text() {
   echo '<p>Options to set how papercite process the data</p>';
+} 
+
+function papercite_files_text() {
+  echo '<p>How attached files are detected - and associated to (bibtex) fields</p>';
 } 
 
 
@@ -234,7 +243,7 @@ function papercite_use_db() {
     print "<div class='papercite_info'>" . $wpdb->get_var("SELECT count(*) FROM $papercite_table_name") . " entries in the database</div>";
     print "<div class='papercite_info'>Cached bibtex files: " . 
       implode(", ", $wpdb->get_col("SELECT url from $papercite_table_name_url")) . "</div>";
-    print "<div><span class='papercite_link' id='papercite_clear_db'>Clear cache</a></div>";
+    print "<div style='margin: 10px 0 10px'><span class='papercite_link' id='papercite_clear_db'>Clear cache</a></div>";
   }
 
   echo "<input type='radio' id='papercite_use_db' " . ($option ? " checked='checked' " : "") . " value='yes' name='papercite_options[use_db]' /> Yes ";
@@ -247,9 +256,10 @@ function papercite_auto_bibshow() {
   echo "<input id='papercite_auto_bibshow' name='papercite_options[auto_bibshow]' type='checkbox' value='1' " . checked(true, $options['auto_bibshow'], false) . " /> This will automatically insert [bibshow] (with default settings) when an unexpected [bibcite] is found.";
 }
 
-function papercite_use_media() {
+function papercite_files_checkers() {
   $options = $GLOBALS["papercite"]->options;
-  echo "<input id='papercite_use_media' name='papercite_options[use_media]' type='checkbox' value='1' " . checked(true, $options['use_media'], false) . " /> When checked, files from the WordPress media will be searched when looking for bibtex, PDFs, or other files.";
+  echo "<div><input id='papercite_use_media' name='papercite_options[use_media]' type='checkbox' value='1' " . checked(true, $options['use_media'], false) . " /> Search files from WordPress media</div>";
+  echo "<div><input id='papercite_use_files' name='papercite_options[use_files]' type='checkbox' value='1' " . checked(true, $options['use_files'], false) . " /> Search files in the papercite folders.</div>";
 }
 
 function papercite_skip_for_post_lists() {
@@ -265,11 +275,27 @@ function papercite_process_titles() {
 function papercite_checked_files() 
 {
   $options = $GLOBALS["papercite"]->options["checked_files"];
-  print "<table class='papercite_checked_files'><thead><th>Field</th><th>Folder</th><th>Extension</th><th><span class='papercite_checked_files'>+</span></th></thead>";
+  print <<<EOS
+  <div>These settings determine <i>how</i> a file can be automatically matched given a bibtex entry. First, the key of the bibtex entry is transformed - lowercased, and the characters <code>:</code> and <code>/</code> are replaced by <code>-</code>. The <b>field</b> determines the bibtex field that will be populated when matching. Then, 
+  <dl>
+    <dt>Filesystem matching<dt><dd>A file will match if it is contained in the <b>folder</b> and its name is  <b>[key]</b><b>[suffix]</b>.<b>extension</b></dd>
+    <dt>WordPress media matching<dt><dd>A file will match if its mime-type corresponds (or is empty) and its permalink name matches <b>[key]</b><b>[suffix]</b> </dd>
+  </dl>
+</div>
+<table class='papercite_checked_files'><thead style='text-align: center'><th>Field</th><th>Folder</th><th>Suffix</th>
+    <th>Extension</th><th>Mime-type</th><th><span class='papercite_checked_files'>+</span></th></thead>
+EOS;
   foreach($options as $x) 
   {
-    print papercite_checked_files_cell($x[0], $x[1], $x[2]);
+    if (sizeof($x) == 3) {
+      // convert to new format
+      $x[3] = $x[2];
+      $x[2] = "";
+      $x[4] = "";
+    }
+    print papercite_checked_files_cell($x[0], $x[1], $x[2], $x[3], $x[4]);
   }
+  print "</table>";
 } 
 
 
@@ -286,6 +312,7 @@ function papercite_options_validate($input) {
   $options['use_db'] = $input['use_db'] == "yes";
   $options['auto_bibshow'] = $input['auto_bibshow'] == "1";
   $options['use_media'] = $input['use_media'] == "1";
+  $options['use_files'] = $input['use_files'] == "1";
   $options['skip_for_post_lists'] = $input['skip_for_post_lists'] == "1";
   $options['process_titles'] = $input['process_titles'] == "1";
 
@@ -299,10 +326,12 @@ function papercite_options_validate($input) {
     {
       $key = $input["checked_files_key"][$i];
       $folder = $input["checked_files_folder"][$i];
+      $suffix = $input["checked_files_suffix"][$i];
       $ext = $input["checked_files_ext"][$i];
+      $mime = $input["checked_files_mime"][$i];
       if (!empty($key) && !empty($folder) && !empty($ext))
       {
-        $a[] = Array($key, $folder, $ext);
+        $a[] = Array($key, $folder, $suffix, $ext, $mime);
       }
     }
     $options['checked_files'] = &$a;
