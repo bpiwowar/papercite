@@ -2,8 +2,8 @@
 **Contributors:** bpiwowar  
 **Tags:** formatting, bibtex, bibliography  
 **Requires at least:** 3.0  
-**Tested up to:** 3.5.2  
-**Stable tag:** 0.5.2  
+**Tested up to:** 3.8.1  
+**Stable tag:** 0.5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -23,7 +23,6 @@ are also available from the HTML.
 *Input*: Sources files are BibTex files that can be:
 
 * Stored into a WordPress folder (with multi-site support);
-* Stored media
 * An URL (e.g., from citeulike.org and bibsonomy.org);
 * A custom field when local to a post/page
 
@@ -58,6 +57,7 @@ as installed on my site <a href="http://www.bpiwowar.net/wp-content/plugins/pape
 * Michael Schreifels: auto-bibshow and no processing in post lists options
 * Stefan Aiche: group by year option
 * Łukasz Radliński: bug fixes & handling polish characters
+* Max Harper: patch for having good URLs
 * Some parts of the code come from bib2html (version 0.9.3) written by Sergio Andreozzi.
 
 ## Installation ##
@@ -116,6 +116,16 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 ## Changelog ##
 
+### 0.5.6 ###
+  * Handles accents with a space before the accentuated character. Fixes #70
+  * Added support for Czech accents to osbib parser. Fixes #77. Thanks to mcapino.
+  * Files can come from wordpress media (issue #76)
+  * Improved the speed of the OSBib parser (issue #68)
+### 0.5.5 ###
+  * OSBib parser is now the default
+  * Handles non-standard plugin folder
+### 0.5.4 ###
+  * Incompatibility with PHP version < 5.4
 ### 0.5.2 ###
   * Option to add new files detectors (beyond pdf) - issue #38
   * Option to control title processing (issue #54)

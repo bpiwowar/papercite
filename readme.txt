@@ -110,6 +110,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.5.7 =
+  * Prevents name clash with other modules using OSBib (e.g. TeachPress). Fixes #79.
 = 0.5.6 =
   * Handles accents with a space before the accentuated character. Fixes #70
   * Added support for Czech accents to osbib parser. Fixes #77. Thanks to mcapino.

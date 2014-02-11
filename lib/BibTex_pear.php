@@ -22,20 +22,20 @@
    * send a note to license@php.net so we can mail you a copy immediately.
    *
    * @category   Structures
-   * @package    Structures_BibTex
+   * @package    PaperciteStructures_BibTex
    * @author     Elmar Pitschke <elmar.pitschke@gmx.de>
    * @copyright  1997-2005 The PHP Group
    * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
    * @version    CVS: $Id: BibTex.php 304756 2010-10-25 10:19:43Z clockwerx $
-   * @link       http://pear.php.net/package/Structures_BibTex
+   * @link       http://pear.php.net/package/PaperciteStructures_BibTex
    */
 
 require_once 'PEAR.php' ;
 require_once 'bibtex_common.php';
 
 
-class BibtexPages {
-  function BibtexPages($start, $end) {
+class PaperciteBibtexPages {
+  function PaperciteBibtexPages($start, $end) {
     $this->start = (int)$start;
     $this->end = (int)$end;
   }
@@ -45,13 +45,13 @@ class BibtexPages {
 }
 
 /**
- * Structures_BibTex
+ * PaperciteStructures_BibTex
  *
  * A class which provides common methods to access and
  * create Strings in BibTex format.
  * Example 1: Parsing a BibTex File and returning the number of entries
  * <code>
- * $bibtex = new Structures_BibTex();
+ * $bibtex = new PaperciteStructures_BibTex();
  * $ret    = $bibtex->loadFile('foo.bib');
  * if (PEAR::isError($ret)) {
  *   die($ret->getMessage());
@@ -61,7 +61,7 @@ class BibtexPages {
  * </code>
  * Example 2: Parsing a BibTex File and getting all Titles
  * <code>
- * $bibtex = new Structures_BibTex();
+ * $bibtex = new PaperciteStructures_BibTex();
  * $ret    = $bibtex->loadFile('bibtex.bib');
  * if (PEAR::isError($ret)) {
  *   die($ret->getMessage());
@@ -73,7 +73,7 @@ class BibtexPages {
  * </code>
  * Example 3: Adding an entry and printing it in BibTex Format
  * <code>
- * $bibtex                         = new Structures_BibTex();
+ * $bibtex                         = new PaperciteStructures_BibTex();
  * $addarray                       = array();
  * $addarray['entrytype']          = 'Article';
  * $addarray['cite']               = 'art2';
@@ -87,14 +87,14 @@ class BibtexPages {
  * </code>
  *
  * @category   Structures
- * @package    Structures_BibTex
+ * @package    PaperciteStructures_BibTex
  * @author     Elmar Pitschke <elmar.pitschke@gmx.de>
  * @copyright  1997-2005 The PHP Group
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  * @version    Release: @package_version@
  * @link       http://pear.php.net/Structures/Structure_BibTex
  */
-class Structures_BibTex
+class PaperciteStructures_BibTex
 {
     /**
      * Array with the BibTex Data
@@ -166,7 +166,7 @@ class Structures_BibTex
      * @access public
      * @return void
      */
-    function Structures_BibTex($options = array())
+    function PaperciteStructures_BibTex($options = array())
     {
         $this->_delimiters     = array('"'=>'"',
                                         '{'=>'}');
@@ -368,7 +368,7 @@ class Structures_BibTex
     }
 
     static function process_accents(&$text) {
-      $text = preg_replace_callback("#\\\\(?:['\"^`H~\.]|¨)\w|\\\\([LlcCoO]|ss|aa|AA|[ao]e|[OA]E|&)#", "Structures_BibTex::_accents_cb", $text);
+      $text = preg_replace_callback("#\\\\(?:['\"^`H~\.]|¨)\w|\\\\([LlcCoO]|ss|aa|AA|[ao]e|[OA]E|&)#", "PaperciteStructures_BibTex::_accents_cb", $text);
     }
 
     static $accents = array(
@@ -398,9 +398,9 @@ class Structures_BibTex
     ); 
 
     static function _accents_cb($input) {
-      if (!array_key_exists($input[0], Structures_BibTex::$accents))
+      if (!array_key_exists($input[0], PaperciteStructures_BibTex::$accents))
 	return "$input[0]";
-      return  Structures_BibTex::$accents[$input[0]];
+      return  PaperciteStructures_BibTex::$accents[$input[0]];
     }
 
     /**
@@ -513,13 +513,13 @@ class Structures_BibTex
 	    // Process accents
 	    foreach($ret as $key => &$value) 
 	      if ($key != "bibtex")
-	      Structures_BibTex::process_accents($value);
+	      PaperciteStructures_BibTex::process_accents($value);
 	    
 	    // Handling pages
             if (in_array('pages', array_keys($ret))) {
 	      $matches = array();
 	      if (preg_match("/^\s*(\d+)(?:\s*--?\s*(\d+))?\s*$/", $ret['pages'], $matches)) {
-		$ret['pages'] = new BibtexPages($matches[1], $matches[2]);
+		$ret['pages'] = new PaperciteBibtexPages($matches[1], $matches[2]);
 	      }
             }
 
@@ -723,7 +723,7 @@ class Structures_BibTex
      * @return array the extracted authors
      */
     function _extractAuthors($authors) {
-      return BibtexCreators::parse($authors);
+      return PaperciteBibtexCreators::parse($authors);
     }
 
     /**

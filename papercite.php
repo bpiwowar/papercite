@@ -5,7 +5,7 @@
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
   Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-  Version: 0.5.6
+  Version: 0.5.7
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
 */
@@ -60,7 +60,7 @@ include("papercite_options.php");
         } else {
             require_once(dirname(__FILE__) . "/lib/bibtex_common.php");
             foreach(preg_split("-\\|-", $authors) as $conjonction) {
-                $this->filters[] = BibtexCreators::parse($conjonction);
+                $this->filters[] = PaperciteBibtexCreators::parse($conjonction);
             }
         }
       }
@@ -382,7 +382,7 @@ class Papercite {
     if (!empty($data)) {
       switch($this->options["bibtex_parser"]) {
       case "pear": // Pear parser
-        $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true, 'processTitles' => $processtitles));
+        $this->_parser = new PaperciteStructures_BibTex(array('removeCurlyBraces' => true, 'extractAuthors' => true, 'processTitles' => $processtitles));
         $this->_parser->loadString($data);
         $stat = $this->_parser->parse();
         
@@ -391,7 +391,7 @@ class Papercite {
         break;
 
       default: // OSBiB parser
-        $parser = new BibTexEntries();
+        $parser = new PaperciteBibTexEntries();
           $parser->processTitles($processtitles);
           if (!$parser->parse($data)) {
             $this->cache[$biburi] = false;
@@ -815,7 +815,7 @@ class Papercite {
     $main = file_get_contents($mainFile[0]);
     $format = file_get_contents($formatFile[0]);
 
-    $bibtexEntryTemplate = new BibtexEntryFormat($format);
+    $bibtexEntryTemplate = new PaperciteBibtexEntryFormat($format);
 
     // Gives a distinct ID to each publication (i.e. to display the corresponding bibtex)
     // in the reference list
