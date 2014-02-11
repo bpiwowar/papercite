@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex, bibliography
 Requires at least: 3.0
 Tested up to: 3.8.1
-Stable tag: 0.5.7
+Stable tag: 0.5.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -111,6 +111,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.5.8 =
+  * (Bug #79) Clears the cache upon upgrading to avoid unknown class names when deserializing
 = 0.5.7 =
   * Prevents name clash with other modules using OSBib (e.g. TeachPress). Fixes #79.
 = 0.5.6 =
@@ -313,6 +315,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Upgrade Notice ==
 
+= 0.5.8 =
+Update to this version for those having troubles after updating to 0.5.7 (or clear the cache)
 = 0.3.17 =
 If you have problems with CPU usage or time to display a page, try this version and choose the OSBiB parser 
 in the plugin preferences (in the WP administration page)

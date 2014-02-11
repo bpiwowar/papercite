@@ -3,7 +3,7 @@
 **Tags:** formatting, bibtex, bibliography  
 **Requires at least:** 3.0  
 **Tested up to:** 3.8.1  
-**Stable tag:** 0.5.6  
+**Stable tag:** 0.5.8  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -22,6 +22,7 @@ are also available from the HTML.
 
 *Input*: Sources files are BibTex files that can be:
 
+* WordPress media files (since 0.5.6)
 * Stored into a WordPress folder (with multi-site support);
 * An URL (e.g., from citeulike.org and bibsonomy.org);
 * A custom field when local to a post/page
@@ -116,6 +117,10 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 ## Changelog ##
 
+### 0.5.8 ###
+  * (Bug #79) Clears the cache upon upgrading to avoid unknown class names when deserializing
+### 0.5.7 ###
+  * Prevents name clash with other modules using OSBib (e.g. TeachPress). Fixes #79.
 ### 0.5.6 ###
   * Handles accents with a space before the accentuated character. Fixes #70
   * Added support for Czech accents to osbib parser. Fixes #77. Thanks to mcapino.
@@ -316,6 +321,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 ## Upgrade Notice ##
 
+### 0.5.8 ###
+Update to this version for those having troubles after updating to 0.5.7 (or clear the cache)
 ### 0.3.17 ###
 If you have problems with CPU usage or time to display a page, try this version and choose the OSBiB parser 
 in the plugin preferences (in the WP administration page)
