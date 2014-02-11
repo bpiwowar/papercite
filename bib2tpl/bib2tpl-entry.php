@@ -7,11 +7,11 @@ require_once(dirname(__FILE__) . "/../lib/UTF8.php");
  * @author Benjamin Piwowarski
  * @version 1.0
  */
-class BibtexEntryFormat {
+class PaperciteBibtexEntryFormat {
   var $formats = array();
   var $properties = array();
 
-  function BibtexEntryFormat(&$file_content) {
+  function PaperciteBibtexEntryFormat(&$file_content) {
     $parser = xml_parser_create(); 
     if (!$parser) 
       return false;
@@ -73,9 +73,9 @@ class BibtexEntryFormat {
 
     $c =  get_class($value);
     switch($c) {
-    case "BibtexCreators":
+    case "PaperciteBibtexCreators":
       return $this->niceAuthors($value->creators);
-    case "BibtexPages":
+    case "PaperciteBibtexPages":
       return $this->nicePages($value);
     default:
       print "<div><b>Internal error [papercite]</b>: unhandled class $c</div>";

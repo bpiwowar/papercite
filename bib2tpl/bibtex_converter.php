@@ -69,7 +69,7 @@ class BibtexConverter
    * BibTex parser
    *
    * @access private
-   * @var Structures_BibTex
+   * @var PaperciteStructures_BibTex
    */
   var $_parser;
 
@@ -115,7 +115,7 @@ class BibtexConverter
     $this->_template = &$template;
     $this->_entry_template = &$entry_template;
 
-    //  $this->_parser = new Structures_BibTex(array('removeCurlyBraces' => true));
+    //  $this->_parser = new PaperciteStructures_BibTex(array('removeCurlyBraces' => true));
 
     // Default options
     $this->_options = array(

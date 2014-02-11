@@ -5,8 +5,8 @@ require_once 'PARSECREATORS.php';
 /**
  * A list of creators (e.g., authors, editors)
  */
-class BibtexCreators {
-  function BibtexCreators(&$creators) {
+class PaperciteBibtexCreators {
+  function PaperciteBibtexCreators(&$creators) {
     $this->creators = &$creators;
   }
   function count() {
@@ -14,7 +14,7 @@ class BibtexCreators {
   }
   
   static function parse($authors) {
-      $parseCreators = new PARSECREATORS();
+      $parseCreators = new PaperciteParseCreators();
       $creators = $parseCreators->parse($authors);
       foreach($creators as &$cArray) {
         $cArray = array(
@@ -25,7 +25,7 @@ class BibtexCreators {
   		      );
         unset($cArray);
       }
-      return new BibtexCreators($creators);
+      return new PaperciteBibtexCreators($creators);
   }
   
 }

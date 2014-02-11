@@ -12,16 +12,16 @@
 
   28/04/2005 - Mark Grimshaw.  Efficiency improvements.
 */
-// For a quick command-line test (php -f PARSECREATORS.php) after installation, uncomment these lines:
+// For a quick command-line test (php -f PaperciteParseCreators.php) after installation, uncomment these lines:
 /*
   $authors = "Mark N. Grimshaw and Bush III, G.W. & M. C. Hammer Jr. and von Frankenstein, Ferdinand Cecil, P.H. & Charles Louis Xavier Joseph de la Vallee Poussin";
-  $creator = new PARSECREATORS();
+  $creator = new PaperciteParseCreators();
   $creatorArray = $creator->parse($authors);
   print_r($creatorArray);
 */
-class PARSECREATORS
+class PaperciteParseCreators
 {
-  function PARSECREATORS()
+  function PaperciteParseCreators()
   {
   }
   /* Create writer arrays from bibtex input.

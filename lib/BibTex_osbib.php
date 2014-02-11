@@ -16,8 +16,8 @@ require_once("bibtex_common.php");
 /**
  * A page range
  */
-class BibtexPages {
-  function BibtexPages($start, $end) {
+class PaperciteBibtexPages {
+  function PaperciteBibtexPages($start, $end) {
     $this->start = (int)$start;
     $this->end = (int)$end;
   }
@@ -27,7 +27,7 @@ class BibtexPages {
 }
 
 /** Incremental way of finding the closing delimiter */
-class IncrementalClosingDelimiter {
+class PaperciteIncrementalClosingDelimiter {
 	function __construct($delimitEnd) {
 		$this->delimitEnd = $delimitEnd;
 		$this->reset();
@@ -69,7 +69,7 @@ class IncrementalClosingDelimiter {
 /**
  * A set of bibtex entries
  */
-class BibTexEntries {
+class PaperciteBibTexEntries {
   /**
    * This contains all the BibTeX entries
    */
@@ -369,8 +369,8 @@ class BibTexEntries {
 // find an entry. Before that sign, and after an entry, everything is considered a comment! 
 	function extractEntries()
 	{
-		$brace_closing = new IncrementalClosingDelimiter('}');
-		$parenthesis_closing = new IncrementalClosingDelimiter(')');
+		$brace_closing = new PaperciteIncrementalClosingDelimiter('}');
+		$parenthesis_closing = new PaperciteIncrementalClosingDelimiter(')');
 		$inside = $possibleEntryStart = FALSE;
 		$entry="";
 		while($line=$this->getLine())
@@ -488,25 +488,25 @@ class BibTexEntries {
     $slash = '\\\\';
 
     // {\x{y}}
-    $text = preg_replace_callback("#\{$slash(.)\{(.)\}\}#", "BibTexEntries::_accents_cb", $text);
+    $text = preg_replace_callback("#\{$slash(.)\{(.)\}\}#", "PaperciteBibTexEntries::_accents_cb", $text);
 
     // {\x y}
-    $text = preg_replace_callback("#\{$slash(.)\s+(.)\}#", "BibTexEntries::_accents_cb", $text);
+    $text = preg_replace_callback("#\{$slash(.)\s+(.)\}#", "PaperciteBibTexEntries::_accents_cb", $text);
 
     // {\x{\i}}
-    $text = preg_replace_callback("#\{$slash(.)\{$slash(i)\}\}#", "BibTexEntries::_accents_cb", $text);
+    $text = preg_replace_callback("#\{$slash(.)\{$slash(i)\}\}#", "PaperciteBibTexEntries::_accents_cb", $text);
 
     // {\xy}
-    $text = preg_replace_callback("#\{$slash(.)(.)\}#", "BibTexEntries::_accents_cb", $text);
+    $text = preg_replace_callback("#\{$slash(.)(.)\}#", "PaperciteBibTexEntries::_accents_cb", $text);
     // \x{y}
-    $text = preg_replace_callback("#$slash(.)\{(.)\}#", "BibTexEntries::_accents_cb", $text);
+    $text = preg_replace_callback("#$slash(.)\{(.)\}#", "PaperciteBibTexEntries::_accents_cb", $text);
     // \x{\i}
-    $text = preg_replace_callback("#$slash(.)\{$slash(i)\}#", "BibTexEntries::_accents_cb", $text);
+    $text = preg_replace_callback("#$slash(.)\{$slash(i)\}#", "PaperciteBibTexEntries::_accents_cb", $text);
 
     // -1- x is not alphanumeric
-    $text = preg_replace_callback("#$slash([^a-zA-Z])(.)#", "BibTexEntries::_accents_cb", $text);
+    $text = preg_replace_callback("#$slash([^a-zA-Z])(.)#", "PaperciteBibTexEntries::_accents_cb", $text);
     // -2- \xy followed by a non-alphanumeric character
-    $text = preg_replace_callback("#$slash([a-zA-Z])(.)(?![a-zA-Z])#", "BibTexEntries::_accents_cb", $text);
+    $text = preg_replace_callback("#$slash([a-zA-Z])(.)(?![a-zA-Z])#", "PaperciteBibTexEntries::_accents_cb", $text);
   }
 
   static $accents = array(
@@ -542,10 +542,10 @@ class BibTexEntries {
 
   static function _accents_cb($input) {
     
-    if (!array_key_exists($input[1], BibTexEntries::$accents)) {
+    if (!array_key_exists($input[1], PaperciteBibTexEntries::$accents)) {
       return "$input[0]";
     }
-    $a = &BibTexEntries::$accents[$input[1]];
+    $a = &PaperciteBibTexEntries::$accents[$input[1]];
     if (!is_array($a)) 
       return "$a$input[2]";
 
@@ -640,7 +640,7 @@ class BibTexEntries {
                 break;
             
             default:
-                BibTexEntries::process_accents($value);
+                PaperciteBibTexEntries::process_accents($value);
         }
     }
 
@@ -654,18 +654,18 @@ class BibTexEntries {
     if (in_array('pages', array_keys($ret))) {
       $matches = array();
       if (preg_match("/^\s*(\d+)(?:\s*--?\s*(\d+))?\s*$/", $ret['pages'], $matches)) {
-	$ret['pages'] = new BibtexPages($matches[1], sizeof($matches) > 2 ? $matches[2] : "");
+	$ret['pages'] = new PaperciteBibtexPages($matches[1], sizeof($matches) > 2 ? $matches[2] : "");
       }
     }
 
     //Handling the authors
     if (in_array('author', array_keys($ret))) {
-      $ret['author'] = BibTexEntries::_extractAuthors($ret['author']);
+      $ret['author'] = PaperciteBibTexEntries::_extractAuthors($ret['author']);
     }
 
     //Handling the editors
     if (in_array('editor', array_keys($ret))) {
-      $ret['editor'] = BibTexEntries::_extractAuthors($ret['editor']);
+      $ret['editor'] = PaperciteBibTexEntries::_extractAuthors($ret['editor']);
     }
 
   }
@@ -678,10 +678,10 @@ class BibTexEntries {
    * @return array the extracted authors
    */
   static function _extractAuthors($authors) {
-      return BibtexCreators::parse($authors);
+      return PaperciteBibtexCreators::parse($authors);
   }
 
-} // end class BibTexEntries
+} // end class PaperciteBibTexEntries
    
 
 ?>
