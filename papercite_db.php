@@ -29,7 +29,7 @@ global $papercite_table_name;
 global $papercite_table_name_url;
 $papercite_table_name = $GLOBALS["wpdb"]->prefix . "plugin_papercite";
 $papercite_table_name_url = $papercite_table_name . "_url";
-$papercite_db_version = "1.8";
+$papercite_db_version = "1.9";
 
 
 function papercite_msg_upgraded() {
@@ -45,9 +45,10 @@ function papercite_install($force = false) {
         if (!empty($installed_ver)) {
             if (version_compare($installed_ver, "1.4") < 0) {
  	          $wpdb->query($wpdb->prepare("DROP TABLE $papercite_table_name"));
-            } elseif (version_compare($installed_ver, "1.8") < 0) {
+            } elseif (version_compare($installed_ver, "1.9") < 0) {
                 // Remove all entries (change in PHP class names)
                 $wpdb->query($wpdb->prepare("TRUNCATE TABLE $papercite_table_name"));
+                $wpdb->query($wpdb->prepare("TRUNCATE TABLE $papercite_table_name_url"));
             }
         }
 
