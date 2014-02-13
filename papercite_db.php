@@ -44,11 +44,11 @@ function papercite_install($force = false) {
          
         if (!empty($installed_ver)) {
             if (version_compare($installed_ver, "1.4") < 0) {
- 	          $wpdb->query($wpdb->prepare("DROP TABLE $papercite_table_name"));
+ 	          $wpdb->query("DROP TABLE $papercite_table_name");
             } elseif (version_compare($installed_ver, "1.9") < 0) {
                 // Remove all entries (change in PHP class names)
-                $wpdb->query($wpdb->prepare("TRUNCATE TABLE $papercite_table_name"));
-                $wpdb->query($wpdb->prepare("TRUNCATE TABLE $papercite_table_name_url"));
+                $wpdb->query("TRUNCATE TABLE $papercite_table_name");
+                $wpdb->query("TRUNCATE TABLE $papercite_table_name_url");
             }
         }
 

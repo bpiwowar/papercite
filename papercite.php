@@ -5,7 +5,7 @@
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
   Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-  Version: 0.5.9
+  Version: 0.5.10
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
 */
@@ -130,26 +130,34 @@ class Papercite {
 
     // check if file date exceeds 60 minutes   
     if (! (file_exists($file) && (filemtime($file) + $timeout > time())))  {
-      // not returned yet, grab new version
-      // since wordpress 2.7, we can use the wp_remote_get function
-      if (function_exists("wp_remote_get")) {
-  $body = wp_remote_retrieve_body(wp_remote_get($url));
-  if ($body) {
-    $f=fopen($file,"wb");
-    fwrite($f,$body);
-    fclose($f);
-  } else return NULL;
+      // Download URL and process
+      $req = wp_remote_get($url);
+      if (is_wp_error($req)) {
+        $this->addMessage("Could not retrieve remote URL ".htmlentities($url). ": " . $req->get_error_message());
+        return false;
       }
-      else {
-  $f=fopen($file,"wb");
-  fwrite($f,file_get_contents($url));
-  fclose($f);
+
+      $code = $req["response"]["code"];
+      if (!preg_match("#^2\d+$#", $code)) {
+        $this->addMessage("Could not retrieve remote URL ".htmlentities($url). ": Page not found / {$code} error code");
+        return false;
+      }
+
+      // Everything is OK: retrieve the body of the HTTP answer
+      $body = wp_remote_retrieve_body($req);
+      if ($body) {
+        $f=fopen($file,"wb");
+        fwrite($f,$body);
+        fclose($f);
+      } else {
+        $this->addMessage("Could not retrieve remote URL ".htmlentities($url));
+        return NULL;
       }
   
   
       if (!$f) {
-  echo "Failed to write file " . $file . " - check directory permission according to your Web server privileges.";
-  return false;
+        $this->addMessage("Failed to write file " . $file . " - check directory permission according to your Web server privileges.");
+        return false;
       }
     }
   
@@ -257,7 +265,7 @@ class Papercite {
       }
     }
 
-    if ($options["use_files"] || $use_files) {
+    if ($use_files || $options["use_files"]) {
       // Rel-file as usual
       $relfile = "$folder/$relfile.$ext";
 
@@ -437,12 +445,11 @@ class Papercite {
       } // end bibtex processing (not in cache)
 
       // Add to the list
-      if (Papercite::array_get($this->cache, $biburi, false)) 
+      if (Papercite::array_get($this->cache, $biburi, false)) {
         $result[$biburi] = $this->cache[$biburi];
-
+      }
     } // end loop over URIs
-    
-    if (sizeof($result) == 0) return false;
+
     return $result;
  
   }
@@ -500,11 +507,20 @@ class Papercite {
             "limit" => papercite::array_get($options, "limit", 0)
       );
   }
-  
+
+  /** Main entry point */
+  function process(&$matches) {
+    $r = $this->_process($matches);
+    if (current_user_can("edit_post", get_the_ID())) {
+      $r .= $this->getAndCleanMessages();
+    }
+    return $r;
+  }
+
   /**
    * Main entry point: Handles a match in the post
    */
-  function process(&$matches) {
+  function _process(&$matches) {
       global $wpdb, $papercite_table_name;
     $debug = false;
 
@@ -683,9 +699,10 @@ class Papercite {
       global $wpdb, $papercite_table_name;
       // --- Filter the data
       $entries = $this->getData($options["file"], $options);
-      if (!$entries) 
-          return "<span style='color: red'>[Could not find the bibliography file(s)".
-              (current_user_can("edit_post") ? " with name [".htmlspecialchars($options["file"])."]" : "") ."</span>";
+      if ($entries === FALSE) {
+        $this->addMessage("[Could not find the bibliography file(s) with name [".htmlspecialchars($options["file"])."]");
+        return false;
+      }
 
       if (array_key_exists('key', $options)) {
       // Select only specified entries
@@ -696,7 +713,7 @@ class Papercite {
       $result = papercite::getEntriesByKey($entries, $keys);
         
         if (array_key_exists("allow", $options) || array_key_exists("deny", $options) || array_key_exists("author", $options)) {
-            trigger_error("[papercite] Filtering by (key argument) is compatible with filtering by type or author (allow, deny, author arguments)", E_USER_ERROR);
+           $this->addMessage("[papercite] Filtering by (key argument) is compatible with filtering by type or author (allow, deny, author arguments)", E_USER_NOTICE);
         }
       } else {
       // Based on the entry types
@@ -742,8 +759,28 @@ class Papercite {
               }
           }
       }
-          
+       
       return $result;
+  }
+
+  //! Add an error message
+  var $error_messages = array();
+  function addMessage($message) {
+    $this->error_messages[] = "<div>" . $message . "</div>";
+  }
+
+  //! Get all the error messages and clean the stack
+  function getAndCleanMessages() {
+    if (sizeof($this->error_messages) == 0)
+      return "";
+
+    $s = "<div class='papercite_errors'>";
+    foreach($this->error_messages as $message) {
+      $s .= $message;
+    }
+    $s .= "</div>";
+    $this->error_messages = array();
+    return $s;
   }
   
   //! Get a db condition subquery
@@ -803,14 +840,14 @@ class Papercite {
    */
   function showEntries($refs, $goptions, $options, $getKeys, $mainTpl, $formatTpl, $mode) {
     // Get the template files
-    $mainFile = $this->getDataFile("$mainTpl", "tpl", "tpl", "MIMETYPE", $options, true);
-    $formatFile = $this->getDataFile("$formatTpl", "tpl", "format", "MIMETYPE", $options, true);
+    $mainFile = $this->getDataFile("$mainTpl", "tpl", "tpl", "MIMETYPE", $goptions, true);
+    $formatFile = $this->getDataFile("$formatTpl", "tpl", "format", "MIMETYPE", $goptions, true);
 
     // Fallback to defaults if needed
     if (!$mainFile)
-      $mainFile = $this->getDataFile(papercite::$default_options["${mode}_template"], "tpl", "tpl", "MIMETYPE", $options, true);
+      $mainFile = $this->getDataFile(papercite::$default_options["${mode}_template"], "tpl", "tpl", "MIMETYPE", $goptions, true);
     if (!$formatFile)
-      $formatFile = $this->getDataFile(papercite::$default_options["format"], "tpl", "format", "MIMETYPE", $options, true);
+      $formatFile = $this->getDataFile(papercite::$default_options["format"], "tpl", "format", "MIMETYPE", $goptions, true);
 
     $main = file_get_contents($mainFile[0]);
     $format = file_get_contents($formatFile[0]);
@@ -819,8 +856,10 @@ class Papercite {
 
     // Gives a distinct ID to each publication (i.e. to display the corresponding bibtex)
     // in the reference list
-    foreach($refs as &$entry) {
-      $entry["papercite_id"] = $this->counter++;
+    if ($refs) {
+      foreach($refs as &$entry) {
+        $entry["papercite_id"] = $this->counter++;
+      }
     }
 
     // Convert (also set the citation key)
@@ -829,13 +868,17 @@ class Papercite {
     $bib2tpl->setGlobal("PAPERCITE_DATA_URL", Papercite::getCustomDataDirectory());
 
     // Now, check for attached files
+    if (!$refs) {
+      // No references: return nothing
+      return "";
+    }
+
     foreach($refs as &$ref) {
       // --- Add custom fields
       $this->checkFiles($ref, $goptions);
     }
 
-
-    $r =  $bib2tpl->display($refs);
+    $r = $bib2tpl->display($refs);
 
     // If we need to get the citation key back
     if ($getKeys) {
@@ -973,8 +1016,6 @@ function &papercite_cb($myContent) {
       require_once(dirname(__FILE__) . "/papercite_db.php");
   }
     
-  //  print "<div style='border: 1pt solid blue'>";  print(nl2br(htmlentities($myContent)));  print "</div>";
-
   // (0) Skip processing on this page?
   if ($papercite->options['skip_for_post_lists'] && !is_single() && !is_page()) {
     return preg_replace("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/", '', $myContent);
@@ -992,7 +1033,6 @@ function &papercite_cb($myContent) {
   // (3) Handles custom keys in bibshow and return
   $text = str_replace($papercite->keys, $papercite->keyValues, $text);
 
-  //  print "<div style='border: 1pt solid black'>";  print(nl2br(htmlentities($text)));  print "</div>";
   return $text;
 }
 

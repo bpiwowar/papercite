@@ -10,7 +10,7 @@ class PaperciteBibtexCreators {
     $this->creators = &$creators;
   }
   function count() {
-    return sizeof($creators);
+    return sizeof($this->creators);
   }
   
   static function parse($authors) {
