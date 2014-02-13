@@ -1,3 +1,17 @@
+.papercite_errors:before {
+  content: "Papercite errors";
+}
+
+.papercite_errors {
+  border: 1px solid red;
+  background: #eee;
+  padding: 5px;
+}
+
+.papercite_errors > div {
+  display: list-item;  
+}
+
 .papercite_bibtex {
     display: none;
 }

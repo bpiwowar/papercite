@@ -111,6 +111,9 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.5.10 =
+ * Better handling of errors when retrieving remote URLs
+ * Fixed warnings and issue more error messages when something goes wrong (issue #80)
 = 0.5.9 =
   * (Bug #79) Clears the cache upon upgrading to avoid unknown class names when deserializing
 = 0.5.7 =
