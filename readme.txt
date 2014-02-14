@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex, bibliography
 Requires at least: 3.0
 Tested up to: 3.8.1
-Stable tag: 0.5.10
+Stable tag: 0.5.11
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
