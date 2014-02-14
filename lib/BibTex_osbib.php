@@ -455,7 +455,9 @@ class PaperciteBibTexEntries {
 				$delimit = $matches[1];
 				$matches = preg_split("/=/", $matches[2], 2, PREG_SPLIT_DELIM_CAPTURE);
 				// macros are case insensitive
-				$this->strings[strtolower(trim($matches[0]))] = $this->extractStringValue($matches[1]); 
+				if (sizeof($matches) > 1) {
+					$this->strings[strtolower(trim($matches[0]))] = $this->extractStringValue($matches[1]); 
+				}
 			}
 		}
 		// changed 21/08/2004 G. Gardey
