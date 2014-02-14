@@ -68,6 +68,9 @@ div.warning {
   <ol>
     <li><a href="#global_options">Global options</a></li>
     <li><a href="#local_options">Local options</a></li>
+    <li><a href="#formatting">Formatting entries</a></li>
+    <li><a href="#grouping">Formatting entries</a></li>
+    <li><a href="#sorting">Sorting entries</a></li>
     </ol>
   </li>
   <li><a href="#FAQ">FAQ</a></li>
@@ -250,9 +253,13 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
 
 <p>  Some of
   these options can be set at a global level (through preferences) and page/post
-  level (using custom fields with a prefix
-  <code>papercite_</code>). These options are shown <span
-  class="goptions">like this</span>.
+  level. These options are shown <span class="goptions">like this</span>.
+  To set options at the post/page level, use the <code>papercite_options</code> field with
+  one line per option in the format:
+  <pre>
+    <b>field_name</b> = <b>field_value</b>
+  </pre>
+  
 </p>
 
   <p>
@@ -314,6 +321,7 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
 </ul>
   </p>
 
+  <a name="formatting"></a>
   <h3>Formatting</h3>
   
   Some options modify the bibtex processing:
@@ -409,7 +417,29 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
        </li>
        </ul>
     </p>
+
+
+    <p>
+      CSS can be used to customize the display of entries. Again, <b>do not customize directly papercite files</b>, this 
+      would be overwritten with plugin updates. The best solution is to use a plugin such as 
+      <a href="http://wordpress.org/plugins/simple-custom-css/">Simple custom CSS</a> that allows
+      custom CSS to be written and stored within the WordPress database.
+    </p>
+
+    <p>
+    In the default templates, the following classes
+    are used:
+      <ul>
+        <li><code>papercite</code> for headers like the <code>h3</code> header for grouping key display</li>
+        <li><code>papercite_entry</code> for a single bibtex</li>
+        <li><code>papercite_bibtex</code> for the bibtex code</li>
+        <li><code>papercite_pdf</code> for the PDF link</li>
+        <li><code>papercite_doi</code> for the DOI link</li>
+      </ul>
+    </p>
+
   
+<a name="grouping"></a>
 <h3>Grouping</h3>
 
        <p>
@@ -437,6 +467,7 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
     
   </p>
 
+<a name="sorting"></a>
 <h3> Sorting </h3>
 
 You can sort the citations using the <code>sort</code> option together
