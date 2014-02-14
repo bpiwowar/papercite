@@ -181,31 +181,37 @@ class Papercite {
    */
   function init() {
 
-      // i18n
-      // http://codex.wordpress.org/I18n_for_WordPress_Developers#Translating_Plugins
-      $plugin_dir = basename(dirname(__FILE__));
-      load_plugin_textdomain('papercite', false, $plugin_dir);
+    // i18n
+    // http://codex.wordpress.org/I18n_for_WordPress_Developers#Translating_Plugins
+    $plugin_dir = basename(dirname(__FILE__));
+    load_plugin_textdomain('papercite', false, $plugin_dir);
 
     // Get general preferences & page wise preferences
     if (!isset($this->options)) {
       $this->options =  papercite::$default_options;
       $pOptions = get_option('papercite_options');
+
       // Use preferences if set to override default values
-      if (is_array($pOptions)) 
-      {
-      foreach(self::$option_names as &$name) 
-        {
-        if (array_key_exists($name, $pOptions) && $pOptions[$name] !== "") 
-          {
-          $this->options[$name] = $pOptions[$name];
+      if (is_array($pOptions)) {
+        foreach(self::$option_names as &$name) {
+          if (array_key_exists($name, $pOptions) && $pOptions[$name] !== "") {
+            $this->options[$name] = $pOptions[$name];
+          }
         }
       }
+
+      // Use custom field values "papercite_options"
+      $option_fields = get_post_custom_values("papercite_options");
+      if (sizeof($option_fields) > 0) {
+        foreach($option_fields as $field) {
+          $matches = array();
+          preg_match_all("#^\s*([\w\d-_]+)\s*=\s*(.+)$#m", $field, $matches, PREG_SET_ORDER);
+          foreach($matches as &$match) {
+            $this->options[$match[1]] = trim($match[2]);
+          }
+        }
       }
 
-      // Use custom field values
-      $custom_field = get_post_custom_values("papercite_$name");
-      if (sizeof($custom_field) > 0)
-          $this->options[$name] = $custom_field[0];
 
       // Upgrade if needed
       if ($this->options["bibtex_parser"] == "papercite") {

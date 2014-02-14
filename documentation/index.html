@@ -250,9 +250,13 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
 
 <p>  Some of
   these options can be set at a global level (through preferences) and page/post
-  level (using custom fields with a prefix
-  <code>papercite_</code>). These options are shown <span
-  class="goptions">like this</span>.
+  level. These options are shown <span class="goptions">like this</span>.
+  To set options at the post/page level, use the <code>papercite_options</code> field with
+  one line per option in the format:
+  <pre>
+    <b>field_name</b> = <b>field_value</b>
+  </pre>
+  
 </p>
 
   <p>

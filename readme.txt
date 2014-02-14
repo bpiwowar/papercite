@@ -111,6 +111,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+ * Custom post/page options refactored (partial fix for issue #80)
 = 0.5.10 =
  * Better handling of errors when retrieving remote URLs
  * Fixed warnings and issue more error messages when something goes wrong (issue #80)
