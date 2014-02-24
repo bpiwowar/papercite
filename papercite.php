@@ -870,7 +870,7 @@ class Papercite {
     // Convert (also set the citation key)
     $bib2tpl = new BibtexConverter($options, $main, $bibtexEntryTemplate);
     // FIXME!!!
-    $cslfile = papercite::getDataFile("csl/style/ieee.csl");
+    $cslfile = papercite::getDataFile("ieee", "csl", "csl/style", "text/x-csl", $goptions, true);
     $csldata = file_get_contents($cslfile[0]);
     $bib2tpl->cslproc = new citeproc($csldata);
     $bib2tpl->setGlobal("WP_PLUGIN_URL", WP_PLUGIN_URL);
