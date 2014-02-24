@@ -111,6 +111,9 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+= 0.5.12 =
+
+ * Fixed a bug with bibfilter
  * Fixed handling of letter "n" with accute accent in OSBib (issue #83)
 
 = 0.5.11 =
