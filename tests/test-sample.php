@@ -1,5 +1,7 @@
 <?php
 
+// See http://wp-cli.org/blog/plugin-unit-tests.html
+
 class SampleTest extends WP_UnitTestCase {
 
 	function testSample() {
