@@ -3,7 +3,7 @@
 **Tags:** formatting, bibtex, bibliography  
 **Requires at least:** 3.0  
 **Tested up to:** 3.8.1  
-**Stable tag:** 0.5.8  
+**Stable tag:** 0.5.11  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -117,27 +117,44 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 ## Changelog ##
 
-### 0.5.8 ###
+ * Fixed handling of letter "n" with accute accent in OSBib (issue #83)
+
+### 0.5.11 ###
+ * Improved documentation for customizing templates and CSS (issue #81)
+ * Custom post/page options refactored (partial fix for issue #80)
+
+### 0.5.10 ###
+ * Better handling of errors when retrieving remote URLs
+ * Fixed warnings and issue more error messages when something goes wrong (issue #80)
+
+### 0.5.9 ###
   * (Bug #79) Clears the cache upon upgrading to avoid unknown class names when deserializing
+
 ### 0.5.7 ###
   * Prevents name clash with other modules using OSBib (e.g. TeachPress). Fixes #79.
+
 ### 0.5.6 ###
   * Handles accents with a space before the accentuated character. Fixes #70
   * Added support for Czech accents to osbib parser. Fixes #77. Thanks to mcapino.
   * Files can come from wordpress media (issue #76)
   * Improved the speed of the OSBib parser (issue #68)
+
 ### 0.5.5 ###
   * OSBib parser is now the default
   * Handles non-standard plugin folder
+
 ### 0.5.4 ###
   * Incompatibility with PHP version < 5.4
+
 ### 0.5.2 ###
   * Option to add new files detectors (beyond pdf) - issue #38
   * Option to control title processing (issue #54)
   * Any field can now be used for filters (issue #62)
   * Unparseable year field causes database issues (issue #63)
+
 ### 0.5.1 ###
   * The journal field was not parsed with OSBiB (issue #59)
+
 ### 0.5.0 ###
   * @conference is now properly handled as @inproceedings (issue #53)
   * Option to limit the number of papers output by bibtex (issue #50)
@@ -146,19 +163,24 @@ subfolders tpl (citation list rendering) and format (entry rendering).
   * Added support for these additional filtering commands to bibtex command (author and type)
   * Added two new options: auto-bibshow and skip display in post lists (thanks to Michael Schreifels)
   * Fixed quite a few PHP warnings
+
 ### 0.4.5 ###
   * Fixed bug #48 (URL as source not working anymore with PHP < 5.4)
+
 ### 0.4.4 ###
   * Fix problems with ignored booktitle in books (harvard and ieee styles) - fixes issue #45
   * Fix for newlines by L. Murray (issues #26 and #35)
   * Handles for URL types (issue #41, A. Dyck)
+
 ### 0.4.3 ###
   * Maintenance mode plugins support (bug #39)
   * Support for PHP 5.4 (bug #37)
   * Improved accent support - bug #36 (josemmoya)
+
 ### 0.4.2 ###
   * Fixes fatal error in PHP 5.4 (bug #37)
   * Improved accent support - bug #36 (josemmoya)
+
 ### 0.4.1 ###
   * Post/page BibTeX entries from custom fields
   * Bug fixes and information for database backend
@@ -321,8 +343,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 ## Upgrade Notice ##
 
-### 0.5.8 ###
-Update to this version for those having troubles after updating to 0.5.7 (or clear the cache)
+### 0.5.9 ###
+Update to this version for those having troubles after updating to 0.5.7 or 0.5.8 (or clear the cache)
 ### 0.3.17 ###
 If you have problems with CPU usage or time to display a page, try this version and choose the OSBiB parser 
 in the plugin preferences (in the WP administration page)
