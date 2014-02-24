@@ -42,6 +42,7 @@ are also available from the HTML.
 
 * Access the single bibtex entry source code to enable copy&paste (toggle-enabled visualization)
 * Easy output customisation with the use of two templates: one for each entry, one for the list of entries
+* <a href="http://citationstyles.org/">Citation Style Language</a> formatting
 * Auto-detection of PDF files based on the BibTeX key (or on the PDF entry)
 * Citation mode: use references in the text and print the citations at the end of a block, page or post
 * Form to let the user dynamically filter the entries
