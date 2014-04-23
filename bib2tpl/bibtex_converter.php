@@ -133,7 +133,9 @@ class BibtexConverter
 
       'key_format' => 'numeric',
       
-      'limit' => 0
+      'limit' => 0,
+      
+      'highlight' => ''
     );
 
     // Overwrite specified options
@@ -526,6 +528,11 @@ class BibtexConverter
           $entryTpl = $this->_entry_template->get($type);
           //print "<div><b>$type</b>: ". htmlentities($entryTpl). "</div>";
           $t=  preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $entryTpl) . $match[2];
+          
+          // highlight authors
+          if (!empty($this->_options['highlight'])) {
+            $t = preg_replace('~\\b('.$this->_options['highlight'].')\\b~', '<span class="papercite_highlight">$0</span>', $t);
+          }
         }
         else $t = "<span style='color:red'>Unknown bibtex entry with key [".$this->_entry["cite"] ."]</span>" . $match[2];
       return $t;
