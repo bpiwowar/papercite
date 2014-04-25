@@ -125,7 +125,7 @@ class Papercite {
   function getCached($url, $timeout = 3600) {
     // check if cached file exists
     $name = strtolower(preg_replace("@[/:]@","_",$url));
-    $dir = WP_PLUGIN_DIR . "/papercite/cache";
+    $dir = plugins_dir_path(__FILE__) . "/papercite/cache";
     $file = "$dir/$name.bib";
 
     // check if file date exceeds 60 minutes   
@@ -161,7 +161,7 @@ class Papercite {
       }
     }
   
-    return array($file, WP_PLUGIN_URL."/papercite/cache/$name");
+    return array($file, plugins_url()."/papercite/cache/$name");
   }
 
   static $bibtex_parsers = array("pear" => "Pear parser", "osbib" => "OSBiB parser");
@@ -225,6 +225,7 @@ class Papercite {
 
   
   static function getCustomDataDirectory() {
+    global $wpdb;
     $url = WP_CONTENT_URL;
     if (is_multisite()) {
       $subpath = '/blogs.dir/'. $wpdb->blogid . "/files";
