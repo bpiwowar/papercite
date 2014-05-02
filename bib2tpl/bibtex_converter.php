@@ -528,11 +528,6 @@ class BibtexConverter
           $entryTpl = $this->_entry_template->get($type);
           //print "<div><b>$type</b>: ". htmlentities($entryTpl). "</div>";
           $t=  preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $entryTpl) . $match[2];
-          
-          // highlight authors
-          if (!empty($this->_options['highlight'])) {
-            $t = preg_replace('~\\b('.$this->_options['highlight'].')\\b~', '<span class="papercite_highlight">$0</span>', $t);
-          }
         }
         else $t = "<span style='color:red'>Unknown bibtex entry with key [".$this->_entry["cite"] ."]</span>" . $match[2];
       return $t;
@@ -578,6 +573,14 @@ class BibtexConverter
       // replace newlines with spaces, to avoid PHP converting them to <br/>
       $str = preg_replace("/[\r\n]+/", " ", $str);
       $str = htmlspecialchars($str);
+      
+    // highlight authors
+	if ($name == 'author' || $name == 'editor') {
+	  if (!empty($this->_options['highlight'])) {
+		$str = preg_replace('~\\b('.$this->_options['highlight'].')\\b~', '<span class="papercite_highlight">$0</span>', $str);
+	  }
+	}
+      
     return $str;
   }
 
