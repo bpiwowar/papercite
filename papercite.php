@@ -930,7 +930,7 @@ class Papercite {
         $result = $this->getEntries($options);
         ob_start();
         ?>
-        <form method="post">
+        <form method="post" accept-charset="UTF-8">
             <input type="hidden" name="papercite_post_id" value="<?php echo $post->ID?>">
           <table style="border-top: solid 1px #eee; border-bottom: solid 1px #eee; width: 100%">
             <tr>
@@ -943,7 +943,7 @@ class Papercite {
                                 sort($authors);
                             
                             foreach($authors as $author) {
-                                print "<option value=\"".htmlentities($author)."\"";
+                                print "<option value=\"".htmlentities($author, ENT_QUOTES, "UTF-8")."\"";
                                 if ($selected_author == $author)
                                     print " selected=\"selected\"";
                                 print ">$author</option>";
@@ -957,7 +957,7 @@ class Papercite {
                             <?php
                             $types = preg_split("#\s*,\s*#", $original_allow);
                             foreach($types as $type) {
-                                print "<option value=\"".htmlentities($type)."\"";
+                                print "<option value=\"".htmlentities($type, ENT_QUOTES, "UTF-8")."\"";
                                 if ($selected_type == $type)
                                     print " selected=\"selected\"";
                                 print ">" . papercite_bibtype2string($type) . "</option>";
