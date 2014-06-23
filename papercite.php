@@ -156,7 +156,7 @@ class Papercite {
   
   
       if (!$f) {
-        $this->addMessage("Failed to write file " . $file . " - check directory permission according to your Web server privileges.");
+        $this->addMessage(printf(__("Failed to write file %s - check directory permission according to your Web server privileges.", "papercite"), $file));
         return false;
       }
     }
@@ -218,6 +218,8 @@ class Papercite {
           $this->options["bibtex_parser"] = "osbib";
       }
       
+      // Load text domain
+      load_plugin_textdomain('papercite', false, $plugin_dir);
   
     }
     
