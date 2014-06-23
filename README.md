@@ -117,6 +117,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 ## Changelog ##
 
+ * Fix for UTF-8 characters and bibfilter (petero-dk)
+
 ### 0.5.12 ###
 
  * Fixed a bug with bibfilter
