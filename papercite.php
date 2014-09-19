@@ -168,14 +168,14 @@ class Papercite {
 
   // Names of the options that can be set
   static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", 
-    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files");
+    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files", "show_links");
 
   // Default value of options
   static $default_options = 
   array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
         "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "osbib", "use_db" => false,
         "auto_bibshow" => false, "use_media" => false, "use_files" => true, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true,
-        "checked_files" => array(array("pdf", "pdf", "", "pdf", "application/pdf")));
+        "checked_files" => array(array("pdf", "pdf", "", "pdf", "application/pdf")), "show_links" => true);
   /**
    * Init is called before the first callback
    */
@@ -665,16 +665,21 @@ class Papercite {
         // Did we already cite this?
         if (!$num) {
           // no, register this
+          $rawid = $this->citesCounter;
           $id = "BIBCITE%%" . $this->citesCounter . "%";
           $this->citesCounter++;
           $num = sizeof($cites);
-          $cites[$key] = array($num, $id);
+          $cites[$key] = array($num, $id, $rawid);
         } else {
           // yes, just copy the id
           $id =  $num[1];
+          $rawid =  $num[2];
         }
-        $returns .= "$id";
-
+        if ($options["show_links"]) {
+	  $returns .= "<a class=\"papercite_bibcite\" href=\"#paperkey_$rawid\">$id</a>";
+	} else {
+	  $returns .= "$id";
+	}
       }
 
       return "[$returns]";

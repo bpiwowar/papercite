@@ -59,7 +59,8 @@ as installed on my site <a href="http://www.bpiwowar.net/wp-content/plugins/pape
 * Stefan Aiche: group by year option
 * Łukasz Radliński: bug fixes & handling polish characters
 * Max Harper: patch for having good URLs
-* Some parts of the code come from bib2html (version 0.9.3) written by Sergio Andreozzi.
+* Jon Nicholson: patch for show_links option
+* * Some parts of the code come from bib2html (version 0.9.3) written by Sergio Andreozzi.
 
 ## Installation ##
 
