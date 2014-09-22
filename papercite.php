@@ -664,22 +664,16 @@ class Papercite {
 
         // Did we already cite this?
         if (!$num) {
-          // no, register this
-          $rawid = $this->citesCounter;
+          // no, register this using a custom ID (hopefully, there will be no conflict)
           $id = "BIBCITE%%" . $this->citesCounter . "%";
           $this->citesCounter++;
           $num = sizeof($cites);
-          $cites[$key] = array($num, $id, $rawid);
+          $cites[$key] = array($num, $id);
         } else {
           // yes, just copy the id
           $id =  $num[1];
-          $rawid =  $num[2];
         }
-        if ($options["show_links"]) {
-	  $returns .= "<a class=\"papercite_bibcite\" href=\"#paperkey_$rawid\">$id</a>";
-	} else {
-	  $returns .= "$id";
-	}
+        $returns .= "$id";
       }
 
       return "[$returns]";
@@ -890,16 +884,23 @@ class Papercite {
       $this->checkFiles($ref, $goptions);
     }
 
+    // This will set the key of each reference
     $r = $bib2tpl->display($refs);
 
     // If we need to get the citation key back
     if ($getKeys) {
-      foreach($refs as &$group)
-      foreach($group as &$ref) {
-        $this->keys[] = $ref["pKey"];
-        $this->keyValues[] = $ref["key"];
+      foreach($refs as &$group) {
+        foreach($group as &$ref) {
+          $this->keys[] = $ref["pKey"];
+          if ($goptions["show_links"]) {
+            $this->keyValues[] = "<a class=\"papercite_bibcite\" href=\"#paperkey_{$ref["papercite_id"]}\">{$ref["key"]}</a>";            
+          } else {
+            $this->keyValues[] = $ref["key"];
+          }
+        }
       }
     }
+
 
     // Process text in order to avoid some unexpected WordPress formatting 
     return str_replace("\t", '  ', trim($r["text"]));
