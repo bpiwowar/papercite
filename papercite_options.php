@@ -180,7 +180,7 @@ function papercite_bibshow_template() {
 
 function papercite_show_links() {
   $options = $GLOBALS["papercite"]->options;
-  echo "<input id='papercite_show_links' name='papercite_options[show_links]' type='checkbox' value='1' " . checked(true, $options['show_links'], false) . " /> This will make [bibcite] have hyperlinks to the appropriate entry in the [bibshow] references. Can manually enabled/disabled with [bibshow show_links=false].";
+  echo "<input id='papercite_show_links' name='papercite_options[show_links]' type='checkbox' value='1' " . checked(true, $options['show_links'], false) . " /> This will make [bibcite] have hyperlinks to the appropriate entry in the [bibshow] references. Can manually enabled/disabled with [bibshow show_links=true/false].";
 }
 
 function papercite_deny() {
