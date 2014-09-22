@@ -5,6 +5,5 @@
     	@#entry@<br/>
 	 <a href="javascript:void(0)" id="papercite_@papercite_id@" class="papercite_toggle">[Bibtex]</a></div>
          <div class="papercite_bibtex" id="papercite_@papercite_id@_block"><pre><code class="tex bibtex">@bibtex@</code></pre></div>
-     </div>
      @}entry@
     @}group@
