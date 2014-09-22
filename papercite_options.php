@@ -186,7 +186,7 @@ function papercite_show_links() {
 
 function papercite_highlight() {
   $options = $GLOBALS["papercite"]->options;
-  echo "<input id='papercite_highlight' name='papercite_options[highlight]' size='40' type='text' value='{$options['highlight']}' /> A | seperated list of author names to highlight, can be set manually in shortcodes e.g. [bibtex highlight=xxx] or [bibshow highlight=xxx].";
+  echo "<input id='papercite_highlight' name='papercite_options[highlight]' size='40' type='text' value='{$options['highlight']}' /> A list of author names to highlight in the format a|b|...|z. Can be set manually in shortcodes e.g. [bibtex highlight=xxx] or [bibshow highlight=xxx].";
 }
 
 function papercite_deny() {
