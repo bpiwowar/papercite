@@ -28,9 +28,7 @@ EOF;
         $doc = new DOMDocument();
         $processed = apply_filters('the_content', $content);
 
-        libxml_use_internal_errors(true);
         $doc->loadHTML("$processed");
-        libxml_use_internal_errors(false);
 
         return $doc;
     }
