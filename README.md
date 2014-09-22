@@ -59,8 +59,7 @@ as installed on my site <a href="http://www.bpiwowar.net/wp-content/plugins/pape
 * Stefan Aiche: group by year option
 * Łukasz Radliński: bug fixes & handling polish characters
 * Max Harper: patch for having good URLs
-* Jon Nicholson: patch for show_links option
-* * Some parts of the code come from bib2html (version 0.9.3) written by Sergio Andreozzi.
+* Some parts of the code come from bib2html (version 0.9.3) written by Sergio Andreozzi.
 
 ## Installation ##
 
@@ -117,8 +116,6 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 
 ## Changelog ##
-
- * Fix for UTF-8 characters and bibfilter (petero-dk)
 
 ### 0.5.12 ###
 
