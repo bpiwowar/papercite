@@ -111,6 +111,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+ * New option, show_links, to display links with bibcite
+
 = 0.5.12 =
 
  * Fixed a bug with bibfilter
