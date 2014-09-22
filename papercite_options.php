@@ -124,6 +124,7 @@ function papercite_admin_init(){
   add_settings_field('bibshow_template', 'Main bibshow template', 'papercite_bibshow_template', 'papercite', 'papercite_main');
   
   add_settings_field('show_links', 'Show links', 'papercite_show_links', 'papercite', 'papercite_main');
+  add_settings_field('highlight', 'Highlight names', 'papercite_highlight', 'papercite', 'papercite_main');
 
   add_settings_section('papercite_choices', 'Options', 'papercite_choices_text', 'papercite');
   add_settings_field('bibtex_parser', 'Bibtex parser', 'papercite_bibtex_parser', 'papercite', 'papercite_choices');
@@ -181,6 +182,11 @@ function papercite_bibshow_template() {
 function papercite_show_links() {
   $options = $GLOBALS["papercite"]->options;
   echo "<input id='papercite_show_links' name='papercite_options[show_links]' type='checkbox' value='1' " . checked(true, $options['show_links'], false) . " /> This will make [bibcite] have hyperlinks to the appropriate entry in the [bibshow] references. Can manually enabled/disabled with [bibshow show_links=true/false].";
+}
+
+function papercite_highlight() {
+  $options = $GLOBALS["papercite"]->options;
+  echo "<input id='papercite_highlight' name='papercite_options[highlight]' size='40' type='text' value='{$options['highlight']}' /> A | seperated list of author names to highlight, can be set manually in shortcodes e.g. [bibtex highlight=xxx] or [bibshow highlight=xxx].";
 }
 
 function papercite_deny() {
@@ -326,6 +332,7 @@ function papercite_options_validate($input) {
 
   $options['file'] = trim($input['file']);
   $options['timeout'] = trim($input["timeout"]);
+  $options['highlight'] = trim($input["highlight"]);
 
   if (array_key_exists('form', $input)) 
   {
