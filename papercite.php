@@ -168,7 +168,7 @@ class Papercite {
 
   // Names of the options that can be set
   static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", 
-    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files");
+    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files", "highlight");
 
   // Default value of options
   static $default_options = 
