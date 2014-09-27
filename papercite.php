@@ -125,7 +125,7 @@ class Papercite {
   function getCached($url, $timeout = 3600) {
     // check if cached file exists
     $name = strtolower(preg_replace("@[/:]@","_",$url));
-    $dir = WP_PLUGIN_DIR . "/papercite/cache";
+    $dir = plugins_dir_path(__FILE__) . "/papercite/cache";
     $file = "$dir/$name.bib";
 
     // check if file date exceeds 60 minutes   
@@ -161,22 +161,21 @@ class Papercite {
       }
     }
   
-    return array($file, WP_PLUGIN_URL."/papercite/cache/$name");
+    return array($file, plugins_url()."/papercite/cache/$name");
   }
 
   static $bibtex_parsers = array("pear" => "Pear parser", "osbib" => "OSBiB parser");
 
   // Names of the options that can be set
   static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", 
-    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files", "highlight");
+    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files", "show_links", "highlight");
 
   // Default value of options
   static $default_options = 
   array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
         "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "osbib", "use_db" => false,
         "auto_bibshow" => false, "use_media" => false, "use_files" => true, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true,
-        "checked_files" => array(array("pdf", "pdf", "", "pdf", "application/pdf")),
-        "highlight" => "");
+        "checked_files" => array(array("pdf", "pdf", "", "pdf", "application/pdf")), "show_links" => true, "highlight" => "");
   /**
    * Init is called before the first callback
    */
@@ -226,6 +225,7 @@ class Papercite {
 
   
   static function getCustomDataDirectory() {
+    global $wpdb;
     $url = WP_CONTENT_URL;
     if (is_multisite()) {
       $subpath = '/blogs.dir/'. $wpdb->blogid . "/files";
@@ -665,7 +665,7 @@ class Papercite {
 
         // Did we already cite this?
         if (!$num) {
-          // no, register this
+          // no, register this using a custom ID (hopefully, there will be no conflict)
           $id = "BIBCITE%%" . $this->citesCounter . "%";
           $this->citesCounter++;
           $num = sizeof($cites);
@@ -675,7 +675,6 @@ class Papercite {
           $id =  $num[1];
         }
         $returns .= "$id";
-
       }
 
       return "[$returns]";
@@ -886,16 +885,23 @@ class Papercite {
       $this->checkFiles($ref, $goptions);
     }
 
+    // This will set the key of each reference
     $r = $bib2tpl->display($refs);
 
     // If we need to get the citation key back
     if ($getKeys) {
-      foreach($refs as &$group)
-      foreach($group as &$ref) {
-        $this->keys[] = $ref["pKey"];
-        $this->keyValues[] = $ref["key"];
+      foreach($refs as &$group) {
+        foreach($group as &$ref) {
+          $this->keys[] = $ref["pKey"];
+          if ($goptions["show_links"]) {
+            $this->keyValues[] = "<a class=\"papercite_bibcite\" href=\"#paperkey_{$ref["papercite_id"]}\">{$ref["key"]}</a>";            
+          } else {
+            $this->keyValues[] = $ref["key"];
+          }
+        }
       }
     }
+
 
     // Process text in order to avoid some unexpected WordPress formatting 
     return str_replace("\t", '  ', trim($r["text"]));
@@ -931,7 +937,7 @@ class Papercite {
         $result = $this->getEntries($options);
         ob_start();
         ?>
-        <form method="post">
+        <form method="post" accept-charset="UTF-8">
             <input type="hidden" name="papercite_post_id" value="<?php echo $post->ID?>">
           <table style="border-top: solid 1px #eee; border-bottom: solid 1px #eee; width: 100%">
             <tr>
@@ -944,7 +950,7 @@ class Papercite {
                                 sort($authors);
                             
                             foreach($authors as $author) {
-                                print "<option value=\"".htmlentities($author)."\"";
+                                print "<option value=\"".htmlentities($author, ENT_QUOTES, "UTF-8")."\"";
                                 if ($selected_author == $author)
                                     print " selected=\"selected\"";
                                 print ">$author</option>";
@@ -958,7 +964,7 @@ class Papercite {
                             <?php
                             $types = preg_split("#\s*,\s*#", $original_allow);
                             foreach($types as $type) {
-                                print "<option value=\"".htmlentities($type)."\"";
+                                print "<option value=\"".htmlentities($type, ENT_QUOTES, "UTF-8")."\"";
                                 if ($selected_type == $type)
                                     print " selected=\"selected\"";
                                 print ">" . papercite_bibtype2string($type) . "</option>";
