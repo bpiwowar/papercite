@@ -283,6 +283,7 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
   between the templates used respectively for <code>bibshow</code> and <code>bibcite</code></li>
     <li><code class="goptions">format</code>: Template used to
   format one BibTeX entry</li>
+    <li><code>highlight</code>: Highlight name(s) of specific author(s)</li>
   </ul>
 
   <p>Filtering options</p>
@@ -436,6 +437,26 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
         <li><code>papercite_pdf</code> for the PDF link</li>
         <li><code>papercite_doi</code> for the DOI link</li>
       </ul>
+    </p>
+    
+    <p>
+      The <code>highlight</code> option can be used to highlight specific parts 
+      of an author or editor list (see <a href="http://www.martinhenze.de/publications/">here</a>
+      for an example). You can specify arbitrary regular expressions. Each match
+      of the regular expression will then be highlighted. For example,
+    
+      <div class='code'>
+        [bibtex highlight="M. Mouse"]
+      </div>
+      
+      will highlight all occurences of <em>M. Mouse</em>. Similarly, 
+
+      <div class='code'>
+        [bibtex highlight="M. Mouse|D. Duck"]
+      </div>
+      
+      will highlight all occurences of <em>M. Mouse</em> or <em>D. Duck</em>.
+      
     </p>
 
   
