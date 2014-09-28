@@ -36,6 +36,10 @@
   color: #555;
 }
 
+.papercite_highlight {
+  font-weight: bold;
+}
+
 span.papercite_checked_files 
 {
 	padding: 5px;
