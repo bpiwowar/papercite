@@ -122,6 +122,8 @@ function papercite_admin_init(){
 
   add_settings_field('bibtex_template', 'Main bibtex template', 'papercite_bibtex_template', 'papercite', 'papercite_main');
   add_settings_field('bibshow_template', 'Main bibshow template', 'papercite_bibshow_template', 'papercite', 'papercite_main');
+  
+  add_settings_field('show_links', 'Show links', 'papercite_show_links', 'papercite', 'papercite_main');
 
   add_settings_section('papercite_choices', 'Options', 'papercite_choices_text', 'papercite');
   add_settings_field('bibtex_parser', 'Bibtex parser', 'papercite_bibtex_parser', 'papercite', 'papercite_choices');
@@ -174,7 +176,12 @@ function papercite_bibtex_template() {
 function papercite_bibshow_template() {
   $options = $GLOBALS["papercite"]->options;
   echo "<input id='papercite_bibshow_template' name='papercite_options[bibshow_template]' size='40' type='text' value='{$options['bibshow_template']}' />";
-} 
+}
+
+function papercite_show_links() {
+  $options = $GLOBALS["papercite"]->options;
+  echo "<input id='papercite_show_links' name='papercite_options[show_links]' type='checkbox' value='1' " . checked(true, $options['show_links'], false) . " /> This will make [bibcite] have hyperlinks to the appropriate entry in the [bibshow] references. Can manually enabled/disabled with [bibshow show_links=true/false].";
+}
 
 function papercite_deny() {
   $options = $GLOBALS["papercite"]->options;
@@ -315,6 +322,7 @@ function papercite_options_validate($input) {
   $options['use_files'] = $input['use_files'] == "1";
   $options['skip_for_post_lists'] = $input['skip_for_post_lists'] == "1";
   $options['process_titles'] = $input['process_titles'] == "1";
+  $options['show_links'] = $input['show_links'] == "1";
 
   $options['file'] = trim($input['file']);
   $options['timeout'] = trim($input["timeout"]);

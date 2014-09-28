@@ -1,8 +1,8 @@
 === papercite ===
 Contributors: bpiwowar
 Tags: formatting, bibtex, bibliography
-Requires at least: 3.0
-Tested up to: 3.8.1
+Requires at least: 3.8
+Tested up to: 4.0
 Stable tag: 0.5.12
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -59,6 +59,7 @@ as installed on my site <a href="http://www.bpiwowar.net/wp-content/plugins/pape
 * Stefan Aiche: group by year option
 * Łukasz Radliński: bug fixes & handling polish characters
 * Max Harper: patch for having good URLs
+* Martin Henze: option for highlighting name(s) of specific author(s)/editor(s)
 * Some parts of the code come from bib2html (version 0.9.3) written by Sergio Andreozzi.
 
 == Installation ==
@@ -110,6 +111,14 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 3. The bibfilter command
 
 == Changelog ==
+
+= 0.5.13 =
+
+ * New "show_links" option to display links with bibcite
+ * New "highlight" option to highlight authors and editors
+ * Bibfilter form is now using UTF-8 (issue #87)
+ * Fixed formatting issues 
+ * Corrected warnings (undefined variables and constants)
 
 = 0.5.12 =
 

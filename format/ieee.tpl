@@ -76,7 +76,7 @@
 </format>
 
 <format types="techreport">
-@?author@@author@, @;@@?title@&quot;@title@,&quot; @;@@?institution@@institution@@;@@?address@, @address@@;@@?type||number@, @:@@;@@?type@@type@ @;@@?number@@number@@;@@?type||number@, @:@@;@@?date@@date@ @;@@?year@, @year@@;@.
+@?author@@author@, @;@@?title@&quot;@title@,&quot; @;@@?institution@@institution@@;@@?address@, @address@@;@@?type||number@, @:@@;@@?type@@type@ @;@@?number@@number@@;@@?type||number@, @:@@;@@?date@@date@ @;@@?year@ @year@@;@.
 </format>
 
 </formats>
