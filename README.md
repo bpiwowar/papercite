@@ -1,7 +1,7 @@
 # papercite #
 **Contributors:** bpiwowar  
 **Tags:** formatting, bibtex, bibliography  
-**Requires at least:** 3.0  
+**Requires at least:** 3.8  
 **Tested up to:** 4.0  
 **Stable tag:** 0.5.12  
 **License:** GPLv2 or later  
@@ -118,7 +118,13 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 ## Changelog ##
 
- * New option, show_links, to display links with bibcite
+### 0.5.13 ###
+
+ * New "show_links" option to display links with bibcite
+ * New "highlight" option to highlight authors and editors
+ * Bibfilter form is now using UTF-8 (issue #87)
+ * Fixed formatting issues 
+ * Corrected warnings (undefined variables and constants)
 
 ### 0.5.12 ###
 
