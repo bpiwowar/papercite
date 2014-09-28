@@ -1,8 +1,9 @@
 <?php
 
 // See http://wp-cli.org/blog/plugin-unit-tests.html
+require_once dirname(__FILE__) . '/common.inc.php';
 
-class ShowLinks extends WP_UnitTestCase {
+class ShowLinks extends PaperciteTestCase {
     static $data = <<<EOF
 @inproceedings{test,
     title="Hello world",
@@ -10,31 +11,10 @@ class ShowLinks extends WP_UnitTestCase {
 }
 EOF;
 
-    public function setUp() {
-        parent::setUp();
-        $this->user_id = $this->factory->user->create();
-    }
 
-    function process_post($content) {
-        $post_id = $this->factory->post->create( array( 
-            'post_author' => $this->user_id, 
-            'post_content' => $content
-            ) 
-        );
-
-        add_post_meta($post_id, "papercite_data", ShowLinks::$data);
-        $GLOBALS['post'] = $post_id;
-
-        $doc = new DOMDocument();
-        $processed = apply_filters('the_content', $content);
-
-        $doc->loadHTML("$processed");
-
-        return $doc;
-    }
 
     function testOn() {
-        $doc = $this->process_post("[bibshow file=custom://data show_links=1][bibcite key=test]");
+        $doc = $this->process_post("[bibshow file=custom://data show_links=1][bibcite key=test]", ShowLinks::$data);
 
         $xpath = new DOMXpath($doc);        
         $href = $xpath->evaluate("//a[@class = 'papercite_bibcite']/@href");
@@ -49,7 +29,7 @@ EOF;
     }
 
     function testOff() {
-        $doc = $this->process_post("[bibshow file=custom://data show_links=0][bibcite key=test]");
+        $doc = $this->process_post("[bibshow file=custom://data show_links=0][bibcite key=test]", ShowLinks::$data);
 
         $xpath = new DOMXpath($doc);        
         $href = $xpath->evaluate("//a[@class = 'papercite_bibcite']/@href");
