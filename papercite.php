@@ -145,6 +145,10 @@ class Papercite {
 
       // Everything is OK: retrieve the body of the HTTP answer
       $body = wp_remote_retrieve_body($req);
+      if (!file_exists($dir)) {
+        mkdir($dir);
+      }
+      
       if ($body) {
         $f=fopen($file,"wb");
         fwrite($f,$body);
