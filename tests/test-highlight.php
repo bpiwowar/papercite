@@ -15,7 +15,7 @@ EOF;
 
     function testHighlight() {
         $doc = $this->process_post("[bibtex file=custom://data highlight=\"Piwowarski\"]", HighlightTest::$data);
-        print $doc->saveXML();
+        // print $doc->saveXML();
 
         $xpath = new DOMXpath($doc);   
 

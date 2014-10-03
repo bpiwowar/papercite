@@ -9,14 +9,16 @@ abstract class PaperciteTestCase extends WP_UnitTestCase {
     }
 
     /** Create a post, process it and return the content */
-    function process_post($content, $data) {
+    function process_post($content, $data = null) {
         $post_id = $this->factory->post->create( array( 
             'post_author' => $this->user_id, 
             'post_content' => $content
             ) 
         );
 
-        add_post_meta($post_id, "papercite_data", $data);
+        if ($data !== null) {
+            add_post_meta($post_id, "papercite_data", $data);
+        }
         $GLOBALS['post'] = $post_id;
 
         $doc = new DOMDocument();
