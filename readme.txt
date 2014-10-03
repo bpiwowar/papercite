@@ -114,6 +114,10 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 = 0.5.14 = 
 
+ * Fixed yet another bug with remote URL fetching
+
+= 0.5.14 = 
+
  * Fixed a fatal error for remote URLs
 
 = 0.5.13 =
