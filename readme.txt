@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex, bibliography
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 0.5.13
+Stable tag: 0.5.14
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -111,6 +111,10 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 3. The bibfilter command
 
 == Changelog ==
+
+= 0.5.14 = 
+
+ * Fixed a fatal error for remote URLs
 
 = 0.5.13 =
 
