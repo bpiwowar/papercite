@@ -50,6 +50,14 @@ install_test_suite() {
 	sed $ioption "s/yourusernamehere/$DB_USER/" wp-tests-config.php
 	sed $ioption "s/yourpasswordhere/$DB_PASS/" wp-tests-config.php
 	sed $ioption "s|localhost|${DB_HOST}|" wp-tests-config.php
+
+	# Detects the wordpress directory based on environment
+	cat >> wp-tests-config.php <<EOF
+\$_wp_path = getenv('WP_TESTS_WP_DIR');
+if ( !\$_wp_path ) \$_wp_path = '/tmp/wordpress/';
+define('ABSPATH', \$_wp_path);
+EOF
+
 }
 
 install_db() {
