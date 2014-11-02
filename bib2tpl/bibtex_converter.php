@@ -133,7 +133,9 @@ class BibtexConverter
 
       'key_format' => 'numeric',
       
-      'limit' => 0
+      'limit' => 0,
+      
+      'highlight' => ''
     );
 
     // Overwrite specified options
@@ -571,6 +573,14 @@ class BibtexConverter
       // replace newlines with spaces, to avoid PHP converting them to <br/>
       $str = preg_replace("/[\r\n]+/", " ", $str);
       $str = htmlspecialchars($str);
+      
+    // highlight authors
+	if ($name == 'author' || $name == 'editor') {
+	  if (!empty($this->_options['highlight'])) {
+		$str = preg_replace('~\\b('.$this->_options['highlight'].')\\b~', '<span class="papercite_highlight">$0</span>', $str);
+	  }
+	}
+      
     return $str;
   }
 

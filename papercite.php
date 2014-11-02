@@ -5,7 +5,7 @@
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
   Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. 
-  Version: 0.5.12
+  Version: 0.5.15
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
 */
@@ -125,7 +125,7 @@ class Papercite {
   function getCached($url, $timeout = 3600) {
     // check if cached file exists
     $name = strtolower(preg_replace("@[/:]@","_",$url));
-    $dir = plugins_dir_path(__FILE__) . "/papercite/cache";
+    $dir = plugin_dir_path(dirname(__FILE__)) . "/papercite/cache";
     $file = "$dir/$name.bib";
 
     // check if file date exceeds 60 minutes   
@@ -145,6 +145,10 @@ class Papercite {
 
       // Everything is OK: retrieve the body of the HTTP answer
       $body = wp_remote_retrieve_body($req);
+      if (!file_exists($dir)) {
+        mkdir($dir);
+      }
+      
       if ($body) {
         $f=fopen($file,"wb");
         fwrite($f,$body);
@@ -168,14 +172,14 @@ class Papercite {
 
   // Names of the options that can be set
   static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", 
-    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files");
+    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files", "show_links", "highlight");
 
   // Default value of options
   static $default_options = 
   array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
         "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "osbib", "use_db" => false,
         "auto_bibshow" => false, "use_media" => false, "use_files" => true, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true,
-        "checked_files" => array(array("pdf", "pdf", "", "pdf", "application/pdf")));
+        "checked_files" => array(array("pdf", "pdf", "", "pdf", "application/pdf")), "show_links" => true, "highlight" => "");
   /**
    * Init is called before the first callback
    */
@@ -511,7 +515,8 @@ class Papercite {
         "sort" => $options["sort"], 
             "order" => $options["order"],
         "key_format" => $options["key_format"],
-            "limit" => papercite::array_get($options, "limit", 0)
+            "limit" => papercite::array_get($options, "limit", 0),
+        "highlight" => $options["highlight"]
       );
   }
 
@@ -664,7 +669,7 @@ class Papercite {
 
         // Did we already cite this?
         if (!$num) {
-          // no, register this
+          // no, register this using a custom ID (hopefully, there will be no conflict)
           $id = "BIBCITE%%" . $this->citesCounter . "%";
           $this->citesCounter++;
           $num = sizeof($cites);
@@ -674,7 +679,6 @@ class Papercite {
           $id =  $num[1];
         }
         $returns .= "$id";
-
       }
 
       return "[$returns]";
@@ -885,16 +889,23 @@ class Papercite {
       $this->checkFiles($ref, $goptions);
     }
 
+    // This will set the key of each reference
     $r = $bib2tpl->display($refs);
 
     // If we need to get the citation key back
     if ($getKeys) {
-      foreach($refs as &$group)
-      foreach($group as &$ref) {
-        $this->keys[] = $ref["pKey"];
-        $this->keyValues[] = $ref["key"];
+      foreach($refs as &$group) {
+        foreach($group as &$ref) {
+          $this->keys[] = $ref["pKey"];
+          if ($goptions["show_links"]) {
+            $this->keyValues[] = "<a class=\"papercite_bibcite\" href=\"#paperkey_{$ref["papercite_id"]}\">{$ref["key"]}</a>";            
+          } else {
+            $this->keyValues[] = $ref["key"];
+          }
+        }
       }
     }
+
 
     // Process text in order to avoid some unexpected WordPress formatting 
     return str_replace("\t", '  ', trim($r["text"]));

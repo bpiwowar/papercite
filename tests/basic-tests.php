@@ -4,7 +4,7 @@
 
 class SampleTest extends WP_UnitTestCase {
 
-	function testSample() {
+    function testSample() {
         $user_id = $this->factory->user->create();
         $content = "[bibtex file=custom://data key=test]";
         $post_id = $this->factory->post->create( array( 
@@ -30,7 +30,6 @@ EOF;
 
         // print $doc->saveXML();
 
-		$this->assertStringStartsWith("B. Piwowarski, “Hello world.”", $title);
-	}
+        $this->assertStringStartsWith("B. Piwowarski, “Hello world.”", $title);
+    }
 }
-
