@@ -133,7 +133,9 @@ class BibtexConverter
 
       'key_format' => 'numeric',
       
-      'limit' => 0
+      'limit' => 0,
+      
+      'highlight' => ''
     );
 
     // Overwrite specified options
@@ -573,7 +575,18 @@ class BibtexConverter
     }
     if ($modifier != 'html') {
       $str = htmlspecialchars($str);
+<<<<<<< HEAD
     }
+=======
+      
+    // highlight authors
+	if ($name == 'author' || $name == 'editor') {
+	  if (!empty($this->_options['highlight'])) {
+		$str = preg_replace('~\\b('.$this->_options['highlight'].')\\b~', '<span class="papercite_highlight">$0</span>', $str);
+	  }
+	}
+      
+>>>>>>> origin/master
     return $str;
   }
 
