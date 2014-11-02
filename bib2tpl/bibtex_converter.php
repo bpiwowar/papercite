@@ -567,10 +567,13 @@ class BibtexConverter
       return $this->_entry_template->count($v);
 
     $str = $this->_entry_template->format($v);
-    if ($name != 'bibtex')
+    if ($name != 'bibtex') {
       // replace newlines with spaces, to avoid PHP converting them to <br/>
       $str = preg_replace("/[\r\n]+/", " ", $str);
+    }
+    if ($modifier != 'html') {
       $str = htmlspecialchars($str);
+    }
     return $str;
   }
 
@@ -579,5 +582,3 @@ class BibtexConverter
 
 
 }
-
-?>
