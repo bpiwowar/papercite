@@ -575,9 +575,7 @@ class BibtexConverter
     }
     if ($modifier != 'html') {
       $str = htmlspecialchars($str);
-<<<<<<< HEAD
     }
-=======
       
     // highlight authors
 	if ($name == 'author' || $name == 'editor') {
@@ -586,12 +584,9 @@ class BibtexConverter
 	  }
 	}
       
->>>>>>> origin/master
     return $str;
   }
 
-
-  
 
 
 }
