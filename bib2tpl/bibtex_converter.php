@@ -541,6 +541,7 @@ class BibtexConverter
     // --- Get the options
     $v = null;
     $count = false;
+    $modifier = "";
 
     if ($name[0] == "#") {
       $name = substr($name,1);
