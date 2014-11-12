@@ -112,6 +112,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+ * SSL certificates can be ignored (issue #98)
+
 = 0.5.15 = 
 
  * Fixed yet another bug with remote URL fetching

@@ -124,6 +124,7 @@ function papercite_admin_init(){
   add_settings_field('bibshow_template', 'Main bibshow template', 'papercite_bibshow_template', 'papercite', 'papercite_main');
   
   add_settings_field('show_links', 'Show links', 'papercite_show_links', 'papercite', 'papercite_main');
+  add_settings_field('ssl_check', 'Check SSL certificates', 'papercite_ssl_check', 'papercite', 'papercite_main');
 
   add_settings_section('papercite_choices', 'Options', 'papercite_choices_text', 'papercite');
   add_settings_field('bibtex_parser', 'Bibtex parser', 'papercite_bibtex_parser', 'papercite', 'papercite_choices');
@@ -181,6 +182,11 @@ function papercite_bibshow_template() {
 function papercite_show_links() {
   $options = $GLOBALS["papercite"]->options;
   echo "<input id='papercite_show_links' name='papercite_options[show_links]' type='checkbox' value='1' " . checked(true, $options['show_links'], false) . " /> This will make [bibcite] have hyperlinks to the appropriate entry in the [bibshow] references. Can manually enabled/disabled with [bibshow show_links=true/false].";
+}
+
+function papercite_ssl_check() {
+  $options = $GLOBALS["papercite"]->options;
+  echo "<input id='papercite_ssl_check' name='papercite_options[ssl_check]' type='checkbox' value='1' " . checked(true, $options['ssl_check'], false) . " />Checks SSL certificates; can be overwritten with the option ssl_check=true/false.";
 }
 
 function papercite_deny() {
@@ -323,6 +329,7 @@ function papercite_options_validate($input) {
   $options['skip_for_post_lists'] = $input['skip_for_post_lists'] == "1";
   $options['process_titles'] = $input['process_titles'] == "1";
   $options['show_links'] = $input['show_links'] == "1";
+  $options['ssl_check'] = $input['ssl_check'] == "1";
 
   $options['file'] = trim($input['file']);
   $options['timeout'] = trim($input["timeout"]);

@@ -122,7 +122,7 @@ class Papercite {
    * @param url The URL
    * @param timeout The timeout of the cache
    */
-  function getCached($url, $timeout = 3600) {
+  function getCached($url, $timeout = 3600, $sslverify = false) {
     // check if cached file exists
     $name = strtolower(preg_replace("@[/:]@","_",$url));
     $dir = plugin_dir_path(dirname(__FILE__)) . "/papercite/cache";
@@ -131,7 +131,7 @@ class Papercite {
     // check if file date exceeds 60 minutes   
     if (! (file_exists($file) && (filemtime($file) + $timeout > time())))  {
       // Download URL and process
-      $req = wp_remote_get($url);
+      $req = wp_remote_get($url, array('sslverify' => $sslverify));
       if (is_wp_error($req)) {
         $this->addMessage("Could not retrieve remote URL ".htmlentities($url). ": " . $req->get_error_message());
         return false;
@@ -172,14 +172,15 @@ class Papercite {
 
   // Names of the options that can be set
   static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", 
-    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files", "show_links", "highlight");
+    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files", "show_links", "highlight", "ssl_check");
 
   // Default value of options
   static $default_options = 
   array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
         "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "osbib", "use_db" => false,
         "auto_bibshow" => false, "use_media" => false, "use_files" => true, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true,
-        "checked_files" => array(array("pdf", "pdf", "", "pdf", "application/pdf")), "show_links" => true, "highlight" => "");
+        "checked_files" => array(array("pdf", "pdf", "", "pdf", "application/pdf")), "show_links" => true, "highlight" => "",
+        "ssl_check" => false);
   /**
    * Init is called before the first callback
    */
@@ -337,6 +338,8 @@ class Papercite {
 
      $timeout = $options["timeout"];
      $processtitles = $options["process_titles"];
+     $sslverify = $options["ssl_check"];
+     print "<div>sslverify is $sslverify</div>";
     
     // Loop over the different given URIs
     $bibFile = false;
@@ -363,7 +366,7 @@ class Papercite {
       if ($stringedFile) {
           // do nothing
       } else if (preg_match('#^(ftp|http)s?://#', $biburi) == 1) {
-        $bibFile = $this->getCached($biburi, $timeout);
+        $bibFile = $this->getCached($biburi, $timeout, $sslverify);
       } else {
         $biburi = preg_replace("#\\.bib$#", "", $biburi);
         $bibFile = $this->getDataFile("$biburi", "bib", "bib", "application/x-bibtex", $options);
