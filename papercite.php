@@ -172,14 +172,14 @@ class Papercite {
 
   // Names of the options that can be set
   static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", 
-    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files", "show_links", "highlight");
+    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files", "show_links", "highlight", "select");
 
   // Default value of options
   static $default_options = 
   array("format" => "ieee", "group" => "none", "order" => "desc", "sort" => "none", "key_format" => "numeric",
         "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "osbib", "use_db" => false,
         "auto_bibshow" => false, "use_media" => false, "use_files" => true, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true,
-        "checked_files" => array(array("pdf", "pdf", "", "pdf", "application/pdf")), "show_links" => true, "highlight" => "");
+        "checked_files" => array(array("pdf", "pdf", "", "pdf", "application/pdf")), "show_links" => true, "highlight" => "", "select" => "Type");
   /**
    * Init is called before the first callback
    */
@@ -734,6 +734,7 @@ class Papercite {
         $deny =  $deny ? preg_split("-,-", $deny) : Array();
         
       $author_matcher = new PaperciteAuthorMatcher(Papercite::array_get($options, "author", ""));
+      $option_selected = $options["select"];
 
         $result = array();
         $dbs = array();
@@ -742,8 +743,12 @@ class Papercite {
                 $dbs[] = $outer[1];
             else
               foreach($outer as &$entry) {
-                $t = &$entry["entrytype"];
-                if ((sizeof($allow)==0 || in_array($t, $allow)) && (sizeof($deny)==0 || !in_array($t, $deny)) && $author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry)) {
+                if ($option_selected=="Type")
+                     $t = Array(&$entry["entrytype"]);
+                else if ($option_selected=="keywords")
+                     $t = array_key_exists("keywords", $entry) ? preg_split('/ and /i',$entry["keywords"]) : Array();
+                else $t = array_key_exists($option_selected, $entry) ? preg_split("/\s+/",$entry[$option_selected]) : Array();
+                if ((sizeof($allow)==0 || $allow[1]|| sizeof(array_intersect($t,$allow))>0) && (sizeof($deny)==0 || sizeof(array_intersect($t,$deny))==0) && $author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry)) {
                 $result[] = $entry;
                 }
               }
@@ -928,14 +933,14 @@ class Papercite {
         
         $original_authors = Papercite::array_get($options, "author", "");
         $original_allow = Papercite::array_get($options, "allow", "");
-        
+        $option_selected = $options["select"];
+
         if (isset($_POST) && (papercite::array_get($_POST, "papercite_post_id", 0) == $post->ID)) {
         if (isset($_POST["papercite_author"]) && !empty($_POST["papercite_author"])) 
                 $selected_author = ($options["author"] = $_POST["papercite_author"]);        
             
         if (isset($_POST["papercite_allow"]) && !empty($_POST["papercite_allow"])) 
                 $selected_type = ($options["allow"] = $_POST["papercite_allow"]);
-        
         }
         
         $result = $this->getEntries($options);
@@ -957,12 +962,12 @@ class Papercite {
                                 print "<option value=\"".htmlentities($author, ENT_QUOTES, "UTF-8")."\"";
                                 if ($selected_author == $author)
                                     print " selected=\"selected\"";
-                                print ">$author</option>";
+                                print ">".htmlentities($author, ENT_QUOTES, "UTF-8")."</option>";
                             }
                             ?>
               </select></td>
                     
-              <td>Type:</td>
+              <td> <?php print "$option_selected:"; ?> </td>
               <td><select name="papercite_allow" id="papercite_type">
                   <option value="">ALL</option>
                             <?php
