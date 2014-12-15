@@ -19,7 +19,7 @@ class RemoteTest extends PaperciteTestCase {
 
     function test() {
         $url = "https://gist.githubusercontent.com/bpiwowar/9793f4e2da48dfb34cde/raw/5fbff41218107aa9dcfab4fc53fe8e2b86ea8416/test.bib";
-        $doc = $this->process_post("[bibtex file=$url]");
+        $doc = $this->process_post("[bibtex ssl_check=true file=$url]");
 
         $xpath = new DOMXpath($doc);   
 

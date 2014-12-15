@@ -12,5 +12,7 @@ function _manually_load_plugin() {
 define('WP_PLUGIN_DIR', dirname(dirname(dirname( __FILE__ ))));
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
+define('PHPUNIT_PAPERCITE_TESTSUITE', 1);
+
 require $_tests_dir . '/includes/bootstrap.php';
 

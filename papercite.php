@@ -779,6 +779,9 @@ class Papercite {
   //! Add an error message
   var $error_messages = array();
   function addMessage($message) {
+    if (defined('PHPUNIT_PAPERCITE_TESTSUITE')) {
+      print "[message] $message\n";
+    }
     $this->error_messages[] = "<div>" . $message . "</div>";
   }
 
