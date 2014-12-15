@@ -118,6 +118,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 ## Changelog ##
 
+ * New template variables : position in list and position in group
  * SSL certificates can be ignored (issue #98)
 
 = 0.5.15 = 

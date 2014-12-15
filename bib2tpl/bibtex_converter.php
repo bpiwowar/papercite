@@ -510,10 +510,16 @@ class BibtexConverter
     if ($match[1] == "#fullentry") {
       $entries = "";
       $limit = $this->_options["limit"];
+      $groupPosition = 0;
       foreach($this->_group as &$entry) {
-          if ($limit > 0 && $limit <= $this->count)
-              break;
-          $this->count++;
+        if ($limit > 0 && $limit <= $this->count)
+          break;
+        $this->count++;
+        $groupPosition++;
+
+        $this->_globals["positionInList"] = $this->count;
+        $this->_globals["positionInGroup"] = $groupPosition;
+
         $this->_entry = $entry;
         $entries .= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $this->full_entry_tpl);
       }

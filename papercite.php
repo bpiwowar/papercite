@@ -339,7 +339,6 @@ class Papercite {
      $timeout = $options["timeout"];
      $processtitles = $options["process_titles"];
      $sslverify = $options["ssl_check"];
-     print "<div>sslverify is $sslverify</div>";
     
     // Loop over the different given URIs
     $bibFile = false;
