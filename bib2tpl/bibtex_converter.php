@@ -373,7 +373,6 @@ class BibtexConverter
     $result = preg_replace('/@globalgroupcount@/', count($data), $result);
     $result = preg_replace('/[\n\r]+/',' ',$result);
     $match = array();
-    //print "<div style='border: 1pt solid red;'>"; print_r(nl2br(htmlentities($result))); print "</div>";
 
     // Extract entry template
     $pattern = '/@\{entry@(.*?)@\}entry@/s';
@@ -391,7 +390,7 @@ class BibtexConverter
     $this->_data = &$data;
     
     // The count
-    $this->count = 0;
+    $this->_globals["positionInList"] = 1;
 
     // "If-then-else" stack
     $this->_ifs = array(true);
@@ -408,7 +407,6 @@ class BibtexConverter
   function _callback($match) {
 
     $condition = $this->_ifs[sizeof($this->_ifs)-1];
-    //    print "<div><b>IF: $condition</b> - <b>[1]</b>:". htmlentities($match[1]) .", <b>[2]</b>:". htmlentities($match[2]) ."</div>";
 
     // --- [ENDIF]
     if ($match[1][0] == ';') {
@@ -436,7 +434,6 @@ class BibtexConverter
 	$matches = array();
 	preg_match("/^(#?[\w]+)(?:([~=><])([^@]+))?$/", $test, $matches);
 	$value = $this->_get_value($matches[1]);
-	//print "<div>Compares $value ($matches[1]) [$matches[2]] $matches[3]</div>";
 	switch(sizeof($matches) > 2 ? $matches[2] : "")
 	  {
 	  case "":
@@ -512,16 +509,17 @@ class BibtexConverter
       $limit = $this->_options["limit"];
       $groupPosition = 0;
       foreach($this->_group as &$entry) {
-        if ($limit > 0 && $limit <= $this->count)
+        if ($limit > 0 && $limit <= $this->count) {
+          // Stop if we reached the limit
           break;
-        $this->count++;
+        }
         $groupPosition++;
 
-        $this->_globals["positionInList"] = $this->count;
         $this->_globals["positionInGroup"] = $groupPosition;
 
         $this->_entry = $entry;
         $entries .= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $this->full_entry_tpl);
+        $this->_globals["positionInList"]++;
       }
       unset($this->_entry);
       return $entries . $match[2];
@@ -532,7 +530,6 @@ class BibtexConverter
         if ($this->_entry["entrytype"]) {
           $type = $this->_entry["entrytype"];
           $entryTpl = $this->_entry_template->get($type);
-          //print "<div><b>$type</b>: ". htmlentities($entryTpl). "</div>";
           $t=  preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $entryTpl) . $match[2];
         }
         else $t = "<span style='color:red'>Unknown bibtex entry with key [".$this->_entry["cite"] ."]</span>" . $match[2];
@@ -560,8 +557,9 @@ class BibtexConverter
     }
 
     // --- If we have an entry
-    if (isset($this->_entry) && array_key_exists($name, $this->_entry))
-	$v = $this->_entry[$name];
+    if (isset($this->_entry) && array_key_exists($name, $this->_entry)) {
+      $v = $this->_entry[$name];
+    }
     
 
     // Global variable
@@ -571,8 +569,9 @@ class BibtexConverter
 
     // --- post processing
 
-    if ($count)
+    if ($count) {
       return $this->_entry_template->count($v);
+    }
 
     $str = $this->_entry_template->format($v);
     if ($name != 'bibtex')
