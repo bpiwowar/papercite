@@ -10,7 +10,6 @@
  * @date November 2011
  */
 
-require_once("UTF8.php");
 require_once("bibtex_common.php");
 
 /**
@@ -207,7 +206,7 @@ class PaperciteBibTexEntries {
 			// 21/08/2004 G.Gardey -> expand macro
 			// Don't remove delimiters now needs to know if the value is a string macro
 			// $this->data[$this->count][strtolower(trim($key))] = trim($this->removeDelimiters(trim($value)));
-			$key = UTF8::utf8_strtolower(trim($key));
+			$key = mb_strtolower(trim($key));
 			$value = trim($value);
 			$this->data[$this->count][$key] = $value;
 		}
@@ -603,7 +602,7 @@ class PaperciteBibTexEntries {
       else
 	$newString .= 
           $this->_processTitles ? 
-          ($start ? UTF8::utf8_ucfirst( UTF8::utf8_strtolower($v[0]) ) : UTF8::utf8_strtolower($v[0]))
+          ($start ? mb_strtoupper(mb_substr($v[0], 0, 1)) . mb_strtolower(mb_substr($v[0], 1)) : mb_strtolower($v[0]))
           : 
           $v[0];
 
