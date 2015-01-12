@@ -2,7 +2,7 @@
 **Contributors:** bpiwowar  
 **Tags:** formatting, bibtex, bibliography  
 **Requires at least:** 3.8  
-**Tested up to:** 4.0  
+**Tested up to:** 4.1  
 **Stable tag:** 0.5.15  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -118,7 +118,6 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 ## Changelog ##
 
- * New template variables : position in list and position in group
  * SSL certificates can be ignored (issue #98)
 
 = 0.5.15 = 
