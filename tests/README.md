@@ -7,4 +7,6 @@ You should install phpunit
 
 ## Running the tests
 
-WP_TESTS_WP_DIR=... WP_TESTS_DIR=... phpunit
+export WP_TESTS_WP_DIR=... 
+export WP_TESTS_DIR=... 
+phpunit
