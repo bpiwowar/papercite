@@ -24,7 +24,7 @@ EOF;
 
     function check($modifier, $expected) {
         $doc = $this->process_post("[bibtex file=custom://data template=custom://template]", 
-            ["data" => HTMLModifierTest::$data, "template" => HTMLModifierTest::getTemplate($modifier)]
+            array("data" => HTMLModifierTest::$data, "template" => HTMLModifierTest::getTemplate($modifier))
         );
 
         $xpath = new DOMXpath($doc);        
