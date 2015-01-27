@@ -300,6 +300,31 @@ class Papercite {
    return false;
   }
 
+  /**
+   * Returns the content of a file (disk or post data)
+   * 
+   * @see papercite::getDataFile
+   */
+    static function getContent($relfile, $ext, $folder, $mimetype, $options, $use_files = false) {
+    // Handles custom:// 
+    $custom_prefix = "custom://";
+    if (papercite::startsWith($relfile, $custom_prefix)) {
+        $key =  substr($relfile, strlen($custom_prefix));
+        $data = get_post_custom_values("papercite_$key");
+        if ($data) {
+          return $data[0];
+        }
+    }
+
+    // Normal behavior
+    $data = papercite::getDataFile($relfile, $ext, $folder, $mimetype, $options, $use_files);
+    if ($data) {
+      return file_get_contents($data[0]);
+    }
+
+    return false;
+  }
+
   /** 
    * Check if a matching file exists, and add it to the bibtex if so
    * @param $entry key
@@ -856,17 +881,16 @@ class Papercite {
    */
   function showEntries($refs, $goptions, $options, $getKeys, $mainTpl, $formatTpl, $mode) {
     // Get the template files
-    $mainFile = $this->getDataFile("$mainTpl", "tpl", "tpl", "MIMETYPE", $goptions, true);
-    $formatFile = $this->getDataFile("$formatTpl", "tpl", "format", "MIMETYPE", $goptions, true);
+    $main = $this->getContent("$mainTpl", "tpl", "tpl", "MIMETYPE", $goptions, true);
+    $format = $this->getContent("$formatTpl", "tpl", "format", "MIMETYPE", $goptions, true);
 
     // Fallback to defaults if needed
-    if (!$mainFile)
-      $mainFile = $this->getDataFile(papercite::$default_options["${mode}_template"], "tpl", "tpl", "MIMETYPE", $goptions, true);
-    if (!$formatFile)
-      $formatFile = $this->getDataFile(papercite::$default_options["format"], "tpl", "format", "MIMETYPE", $goptions, true);
-
-    $main = file_get_contents($mainFile[0]);
-    $format = file_get_contents($formatFile[0]);
+    if (!$main) {
+      $main = $this->getContent(papercite::$default_options["${mode}_template"], "tpl", "tpl", "MIMETYPE", $goptions, true);
+    }
+    if (!$format) {
+      $format = $this->getContent(papercite::$default_options["format"], "tpl", "format", "MIMETYPE", $goptions, true);
+    }
 
     $bibtexEntryTemplate = new PaperciteBibtexEntryFormat($format);
 
@@ -875,10 +899,8 @@ class Papercite {
     if ($refs) {
       foreach($refs as &$entry) {
         $entry["papercite_id"] = $this->counter++;
-		$entry["papercite_title"] = sanitize_title($entry["title"]);
       }
     }
-	
 
     // Convert (also set the citation key)
     $bib2tpl = new BibtexConverter($options, $main, $bibtexEntryTemplate);

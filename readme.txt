@@ -112,6 +112,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+ * Added modifiers for output (html, strip, protect, sanitize)
  * SSL certificates can be ignored (issue #98)
 
 = 0.5.15 = 

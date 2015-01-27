@@ -8,7 +8,12 @@ abstract class PaperciteTestCase extends WP_UnitTestCase {
         $this->user_id = $this->factory->user->create();
     }
 
-    /** Create a post, process it and return the content */
+    /** 
+     * Create a post, process it and return the content 
+     * 
+     * @param $content The post content
+     * @param $data The post data or an array whose keys are the names of the post datas
+     */
     function process_post($content, $data = null) {
         $post_id = $this->factory->post->create( array( 
             'post_author' => $this->user_id, 
@@ -17,7 +22,13 @@ abstract class PaperciteTestCase extends WP_UnitTestCase {
         );
 
         if ($data !== null) {
-            add_post_meta($post_id, "papercite_data", $data);
+            if (is_array($data)) {
+                foreach($data as $key => &$value)
+                add_post_meta($post_id, "papercite_$key", $value);
+
+            } else {
+                add_post_meta($post_id, "papercite_data", $data);
+            }
         }
         $GLOBALS['post'] = $post_id;
 

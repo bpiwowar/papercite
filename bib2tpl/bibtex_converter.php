@@ -579,8 +579,21 @@ class BibtexConverter
       // replace newlines with spaces, to avoid PHP converting them to <br/>
       $str = preg_replace("/[\r\n]+/", " ", $str);
     }
-    if ($modifier != 'html') {
-      $str = htmlspecialchars($str);
+
+    switch($modifier) {
+      case "sanitize":
+        $str = sanitize_title($str);
+        break;
+      case "strip":
+        $str = wp_strip_all_tags($str);
+      case "protect":
+        $str = htmlentities($str);
+      case "html":
+        break;
+
+      default:
+        // TODO: should report an error here?
+        break;
     }
       
     // highlight authors

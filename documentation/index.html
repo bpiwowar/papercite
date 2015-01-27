@@ -422,10 +422,13 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
        same semantics as in main programming languages.
        </li>
        <li>
+       HTML in fields is preserved by default. 
        All fields are stripped for html code by default, this behaviour can be disabled in the template on a field by field basis by adding the modifier <code>:html</code> to the field.<br>I.e. an abstract field that contains <code>This is the &lt;b&gt;greatest&lt;/b&gt; book in the world</code> will show:
        <ul>
-       <li><code>@abstract@</code> = This is the greatest book in the world</li>
-       <li><code>@abstract:html@</code> = This is the <b>greatest</b> book in the world</li>
+       <li><code>@abstract@</code> or <code>@abstract:html@</code> = This is the <b>greatest</b> book in the world</li>
+       <li><code>@abstract:strip@</code> = This is the greatest book in the world</li>
+       <li><code>@abstract:protect@</code> = This is the &lt;b&gt;greatest&lt;/b&gt; book in the world</li>
+       <li><code>@abstract:sanitize@</code> = This is the &lt;b&gt;greatest&lt;/b&gt; book in the world</li>
        </ul><br><b>This should only be used when with fully trusted bibtex sources, as it can be used to embed malicious code on the website</b>
        </li>
        </ul>
