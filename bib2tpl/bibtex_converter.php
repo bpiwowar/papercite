@@ -544,6 +544,7 @@ class BibtexConverter
     // --- Get the options
     $v = null;
     $count = false;
+    $modifier = "";
 
     if ($name[0] == "#") {
       $name = substr($name,1);
@@ -574,10 +575,13 @@ class BibtexConverter
     }
 
     $str = $this->_entry_template->format($v);
-    if ($name != 'bibtex')
+    if ($name != 'bibtex') {
       // replace newlines with spaces, to avoid PHP converting them to <br/>
       $str = preg_replace("/[\r\n]+/", " ", $str);
+    }
+    if ($modifier != 'html') {
       $str = htmlspecialchars($str);
+    }
       
     // highlight authors
 	if ($name == 'author' || $name == 'editor') {
@@ -590,9 +594,5 @@ class BibtexConverter
   }
 
 
-  
-
 
 }
-
-?>

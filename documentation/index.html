@@ -397,6 +397,7 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
     <ul>
       <li><code>@WP_PLUGIN_URL@</code> will be replaced by the plugin URL.</li>
       <li><code>@papercite_id@</code> is a unique id within the page/post</li>
+      <li><code>@papercite_title@</code> is the title sanitized for use in code or urls. It is sanitized with <code><a href="http://codex.wordpress.org/Function_Reference/sanitize_title">sanitize title()</a></code>, specifically, HTML and PHP tags are stripped.</li>
       <li><code>@key@</code> is a the key as formatted with <code>key_format</code>.</li>
       <li><code>@pdf@</code> is the URL to the auto-detected PDF (or to the URL specified in the PDF field).</li>
       <li><code>@positionInList@</code> gives the position of the entry within the full list</li>
@@ -419,6 +420,13 @@ The second way of using this plug-in (new to papercite), is to use bibcite and b
      bib2tpl: you can use the operators <code>&gt;</code>,
      <code>&lt;</code>, <code>=</code> and <code>||</code> with the
        same semantics as in main programming languages.
+       </li>
+       <li>
+       All fields are stripped for html code by default, this behaviour can be disabled in the template on a field by field basis by adding the modifier <code>:html</code> to the field.<br>I.e. an abstract field that contains <code>This is the &lt;b&gt;greatest&lt;/b&gt; book in the world</code> will show:
+       <ul>
+       <li><code>@abstract@</code> = This is the greatest book in the world</li>
+       <li><code>@abstract:html@</code> = This is the <b>greatest</b> book in the world</li>
+       </ul><br><b>This should only be used when with fully trusted bibtex sources, as it can be used to embed malicious code on the website</b>
        </li>
        </ul>
     </p>

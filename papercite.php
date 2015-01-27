@@ -875,8 +875,10 @@ class Papercite {
     if ($refs) {
       foreach($refs as &$entry) {
         $entry["papercite_id"] = $this->counter++;
+		$entry["papercite_title"] = sanitize_title($entry["title"]);
       }
     }
+	
 
     // Convert (also set the citation key)
     $bib2tpl = new BibtexConverter($options, $main, $bibtexEntryTemplate);
