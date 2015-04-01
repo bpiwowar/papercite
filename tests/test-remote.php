@@ -4,12 +4,20 @@ require_once dirname(__FILE__) . '/common.inc.php';
 
 class RemoteTest extends PaperciteTestCase {
 
-    function testRemote() {
-        $cachedir = dirname(dirname(__FILE__)) . "/cache";
+    public function setUp() {
+	parent::setUp();
+
+	$cachedir = Papercite::getCacheDirectory();
         foreach(glob("$cachedir/*") as $file) {
-            unlink($file);
+          unlink($file);
         }
 
+	if ( file_exists( $cachedir ) ) {
+          rmdir( $cachedir );
+	}
+    }
+
+    function testRemote() {
         $this->test();
     }
 
@@ -30,5 +38,29 @@ class RemoteTest extends PaperciteTestCase {
         $this->assertRegExp("#Piwowarski#", $text);
     }
 
+    public function testGetCachedShouldCreateCacheDirectory() {
+	$cachedir = Papercite::getCacheDirectory();
+
+	$p = new Papercite();
+        $url = "https://gist.githubusercontent.com/bpiwowar/9793f4e2da48dfb34cde/raw/5fbff41218107aa9dcfab4fc53fe8e2b86ea8416/test.bib";
+	$cached = $p->getCached( $url );
+
+	$this->assertNotEmpty( $cached );
+	$this->assertTrue( file_exists( $cachedir ) );
+    }
+
+    public function testGetCachedShouldCreateLocalCopyOfRemoteFile() {
+	$cachedir = Papercite::getCacheDirectory();
+
+	$p = new Papercite();
+        $url = "https://gist.githubusercontent.com/bpiwowar/9793f4e2da48dfb34cde/raw/5fbff41218107aa9dcfab4fc53fe8e2b86ea8416/test.bib";
+	$cached = $p->getCached( $url );
+
+        $name = strtolower(preg_replace("@[/:]@","_",$url));
+
+	$this->assertNotEmpty( $cached );
+	$this->assertTrue( file_exists( $cached[0] ) );
+	$this->assertTrue( file_exists( $cachedir . '/' . $name . '.bib' ) );
+    }
 }
 

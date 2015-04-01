@@ -125,8 +125,8 @@ class Papercite {
   function getCached($url, $timeout = 3600, $sslverify = false) {
     // check if cached file exists
     $name = strtolower(preg_replace("@[/:]@","_",$url));
-    $dir = plugin_dir_path(dirname(__FILE__)) . "/papercite/cache";
-    $file = "$dir/$name.bib";
+    $dir_path = self::getCacheDirectory( 'path' );
+    $file = "$dir_path/$name.bib";
 
     // check if file date exceeds 60 minutes   
     if (! (file_exists($file) && (filemtime($file) + $timeout > time())))  {
@@ -145,8 +145,8 @@ class Papercite {
 
       // Everything is OK: retrieve the body of the HTTP answer
       $body = wp_remote_retrieve_body($req);
-      if (!file_exists($dir)) {
-        mkdir($dir);
+      if (!file_exists($dir_path)) {
+        mkdir($dir_path);
       }
       
       if ($body) {
@@ -164,8 +164,10 @@ class Papercite {
         return false;
       }
     }
-  
-    return array($file, plugins_url()."/papercite/cache/$name");
+
+    $dir_url = self::getCacheDirectory( 'url' );
+
+    return array($file, $dir_url . '/' . $name);
   }
 
   static $bibtex_parsers = array("pear" => "Pear parser", "osbib" => "OSBiB parser");
@@ -225,7 +227,20 @@ class Papercite {
       
   
     }
-    
+
+  }
+
+  /**
+   * Get a writeable directory for caching remote bibtex files.
+   *
+   * @param string $type 'path' for local filepath, or 'url' for URL.
+   * @return string
+   */
+  static function getCacheDirectory( $type = 'dir' ) {
+    $uploads_dir = wp_upload_dir();
+
+    $base = 'url' === $type ? $uploads_dir['baseurl'] : $uploads_dir['basedir'];
+    return apply_filters( 'papercite_cache_directory', $base . '/papercite-cache' );
   }
 
   
