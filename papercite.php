@@ -1118,7 +1118,7 @@ function papercite_staff($myContent) {
 
   // (3) Handles custom keys in bibshow and return
   $text = str_replace($papercite->keys, $papercite->keyValues, $text);
-echo $text;
+//echo $text;
   return $text;
 }
 
