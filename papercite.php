@@ -1086,6 +1086,42 @@ function papercite_init() {
 }
 
 // --- Callback function ----
+function papercite_staff($myContent) {
+
+  // Init
+  $papercite = &$GLOBALS["papercite"];
+  
+  // Fixes issue #39 (maintenance mode support)
+  if(!is_object($papercite))
+      return $myContent;
+  
+  $papercite->init();
+
+  // Database support if needed
+  if ($papercite->options["use_db"]) {
+      require_once(dirname(__FILE__) . "/papercite_db.php");
+  }
+    
+  // (0) Skip processing on this page?
+  if ($papercite->options['skip_for_post_lists'] && !is_single() ) {//&& !is_page()
+
+ return preg_replace("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/", '', $myContent);
+  }
+  // (1) First phase - handles everything but bibcite keys
+  $text = preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex|bibfilter)(?:\s+([^[]+))?]/",
+        array($papercite, "process"), $myContent);
+
+  // (2) Handles missing bibshow tags
+  while (sizeof($papercite->bibshows) > 0)
+    $text .= $papercite->end_bibshow();
+
+
+  // (3) Handles custom keys in bibshow and return
+  $text = str_replace($papercite->keys, $papercite->keyValues, $text);
+echo $text;
+  return $text;
+}
+
 function &papercite_cb($myContent) {
   // Init
   $papercite = &$GLOBALS["papercite"];
