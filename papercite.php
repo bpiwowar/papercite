@@ -70,12 +70,35 @@ include("papercite_options.php");
           $eAuthors = &$entry["author"];
           foreach($this->filters as &$filter) {
               foreach($filter->creators as $author) {
+					if(!empty($author['firstname'])||!empty($author['initials']))
+						{
+							if(!empty($author['firstname']))
+									{$FirstNameInitial=$author['firstname']{0};}
+								else
+									{$FirstNameInitial=$author['initials'];}
+							$IgnoreFirstname=false;
+					  }else
+						{
+							$IgnoreFirstname=true;
+						}
                   $ok = false;
                   foreach($eAuthors->creators as $eAuthor) {
                       if ($author["surname"] === $eAuthor["surname"]) {
-                          $ok = true;
-                          break;
-                      }
+												if($IgnoreFirstname) {$ok = true;break;}
+												else
+												{// If filter contains full firstname und entry has full name, full name must match!
+													if(!empty($eAuthor['firstname'])&&!empty($author['firstname']))
+														{
+															if($author['firstname'] === $eAuthor["firstname"]){$ok = true;break;}
+														}
+													else //otherwise at least initials must match
+													{
+														if(!empty($eAuthor["firstname"])&&($FirstNameInitial===$eAuthor["firstname"]{0})){$ok = true;break;}
+														if(!empty($eAuthor["initials"])&&($FirstNameInitial===$eAuthor["initials"])){$ok = true;break;}
+														if(empty($eAuthor["initials"]) && empty($eAuthor["firstname"])){$ok = true;break;}//Nothing to match, return ok
+													}
+	    									}
+										}
                   }
                   // Author was not found in publication
                   if (!$ok) break;
