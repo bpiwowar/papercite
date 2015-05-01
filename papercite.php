@@ -82,6 +82,7 @@ include("papercite_options.php");
 							$IgnoreFirstname=true;
 						}
                   $ok = false;
+if (is_array($eAuthors->creators)){
                   foreach($eAuthors->creators as $eAuthor) {
                       if ($author["surname"] === $eAuthor["surname"]) {
 												if($IgnoreFirstname) {$ok = true;break;}
@@ -99,7 +100,8 @@ include("papercite_options.php");
 													}
 	    									}
 										}
-                  }
+                  }//endforeach
+}//end if -forearch
                   // Author was not found in publication
                   if (!$ok) break;
               }
