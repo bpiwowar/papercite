@@ -124,11 +124,8 @@ function papercite_admin_init(){
   add_settings_field('bibshow_template', 'Main bibshow template', 'papercite_bibshow_template', 'papercite', 'papercite_main');
 
   add_settings_field('show_links', 'Show links', 'papercite_show_links', 'papercite', 'papercite_main');
-<<<<<<< HEAD
   add_settings_field('ssl_check', 'Check SSL certificates', 'papercite_ssl_check', 'papercite', 'papercite_main');
-=======
   add_settings_field('highlight', 'Highlight names', 'papercite_highlight', 'papercite', 'papercite_main');
->>>>>>> 962abee1b76e39c44507c11f039330352a41153a
 
   add_settings_section('papercite_choices', 'Options', 'papercite_choices_text', 'papercite');
   add_settings_field('bibtex_parser', 'Bibtex parser', 'papercite_bibtex_parser', 'papercite', 'papercite_choices');
