@@ -19,7 +19,7 @@
 
 /*
   Documentation:
-  - http://ottopress.com/2009/wordpress-settings-api-tutorial/ 
+  - http://ottopress.com/2009/wordpress-settings-api-tutorial/
  */
 
 
@@ -47,15 +47,15 @@ function papercite_options_page() {
 ?>
   <div>
     <h2>Papercite options</h2>
-    
+
     Options related to the papercite plugin.
-    
+
     <form action="options.php" method="post">
 
     <?php settings_fields('papercite_options'); ?>
     <?php do_settings_sections('papercite'); ?>
     <input type='hidden' name='papercite_options[form]' value='1'>
-    
+
     <input name="Submit" type="submit" value="<?php esc_attr_e('Save Changes'); ?>" />
     </form>
     </div>
@@ -93,7 +93,7 @@ function papercite_options_page() {
 
   jQuery(document).on("click", "span.papercite_checked_files", function() {
     var cell = jQuery(this).parents().eq(1);
-    if (this.textContent == "+") 
+    if (this.textContent == "+")
     {
       cell.parent().append(<?php print json_encode(papercite_checked_files_cell("","","","","")); ?>);
     }
@@ -102,7 +102,7 @@ function papercite_options_page() {
       cell.remove();
     }
   });
-  
+
   </script>
   <?php
 }
@@ -122,9 +122,10 @@ function papercite_admin_init(){
 
   add_settings_field('bibtex_template', 'Main bibtex template', 'papercite_bibtex_template', 'papercite', 'papercite_main');
   add_settings_field('bibshow_template', 'Main bibshow template', 'papercite_bibshow_template', 'papercite', 'papercite_main');
-  
+
   add_settings_field('show_links', 'Show links', 'papercite_show_links', 'papercite', 'papercite_main');
   add_settings_field('ssl_check', 'Check SSL certificates', 'papercite_ssl_check', 'papercite', 'papercite_main');
+  add_settings_field('highlight', 'Highlight names', 'papercite_highlight', 'papercite', 'papercite_main');
 
   add_settings_section('papercite_choices', 'Options', 'papercite_choices_text', 'papercite');
   add_settings_field('bibtex_parser', 'Bibtex parser', 'papercite_bibtex_parser', 'papercite', 'papercite_choices');
@@ -141,33 +142,33 @@ function papercite_admin_init(){
 
 function papercite_section_text() {
   echo '<p>Set the default settings - leave the fields empty to use papercite default values</p>';
-} 
+}
 
 
 function papercite_choices_text() {
   echo '<p>Options to set how papercite process the data</p>';
-} 
+}
 
 function papercite_files_text() {
   echo '<p>How attached files are detected - and associated to (bibtex) fields</p>';
-} 
+}
 
 
 
 function papercite_file() {
   $options = $GLOBALS["papercite"]->options;
   echo "<input id='papercite_file' name='papercite_options[file]' size='40' type='text' value='{$options['file']}' />";
-} 
+}
 
 function papercite_format() {
   $options = $GLOBALS["papercite"]->options;
   echo "<input id='papercite_format' name='papercite_options[format]' size='40' type='text' value='{$options['format']}' />";
-} 
+}
 
 function papercite_timeout() {
   $options = $GLOBALS["papercite"]->options;
   echo "<input id='papercite_timeout' name='papercite_options[timeout]' size='40' type='text' value='{$options['timeout']}' />";
-} 
+}
 
 function papercite_bibtex_template() {
   $options = $GLOBALS["papercite"]->options;
@@ -189,20 +190,25 @@ function papercite_ssl_check() {
   echo "<input id='papercite_ssl_check' name='papercite_options[ssl_check]' type='checkbox' value='1' " . checked(true, $options['ssl_check'], false) . " />Checks SSL certificates; can be overwritten with the option ssl_check=true/false.";
 }
 
+function papercite_highlight() {
+  $options = $GLOBALS["papercite"]->options;
+  echo "<input id='papercite_highlight' name='papercite_options[highlight]' size='40' type='text' value='{$options['highlight']}' /> A list of author names to highlight in the format a|b|...|z. Can be set manually in shortcodes e.g. [bibtex highlight=xxx] or [bibshow highlight=xxx]. Note that author names are case sensitive.";
+}
+
 function papercite_deny() {
   $options = $GLOBALS["papercite"]->options;
   echo "<input id='papercite_deny' name='papercite_options[deny]' size='40' type='text' value='"
     . implode(" ", $options['deny']) . "' />";
-} 
+}
 
 
 function papercite_bibtex_parser() {
   $option = $GLOBALS["papercite"]->options["bibtex_parser"];
   echo "<select id='papercite_bibtex_parser' name='papercite_options[bibtex_parser]'>";
-  foreach(papercite::$bibtex_parsers as $key => $value) 
+  foreach(papercite::$bibtex_parsers as $key => $value)
     print "<option value=\"$key\"" . ($key == $option ? ' selected="selected"' : "") . ">$value</option>";
   print "</select>";
-} 
+}
 
 
 add_action('wp_ajax_papercite_create_db', 'papercite_ajax_create_db');
@@ -215,11 +221,11 @@ function papercite_ajax_clear_db() {
 
     ob_start();
     $result = $wpdb->query($wpdb->prepare("DELETE FROM $papercite_table_name_url"));
-    
-    if ($result !== FALSE) 
+
+    if ($result !== FALSE)
     {
-        $result = $wpdb->query($wpdb->prepare("DELETE FROM $papercite_table_name"));        
-        if ($result !== FALSE) 
+        $result = $wpdb->query($wpdb->prepare("DELETE FROM $papercite_table_name"));
+        if ($result !== FALSE)
         {
             $out = ob_get_flush();
             $result = TRUE;
@@ -229,13 +235,13 @@ function papercite_ajax_clear_db() {
     $out = ob_get_contents();
     ob_end_clean();
     print json_encode(Array($result ? 0 : 1, $out));
-	die(); 
+	die();
 }
 
 function papercite_ajax_create_db() {
     require_once(dirname(__FILE__) . "/papercite_db.php");
     print json_encode(papercite_install(true));
-	die(); 
+	die();
 }
 
 function papercite_use_db() {
@@ -246,7 +252,7 @@ function papercite_use_db() {
   global $papercite_table_name_url, $wpdb;
 
   $exists =  sizeof($wpdb->get_col("SHOW TABLES LIKE '$papercite_table_name'")) == 1;
- 
+
   echo "<div>Papercite can use a database backend to avoid reparsing bibtex files and loading the full data each time<div>";
   print "<div id=\"papercite_db_ok\" style='" . ($exists ? "" : "display:none;"). "color:blue'>The database has been created.</div>";
   print "<div id=\"papercite_db_nok\" style='" .(!$exists ? "" : "display:none;"). ($option ? "color:red;" : ""). "'>The database does not exist. [<span class='papercite_link' id='papercite_create_db'>Create</span>]</div>";
@@ -254,14 +260,14 @@ function papercite_use_db() {
   if ($exists) {
     // Display some information
     print "<div class='papercite_info'>" . $wpdb->get_var("SELECT count(*) FROM $papercite_table_name") . " entries in the database</div>";
-    print "<div class='papercite_info'>Cached bibtex files: " . 
+    print "<div class='papercite_info'>Cached bibtex files: " .
       implode(", ", $wpdb->get_col("SELECT url from $papercite_table_name_url")) . "</div>";
     print "<div style='margin: 10px 0 10px'><span class='papercite_link' id='papercite_clear_db'>Clear cache</a></div>";
   }
 
   echo "<input type='radio' id='papercite_use_db' " . ($option ? " checked='checked' " : "") . " value='yes' name='papercite_options[use_db]' /> Yes ";
   echo "<input type='radio' id='papercite_use_db' " . (!$option ? " checked='checked' " : "") . "value='no' name='papercite_options[use_db]' /> No";
-  
+
 }
 
 function papercite_auto_bibshow() {
@@ -282,14 +288,14 @@ function papercite_skip_for_post_lists() {
 
 function papercite_process_titles() {
   $options = $GLOBALS["papercite"]->options;
-  echo "<input id='papercite_process_titles' name='papercite_options[process_titles]' type='checkbox' value='1' " . checked(true, $options['process_titles'], false) . " /> This will process the title fields (title, booktitle) as BibTeX, that is, lowercasing everything which is not between braces.";  
-} 
+  echo "<input id='papercite_process_titles' name='papercite_options[process_titles]' type='checkbox' value='1' " . checked(true, $options['process_titles'], false) . " /> This will process the title fields (title, booktitle) as BibTeX, that is, lowercasing everything which is not between braces.";
+}
 
-function papercite_checked_files() 
+function papercite_checked_files()
 {
   $options = $GLOBALS["papercite"]->options["checked_files"];
   print <<<EOS
-  <div>These settings determine <i>how</i> a file can be automatically matched given a bibtex entry. First, the key of the bibtex entry is transformed - lowercased, and the characters <code>:</code> and <code>/</code> are replaced by <code>-</code>. The <b>field</b> determines the bibtex field that will be populated when matching. Then, 
+  <div>These settings determine <i>how</i> a file can be automatically matched given a bibtex entry. First, the key of the bibtex entry is transformed - lowercased, and the characters <code>:</code> and <code>/</code> are replaced by <code>-</code>. The <b>field</b> determines the bibtex field that will be populated when matching. Then,
   <dl>
     <dt>Filesystem matching<dt><dd>A file will match if it is contained in the <b>folder</b> and its name is  <b>[key]</b><b>[suffix]</b>.<b>extension</b></dd>
     <dt>WordPress media matching<dt><dd>A file will match if its mime-type corresponds (or is empty) and its permalink name matches <b>[key]</b><b>[suffix]</b> </dd>
@@ -298,7 +304,7 @@ function papercite_checked_files()
 <table class='papercite_checked_files'><thead style='text-align: center'><th>Field</th><th>Folder</th><th>Suffix</th>
     <th>Extension</th><th>Mime-type</th><th><span class='papercite_checked_files'>+</span></th></thead>
 EOS;
-  foreach($options as $x) 
+  foreach($options as $x)
   {
     if (sizeof($x) == 3) {
       // convert to new format
@@ -309,13 +315,13 @@ EOS;
     print papercite_checked_files_cell($x[0], $x[1], $x[2], $x[3], $x[4]);
   }
   print "</table>";
-} 
+}
 
 
 function papercite_set(&$options, &$input, $name) {
   if (array_key_exists($name, $input)) {
     $options[$name] = trim($input[$name]);
-    if (!$options[$name]) 
+    if (!$options[$name])
       unset($options[$name]);
   }
 }
@@ -333,11 +339,12 @@ function papercite_options_validate($input) {
 
   $options['file'] = trim($input['file']);
   $options['timeout'] = trim($input["timeout"]);
+  $options['highlight'] = trim($input["highlight"]);
 
-  if (array_key_exists('form', $input)) 
+  if (array_key_exists('form', $input))
   {
     $a = Array();
-    for($i = 0; $i < sizeof($input["checked_files_ext"]); $i++) 
+    for($i = 0; $i < sizeof($input["checked_files_ext"]); $i++)
     {
       $key = $input["checked_files_key"][$i];
       $folder = $input["checked_files_folder"][$i];
@@ -351,42 +358,42 @@ function papercite_options_validate($input) {
     }
     $options['checked_files'] = &$a;
   }
-  
+
   papercite_set($options, $input, "bibshow_template");
   papercite_set($options, $input, "bibtex_template");
   papercite_set($options, $input, "format");
   papercite_set($options, $input, "bibtex_parser");
-  
+
   return $options;
 }
 
 function papercite_bibtype2string($type) {
     switch($type) {
-        case "article":     
+        case "article":
             return __("Journal/magazine article", "papercite");
 
         case "conference":
         case "inproceedings":
             return __("Paper in conference proceedings", "papercite");
-        
-        case "manual": 
+
+        case "manual":
             return __("Technical documentation", "papercite");
 
-        case "mastersthesis": 
+        case "mastersthesis":
             return __("Master's thesis", "papercite");
 
-        case "phdthesis": 
+        case "phdthesis":
             return __("Ph.D. thesis", "papercite");
 
-        case "proceedings": 
+        case "proceedings":
             return __("Conference proceedings", "papercite");
 
-        case "techreport": 
+        case "techreport":
             return __("Technical report", "papercite");
 
-        case "incollection": 
+        case "incollection":
             return __("Book chapter", "papercite");
-        
+
         default: return __(ucfirst($type), "papercite");
     }
 }
