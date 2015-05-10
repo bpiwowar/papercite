@@ -56,8 +56,8 @@ function papercite_install($force = false) {
 
          $sql = "CREATE TABLE $papercite_table_name (
              urlid INT UNSIGNED NOT NULL,  
-             bibtexid VARCHAR(200) CHARSET ASCII NOT NULL,
-             entrytype VARCHAR(80) CHARSET ASCII NOT NULL,
+             bibtexid VARCHAR(200) CHARSET UTF8 NOT NULL,
+             entrytype VARCHAR(80) CHARSET UTF8 NOT NULL,
              year SMALLINT,
              data TEXT NOT NULL,
              PRIMARY KEY id (urlid, bibtexid),
