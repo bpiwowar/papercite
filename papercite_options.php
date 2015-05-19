@@ -262,10 +262,10 @@ function papercite_use_db() {
     print "<div class='papercite_info'>" . $wpdb->get_var("SELECT count(*) FROM $papercite_table_name") . " entries in the database</div>";
     print "<div class='papercite_info'>Cached bibtex files: " .
       implode(", ", $wpdb->get_col("SELECT url from $papercite_table_name_url")) . "</div>";
-    print "<div style='margin: 10px 0 10px'><span class='papercite_link' id='papercite_clear_db'>Clear cache</a></div>";
+    print "<div style='margin: 10px 0 10px'><span class='papercite_link' id='papercite_clear_db'>Click here to Clear cache</a></div>";
   }
 
-  echo "<input type='radio' id='papercite_use_db' " . ($option ? " checked='checked' " : "") . " value='yes' name='papercite_options[use_db]' /> Yes ";
+  echo "<h3>Use DB?</h3> <input type='radio' id='papercite_use_db' " . ($option ? " checked='checked' " : "") . " value='yes' name='papercite_options[use_db]' /> Yes ";
   echo "<input type='radio' id='papercite_use_db' " . (!$option ? " checked='checked' " : "") . "value='no' name='papercite_options[use_db]' /> No";
 
 }

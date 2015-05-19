@@ -137,6 +137,7 @@ class BibtexConverter
       
       'highlight' => ''
     );
+    
 
     // Overwrite specified options
     foreach ( $this->_options as $key => $value )
@@ -510,7 +511,7 @@ class BibtexConverter
       $groupPosition = 0;
       foreach($this->_group as &$entry) {
         if ($limit > 0 && $limit <= $this->count) {
-          // Stop if we reached the limit
+            // Stop if we reached the limit
           break;
         }
         $groupPosition++;
@@ -520,6 +521,7 @@ class BibtexConverter
         $this->_entry = $entry;
         $entries .= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $this->full_entry_tpl);
         $this->_globals["positionInList"]++;
+        $this->count++;
       }
       unset($this->_entry);
       return $entries . $match[2];

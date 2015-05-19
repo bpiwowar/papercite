@@ -210,7 +210,7 @@ class Papercite {
 
   // Names of the options that can be set
   static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", 
-    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files", "show_links", "highlight", "ssl_check");
+    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files", "show_links", "highlight", "ssl_check", "limit");
 
   // Default value of options
   static $default_options = 
@@ -218,7 +218,7 @@ class Papercite {
         "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "osbib", "use_db" => false,
         "auto_bibshow" => false, "use_media" => false, "use_files" => true, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true,
         "checked_files" => array(array("pdf", "pdf", "", "pdf", "application/pdf")), "show_links" => true, "highlight" => "",
-        "ssl_check" => false);
+        "ssl_check" => false,"limit"=>0);
   /**
    * Init is called before the first callback
    */
@@ -458,15 +458,18 @@ class Papercite {
   if ($data || file_exists($bibFile[0])) {
       if (!$data) {
           $fileTS = filemtime($bibFile[0]);
-          
-          // Check if we don't have the data in cache
+
+           // Check if we don't have the data in cache
             if ($this->useDb()) {
                 $oldurlid = -1;
+
                 // We use entrytype as a timestamp
-                $row = $wpdb->get_row($wpdb->prepare("SELECT urlid, ts FROM $papercite_table_name_url WHERE url=%s", $biburi));
+		$statement=$wpdb->prepare("SELECT urlid, ts FROM $papercite_table_name_url WHERE url=%s",$biburi);
+                $row = $wpdb->get_row($statement);
                 if ($row) {
                     $oldurlid = $row->urlid;
                     if ($row->ts >= $fileTS) {
+				echo "<!-- using cache-->";
                       $result[$biburi] = $this->cache[$biburi] = array("__DB__", $row->urlid);
                       continue;
                     } 
@@ -475,6 +478,7 @@ class Papercite {
 
           $data = file_get_contents($bibFile[0]);
         } 
+    
     
     if (!empty($data)) {
       switch($this->options["bibtex_parser"]) {
@@ -499,11 +503,11 @@ class Papercite {
         break;
       }
 
-    
       // Save to DB
       if (!$stringedFile && $this->useDb()) {
           // First delete everything
             if ($oldurlid >= 0) {
+                      //echo "delete old database";
                 $wpdb->query($wpdb->prepare("DELETE FROM $papercite_table_name WHERE urlid=%d", $oldurlid));
               if ($code === FALSE) 
                     break;
@@ -517,10 +521,13 @@ class Papercite {
           $code = true;
           foreach($this->cache[$biburi] as &$value) {
                 $year = is_numeric($value["year"]) ? intval($value["year"]) : -1;
-              $statement = $wpdb->prepare("REPLACE $papercite_table_name(urlid, bibtexid, entrytype, year, data) VALUES (%s,%s,%s,%s,%s)", 
-                              $oldurlid, $value["cite"], $value["entrytype"], $year, maybe_serialize($value));
+              $statement = $wpdb->prepare("REPLACE $papercite_table_name(urlid, bibtexid, entrytype, year, data) VALUES (%s,%s,%s,%s,%s)", $oldurlid, $value["cite"], $value["entrytype"], $year,maybe_serialize($value));
               $code = $wpdb->query($statement);
+             //echo mb_detect_encoding(maybe_serialize($value));
+             // echo "<p>".$statement."<br>.".$code.".</p>";
+            //$wpdb->print_error();
               if ($code === FALSE) {
+                         echo "Failed entry:<p>".$statement."<br>.".$code.".</p>";
                   break;
                 }
           }
@@ -831,7 +838,7 @@ class Papercite {
           // --- Add entries from database
           if ($dbs) {
               $dbCond = $this->getDbCond($dbs);
-              
+    
               // Handles year and entry type by direct SQL
               foreach($allow as &$v) $v = '"' . $wpdb->escape($v) . '"';
               $allowCond = $allow ? "and entrytype in (" . implode(",",$allow) . ")" : "";
