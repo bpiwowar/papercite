@@ -636,9 +636,9 @@ class Papercite {
 
     // Get all the options pairs and store them
     // in the $options array
+
     $options_pairs = array();
     preg_match_all("/\s*([\w-:_]+)=(?:([^\"]\S*)|\"([^\"]+)\")(?:\s+|$)/", sizeof($matches) > 2 ? $matches[2] : "", $options_pairs, PREG_SET_ORDER);
-    
     // print "<pre>";
     // print htmlentities(print_r($options_pairs,true));
     // print "</pre>";
@@ -655,7 +655,7 @@ class Papercite {
         
     foreach($options_pairs as $x) {
       $value = $x[2] . (sizeof($x) > 3 ? $x[3] : "");
-      
+
       if ($x[1] == "template") 
       {
           // Special case of template: should overwrite the corresponding command template
@@ -665,7 +665,7 @@ class Papercite {
       {
           $options["filters"][substr($x[1],7)] = $value;
       }
-      else 
+      else
       {
           $options[$x[1]] = $value;
       }
@@ -815,9 +815,11 @@ class Papercite {
       // Based on the entry types
       $allow = Papercite::array_get($options, "allow", "");
       $deny = Papercite::array_get($options, "deny", "");
+      $ignore = Papercite::array_get($options, "ignore", "");
         $allow = $allow ? preg_split("-,-",$allow) : Array();
         $deny =  $deny ? preg_split("-,-", $deny) : Array();
-        
+        $ignore = $ignore ? preg_split("-,-",$ignore) : Array();
+
       $author_matcher = new PaperciteAuthorMatcher(Papercite::array_get($options, "author", ""));
 
         $result = array();
@@ -828,7 +830,9 @@ class Papercite {
             else
               foreach($outer as &$entry) {
                 $t = &$entry["entrytype"];
-                if ((sizeof($allow)==0 || in_array($t, $allow)) && (sizeof($deny)==0 || !in_array($t, $deny)) && $author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry)) {
+                $k = &$entry["cite"];
+
+                if ((sizeof($allow)==0 || in_array($t, $allow)) && (sizeof($deny)==0 || !in_array($t, $deny)) && $author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry)&&!in_array($k, $ignore)) {
                 $result[] = $entry;
                 }
               }
@@ -844,9 +848,10 @@ class Papercite {
               $allowCond = $allow ? "and entrytype in (" . implode(",",$allow) . ")" : "";
               foreach($deny as &$v) $v = '"' . $wpdb->escape($v) . '"';
               $denyCond = $deny ? "and entrytype not in (" . implode(",",$deny) . ")" : "";
-      
+              foreach($ignore as &$v) $v = '"' . $wpdb->escape($v) . '"';
+              $ignoreCond = $ignore ? "and bibtexid not in (" . implode(",",$ignore) . ")" : "";     
               // Retrieve and filter further
-              $st = "SELECT data FROM $papercite_table_name WHERE $dbCond $denyCond $allowCond";
+              $st = "SELECT data FROM $papercite_table_name WHERE $dbCond $denyCond $allowCond $ignoreCond";
 	      $rows = $wpdb->get_col($st);
               if ($rows) foreach($rows as $data) {
                   $entry = maybe_unserialize($data);
