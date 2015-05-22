@@ -88,7 +88,7 @@ include("papercite_options.php");
 		  }
                   $ok = false;
 
-		  if (is_array($eAuthors->creators)){
+		  if ($eAuthors&&is_array($eAuthors->creators)){
                   foreach($eAuthors->creators as $eAuthor)
 		    {
                       if ($author["surname"] === $eAuthor["surname"])
@@ -578,7 +578,7 @@ class Papercite {
         $unfound = array_diff($keys, $found);
         if ($dbs && sizeof($unfound) > 0) {
             $dbs = papercite::getDbCond($dbs);
-            foreach($unfound as &$v) $v = '"' . $wpdb->escape($v) . '"';
+            foreach($unfound as &$v) $v = '"' . esc_sql($v) . '"';
             $keylist = implode(",", $unfound);
             $st = "SELECT data FROM $papercite_table_name WHERE $dbs and bibtexid in ($keylist)";
             $val = $wpdb->get_col($st);
@@ -844,11 +844,11 @@ class Papercite {
               $dbCond = $this->getDbCond($dbs);
     
               // Handles year and entry type by direct SQL
-              foreach($allow as &$v) $v = '"' . $wpdb->escape($v) . '"';
+              foreach($allow as &$v) $v = '"' . esc_sql($v) . '"';
               $allowCond = $allow ? "and entrytype in (" . implode(",",$allow) . ")" : "";
-              foreach($deny as &$v) $v = '"' . $wpdb->escape($v) . '"';
+              foreach($deny as &$v) $v = '"' . esc_sql($v) . '"';
               $denyCond = $deny ? "and entrytype not in (" . implode(",",$deny) . ")" : "";
-              foreach($ignore as &$v) $v = '"' . $wpdb->escape($v) . '"';
+              foreach($ignore as &$v) $v = '"' . esc_sql($v) . '"';
               $ignoreCond = $ignore ? "and bibtexid not in (" . implode(",",$ignore) . ")" : "";     
               // Retrieve and filter further
               $st = "SELECT data FROM $papercite_table_name WHERE $dbCond $denyCond $allowCond $ignoreCond";
@@ -893,7 +893,7 @@ class Papercite {
       
       $dbs = array();
       foreach($dbArray as &$db)
-          $dbs[] = "\"" . $wpdb->escape($db) . "\"";
+          $dbs[] = "\"" . esc_sql($db) . "\"";
       $dbs = implode(",", $dbs);
       if ($dbs) $dbs = "urlid in ($dbs)";
       

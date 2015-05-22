@@ -95,6 +95,8 @@ class BibtexConverter
    * Global variables that can be accessed in the template
    */
   var $_globals;
+  
+  private  $count=0;
 
   /**
    * Constructor.
