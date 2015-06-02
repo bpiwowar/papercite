@@ -520,8 +520,12 @@ class Papercite {
 
           $code = true;
           foreach($this->cache[$biburi] as &$value) {
-                $year = is_numeric($value["year"]) ? intval($value["year"]) : -1;
-              $statement = $wpdb->prepare("REPLACE $papercite_table_name(urlid, bibtexid, entrytype, year, data) VALUES (%s,%s,%s,%s,%s)", $oldurlid, $value["cite"], $value["entrytype"], $year,maybe_serialize($value));
+                  $dateexplode= explode('-',$value["date"]);
+                  if(empty($dateexplode[0])){$dateexplode[1]=$value["year"];}
+                  if(empty($dateexplode[1])){$dateexplode[1]=1;}//default month
+                  if(empty($dateexplode[2])){$dateexplode[2]=1;}//default day
+                  $date=date("Y-m-d",mktime(0, 0, 0,$dateexplode[1] , $dateexplode[2], $dateexplode[0]));
+              $statement = $wpdb->prepare("REPLACE $papercite_table_name(urlid, bibtexid, entrytype, year, data) VALUES (%s,%s,%s,%s,%s)", $oldurlid, $value["cite"], $value["entrytype"], $date,maybe_serialize($value));
               $code = $wpdb->query($statement);
              //echo mb_detect_encoding(maybe_serialize($value));
              // echo "<p>".$statement."<br>.".$code.".</p>";

@@ -58,7 +58,7 @@ function papercite_install($force = false) {
              urlid INT UNSIGNED NOT NULL,  
              bibtexid VARCHAR(200) CHARSET UTF8 NOT NULL,
              entrytype VARCHAR(80) CHARSET UTF8 NOT NULL,
-             year SMALLINT,
+             year DATE,
              data TEXT NOT NULL,
              PRIMARY KEY id (urlid, bibtexid),
              INDEX year (year),
