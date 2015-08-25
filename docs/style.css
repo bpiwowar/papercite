@@ -1,0 +1,31 @@
+div.code {
+  border: 1px solid black;
+  padding: 1em;
+  background: #eef;
+  margin: 1em;
+  font-family: monospace;
+}
+
+
+.goptions {
+color: red;
+}
+
+.faq dt {
+    background: #eee;
+    font-weight: bold;
+    border-left: 2px solid red;
+    padding: 3px;
+}
+
+div.warning {
+   background-image: url('/warning.png');
+   background-repeat: no-repeat;
+   background-position: 3px 5px;
+   background-color: #eee;
+
+   min-height: 50px;
+   border: 1px dashed red;
+   padding: 10px 10px 10px 70px;
+   font-weight: bold;
+}

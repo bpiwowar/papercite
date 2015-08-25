@@ -12,7 +12,8 @@ cite papers.
 
 ## Description ##
 
-**To report bugs or request features, please go to https://github.com/bpiwowar/papercite**
+**To report bugs or request features, please go to https://github.com/bpiwowar/papercite**.
+**Documentation can be found on http://papercite.readthedocs.org/en/latest/**.
 
 papercite format bibtex entries as HTML so they can be inserted in
 WordPress pages and posts. The input data is a bibtex file (either

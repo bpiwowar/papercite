@@ -1,0 +1,9 @@
+site_name: Papercite
+site_description: Wordpress plugin for bibtex citations and bibliographies
+theme: readthedocs
+pages:
+    - Home: 'index.md'
+    - Files: 'files.md'
+    - Usages: 'usages.md'
+    - Options: 'options.md'
+    - FAQ: 'faq.md'
