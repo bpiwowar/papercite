@@ -70,13 +70,49 @@ include("papercite_options.php");
           $eAuthors = &$entry["author"];
           foreach($this->filters as &$filter) {
               foreach($filter->creators as $author) {
+		if(!empty($author['firstname'])||!empty($author['initials']))
+		  {
+		    if(!empty($author['firstname']))
+			{
+			  $FirstNameInitial=$author['firstname']{0};
+			}
+			else
+			{
+			  $FirstNameInitial=$author['initials'];
+			}
+		    $IgnoreFirstname=false;
+		  }
+		  else
+		  {
+		    $IgnoreFirstname=true;
+		  }
                   $ok = false;
-                  foreach($eAuthors->creators as $eAuthor) {
-                      if ($author["surname"] === $eAuthor["surname"]) {
-                          $ok = true;
-                          break;
-                      }
-                  }
+
+		  if ($eAuthors&&is_array($eAuthors->creators)){
+                  foreach($eAuthors->creators as $eAuthor)
+		    {
+                      if ($author["surname"] === $eAuthor["surname"])
+			{
+			  if($IgnoreFirstname)
+			  {
+			    $ok = true;break;
+			  }
+			  else
+			  {// If filter contains full firstname und entry has full name, full name must match!
+			    if(!empty($eAuthor['firstname'])&&!empty($author['firstname']))
+			    {
+				if($author['firstname'] === $eAuthor["firstname"]){$ok = true;break;}
+			    }
+			    else //otherwise at least initials must match
+			    {
+				if(!empty($eAuthor["firstname"])&&($FirstNameInitial===$eAuthor["firstname"]{0})){$ok = true;break;}
+				if(!empty($eAuthor["initials"])&&($FirstNameInitial===$eAuthor["initials"])){$ok = true;break;}
+				if(empty($eAuthor["initials"]) && empty($eAuthor["firstname"])){$ok = true;break;}//Nothing to match, return ok
+			    }
+			  }
+		        }
+                    }//endforeach
+		  }//end if -forearch
                   // Author was not found in publication
                   if (!$ok) break;
               }
@@ -174,7 +210,7 @@ class Papercite {
 
   // Names of the options that can be set
   static $option_names = array("format", "timeout", "file", "bibshow_template", "bibtex_template", "bibtex_parser", 
-    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files", "show_links", "highlight", "ssl_check");
+    "use_db", "auto_bibshow", "use_media", "use_files", "skip_for_post_lists", "process_titles", "checked_files", "show_links", "highlight", "ssl_check", "limit");
 
   // Default value of options
   static $default_options = 
@@ -182,7 +218,7 @@ class Papercite {
         "bibtex_template" => "default-bibtex", "bibshow_template" => "default-bibshow", "bibtex_parser" => "osbib", "use_db" => false,
         "auto_bibshow" => false, "use_media" => false, "use_files" => true, "skip_for_post_lists" => false, "group_order" => "", "timeout" => 3600, "process_titles" => true,
         "checked_files" => array(array("pdf", "pdf", "", "pdf", "application/pdf")), "show_links" => true, "highlight" => "",
-        "ssl_check" => false);
+        "ssl_check" => false,"limit"=>0);
   /**
    * Init is called before the first callback
    */
@@ -422,15 +458,18 @@ class Papercite {
   if ($data || file_exists($bibFile[0])) {
       if (!$data) {
           $fileTS = filemtime($bibFile[0]);
-          
-          // Check if we don't have the data in cache
+
+           // Check if we don't have the data in cache
             if ($this->useDb()) {
                 $oldurlid = -1;
+
                 // We use entrytype as a timestamp
-                $row = $wpdb->get_row($wpdb->prepare("SELECT urlid, ts FROM $papercite_table_name_url WHERE url=%s", $biburi));
+		$statement=$wpdb->prepare("SELECT urlid, ts FROM $papercite_table_name_url WHERE url=%s",$biburi);
+                $row = $wpdb->get_row($statement);
                 if ($row) {
                     $oldurlid = $row->urlid;
                     if ($row->ts >= $fileTS) {
+				echo "<!-- using cache-->";
                       $result[$biburi] = $this->cache[$biburi] = array("__DB__", $row->urlid);
                       continue;
                     } 
@@ -439,6 +478,7 @@ class Papercite {
 
           $data = file_get_contents($bibFile[0]);
         } 
+    
     
     if (!empty($data)) {
       switch($this->options["bibtex_parser"]) {
@@ -463,11 +503,11 @@ class Papercite {
         break;
       }
 
-    
       // Save to DB
       if (!$stringedFile && $this->useDb()) {
           // First delete everything
             if ($oldurlid >= 0) {
+                      //echo "delete old database";
                 $wpdb->query($wpdb->prepare("DELETE FROM $papercite_table_name WHERE urlid=%d", $oldurlid));
               if ($code === FALSE) 
                     break;
@@ -480,11 +520,18 @@ class Papercite {
 
           $code = true;
           foreach($this->cache[$biburi] as &$value) {
-                $year = is_numeric($value["year"]) ? intval($value["year"]) : -1;
-              $statement = $wpdb->prepare("REPLACE $papercite_table_name(urlid, bibtexid, entrytype, year, data) VALUES (%s,%s,%s,%s,%s)", 
-                              $oldurlid, $value["cite"], $value["entrytype"], $year, maybe_serialize($value));
+                  $dateexplode= explode('-',$value["date"]);
+                  if(empty($dateexplode[0])){$dateexplode[1]=$value["year"];}
+                  if(empty($dateexplode[1])){$dateexplode[1]=1;}//default month
+                  if(empty($dateexplode[2])){$dateexplode[2]=1;}//default day
+                  $date=date("Y-m-d",mktime(0, 0, 0,$dateexplode[1] , $dateexplode[2], $dateexplode[0]));
+              $statement = $wpdb->prepare("REPLACE $papercite_table_name(urlid, bibtexid, entrytype, year, data) VALUES (%s,%s,%s,%s,%s)", $oldurlid, $value["cite"], $value["entrytype"], $date,maybe_serialize($value));
               $code = $wpdb->query($statement);
+             //echo mb_detect_encoding(maybe_serialize($value));
+             // echo "<p>".$statement."<br>.".$code.".</p>";
+            //$wpdb->print_error();
               if ($code === FALSE) {
+                         echo "Failed entry:<p>".$statement."<br>.".$code.".</p>";
                   break;
                 }
           }
@@ -535,7 +582,7 @@ class Papercite {
         $unfound = array_diff($keys, $found);
         if ($dbs && sizeof($unfound) > 0) {
             $dbs = papercite::getDbCond($dbs);
-            foreach($unfound as &$v) $v = '"' . $wpdb->escape($v) . '"';
+            foreach($unfound as &$v) $v = '"' . esc_sql($v) . '"';
             $keylist = implode(",", $unfound);
             $st = "SELECT data FROM $papercite_table_name WHERE $dbs and bibtexid in ($keylist)";
             $val = $wpdb->get_col($st);
@@ -593,9 +640,9 @@ class Papercite {
 
     // Get all the options pairs and store them
     // in the $options array
+
     $options_pairs = array();
     preg_match_all("/\s*([\w-:_]+)=(?:([^\"]\S*)|\"([^\"]+)\")(?:\s+|$)/", sizeof($matches) > 2 ? $matches[2] : "", $options_pairs, PREG_SET_ORDER);
-    
     // print "<pre>";
     // print htmlentities(print_r($options_pairs,true));
     // print "</pre>";
@@ -612,7 +659,7 @@ class Papercite {
         
     foreach($options_pairs as $x) {
       $value = $x[2] . (sizeof($x) > 3 ? $x[3] : "");
-      
+
       if ($x[1] == "template") 
       {
           // Special case of template: should overwrite the corresponding command template
@@ -622,7 +669,7 @@ class Papercite {
       {
           $options["filters"][substr($x[1],7)] = $value;
       }
-      else 
+      else
       {
           $options[$x[1]] = $value;
       }
@@ -772,9 +819,11 @@ class Papercite {
       // Based on the entry types
       $allow = Papercite::array_get($options, "allow", "");
       $deny = Papercite::array_get($options, "deny", "");
+      $ignore = Papercite::array_get($options, "ignore", "");
         $allow = $allow ? preg_split("-,-",$allow) : Array();
         $deny =  $deny ? preg_split("-,-", $deny) : Array();
-        
+        $ignore = $ignore ? preg_split("-,-",$ignore) : Array();
+
       $author_matcher = new PaperciteAuthorMatcher(Papercite::array_get($options, "author", ""));
 
         $result = array();
@@ -785,7 +834,9 @@ class Papercite {
             else
               foreach($outer as &$entry) {
                 $t = &$entry["entrytype"];
-                if ((sizeof($allow)==0 || in_array($t, $allow)) && (sizeof($deny)==0 || !in_array($t, $deny)) && $author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry)) {
+                $k = &$entry["cite"];
+
+                if ((sizeof($allow)==0 || in_array($t, $allow)) && (sizeof($deny)==0 || !in_array($t, $deny)) && $author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry)&&!in_array($k, $ignore)) {
                 $result[] = $entry;
                 }
               }
@@ -795,15 +846,16 @@ class Papercite {
           // --- Add entries from database
           if ($dbs) {
               $dbCond = $this->getDbCond($dbs);
-              
+    
               // Handles year and entry type by direct SQL
-              foreach($allow as &$v) $v = '"' . $wpdb->escape($v) . '"';
+              foreach($allow as &$v) $v = '"' . esc_sql($v) . '"';
               $allowCond = $allow ? "and entrytype in (" . implode(",",$allow) . ")" : "";
-              foreach($deny as &$v) $v = '"' . $wpdb->escape($v) . '"';
+              foreach($deny as &$v) $v = '"' . esc_sql($v) . '"';
               $denyCond = $deny ? "and entrytype not in (" . implode(",",$deny) . ")" : "";
-      
+              foreach($ignore as &$v) $v = '"' . esc_sql($v) . '"';
+              $ignoreCond = $ignore ? "and bibtexid not in (" . implode(",",$ignore) . ")" : "";     
               // Retrieve and filter further
-              $st = "SELECT data FROM $papercite_table_name WHERE $dbCond $denyCond $allowCond";
+              $st = "SELECT data FROM $papercite_table_name WHERE $dbCond $denyCond $allowCond $ignoreCond";
 	      $rows = $wpdb->get_col($st);
               if ($rows) foreach($rows as $data) {
                   $entry = maybe_unserialize($data);
@@ -845,7 +897,7 @@ class Papercite {
       
       $dbs = array();
       foreach($dbArray as &$db)
-          $dbs[] = "\"" . $wpdb->escape($db) . "\"";
+          $dbs[] = "\"" . esc_sql($db) . "\"";
       $dbs = implode(",", $dbs);
       if ($dbs) $dbs = "urlid in ($dbs)";
       
@@ -1063,6 +1115,42 @@ function papercite_init() {
 }
 
 // --- Callback function ----
+function papercite_staff($myContent) {
+
+  // Init
+  $papercite = &$GLOBALS["papercite"];
+  
+  // Fixes issue #39 (maintenance mode support)
+  if(!is_object($papercite))
+      return $myContent;
+  
+  $papercite->init();
+
+  // Database support if needed
+  if ($papercite->options["use_db"]) {
+      require_once(dirname(__FILE__) . "/papercite_db.php");
+  }
+    
+  // (0) Skip processing on this page?
+  if ($papercite->options['skip_for_post_lists'] && !is_single() ) {//&& !is_page()
+
+ return preg_replace("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex)(?:\s+([^[]+))?]/", '', $myContent);
+  }
+  // (1) First phase - handles everything but bibcite keys
+  $text = preg_replace_callback("/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex|bibfilter)(?:\s+([^[]+))?]/",
+        array($papercite, "process"), $myContent);
+
+  // (2) Handles missing bibshow tags
+  while (sizeof($papercite->bibshows) > 0)
+    $text .= $papercite->end_bibshow();
+
+
+  // (3) Handles custom keys in bibshow and return
+  $text = str_replace($papercite->keys, $papercite->keyValues, $text);
+//echo $text;
+  return $text;
+}
+
 function &papercite_cb($myContent) {
   // Init
   $papercite = &$GLOBALS["papercite"];
