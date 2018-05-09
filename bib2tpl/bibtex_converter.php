@@ -421,46 +421,48 @@ class BibtexConverter
     // --- [IF]
     if ($match[1][0] == '?') {
       if ($condition != 1) {
-	// Don't evaluate if not needed
-	// -1 implies to evaluate to false the alternative (ELSE)
-	$this->_ifs[] = -1;
-	return "";
+      	// Don't evaluate if not needed
+      	// -1 implies to evaluate to false the alternative (ELSE)
+      	$this->_ifs[] = -1;
+      	return "";
       }
       
       $tests = preg_split("/\|\|/", substr($match[1], 1));
     
       $condition = true;
       foreach($tests as $test) {
-	$matches = array();
-	preg_match("/^(#?[\w]+)(?:([~=><])([^@]+))?$/", $test, $matches);
-	$value = $this->_get_value($matches[1]);
-	switch(sizeof($matches) > 2 ? $matches[2] : "")
-	  {
-	  case "":
-	    $condition = $value ? true : false;
-	    break;
-	  case "=":
-	    $condition = $value == $matches[3];
-	    break;
-	  case "~":
-	    $condition = preg_match("/$matches[3]/",$value);
-	    break;
-	  case ">":
-	    $condition =  (float)$value > (float)$matches[3];
-	    break;
-	  case "<":
-	    $condition =  (float)$value < (float)$matches[3];
-	    break;
-	  default:
-	    $condition = false;
-	  }
+      	$matches = array();
+      	preg_match("/^(#?[\w]+)(?:([~=><])([^@]+))?$/", $test, $matches);
+      	$value = $this->_get_value($matches[1]);
+      	//print "<div>Compares $value ($matches[1]) [$matches[2]] $matches[3]</div>";
+      	switch(sizeof($matches) > 2 ? $matches[2] : "") {
+      	  case "":
+      	    $condition = $value ? true : false;
+      	    break;
+      	  case "=":
+      	    $condition = $value == $matches[3];
+      	    break;
+      	  case "~":
+      	    $condition = preg_match("/$matches[3]/",$value);
+      	    break;
+      	  case ">":
+      	    $condition =  (float)$value > (float)$matches[3];
+      	    break;
+      	  case "<":
+      	    $condition =  (float)$value < (float)$matches[3];
+      	    break;
+      	  default:
+      	    $condition = false;
+      	}
 
-	// And
-	if ($condition) break;
+      	// And
+      	if ($condition) break;
       }
+
       $this->_ifs[] = $condition ? 1 : 0;
-      if ($condition) 
-	return $match[2];
+      if ($condition) {
+    	  return $match[2];
+      }
       return "";
     }
 
@@ -480,22 +482,21 @@ class BibtexConverter
     // --- Group loop
     if ($match[1] == "#group") {
       $groups = "";
-      foreach ( $this->_data as $groupkey => &$group )
-	{
-	  
-	  if ( is_array($groupkey) )
-	    // authors
-	    $groupkey = $this->_helper->niceAuthor($key);
-	  elseif ( $this->_options['group'] === 'entrytype' )
-	    $groupkey = $this->_options['lang']['entrytypes'][$groupkey];
-	  
-	  // Set the different global variables and parse
-	  $this->_globals["groupkey"] = $groupkey;
-	  $this->_globals["groupid"] = md5($groupkey);
-	  $this->_globals["groupcount"] = count($group);
-	  $this->_group = &$group;
-	  $groups .= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $this->group_tpl);
-	}
+      foreach ( $this->_data as $groupkey => &$group ) {
+    	  
+    	  if ( is_array($groupkey) )
+    	    // authors
+    	    $groupkey = $this->_helper->niceAuthor($key);
+    	  elseif ( $this->_options['group'] === 'entrytype' )
+    	    $groupkey = $this->_options['lang']['entrytypes'][$groupkey];
+    	  
+    	  // Set the different global variables and parse
+    	  $this->_globals["groupkey"] = $groupkey;
+    	  $this->_globals["groupid"] = md5($groupkey);
+    	  $this->_globals["groupcount"] = count($group);
+    	  $this->_group = &$group;
+    	  $groups .= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $this->group_tpl);
+    	}
 
       $this->_globals["groupkey"] = null;
       $this->_group = null;
@@ -518,6 +519,8 @@ class BibtexConverter
         $this->_globals["positionInGroup"] = $groupPosition;
 
         $this->_entry = $entry;
+        $this->_globals["positionInGroup"] = $this->count;
+        $this->_globals["positionInList"] = $this->count;
         $entries .= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $this->full_entry_tpl);
         $this->_globals["positionInList"]++;
       }
@@ -527,12 +530,17 @@ class BibtexConverter
 
     // --- Entry 
     if ($match[1] == "#entry") {
-        if ($this->_entry["entrytype"]) {
-          $type = $this->_entry["entrytype"];
-          $entryTpl = $this->_entry_template->get($type);
-          $t=  preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $entryTpl) . $match[2];
-        }
-        else $t = "<span style='color:red'>Unknown bibtex entry with key [".$this->_entry["cite"] ."]</span>" . $match[2];
+      // Formats one bibtex
+      if ($this->_entry["entrytype"]) {
+        $type = $this->_entry["entrytype"];
+        $entryTpl = $this->_entry_template->get($type);
+        //print "<div><b>$type</b>: ". htmlentities($entryTpl). "</div>";
+        $this->_globals["positionInGroup"] = $this->count;
+        $this->_globals["positionInList"] = $this->count;
+        $t=  preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $entryTpl) . $match[2];
+      } else {
+        $t = "<span style='color:red'>Unknown bibtex entry with key [".$this->_entry["cite"] ."]</span>" . $match[2];
+      }
       return $t;
     }
 
