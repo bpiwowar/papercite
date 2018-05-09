@@ -110,7 +110,7 @@ class BibtexConverter
    *   lang  => any string $s as long as proper lang/$s.php exists
    * @return void
    */
-  function BibtexConverter($options=array(), &$template, &$entry_template)
+  function __construct($options=array(), &$template, &$entry_template)
   {
     $this->_template = &$template;
     $this->_entry_template = &$entry_template;
@@ -158,6 +158,7 @@ class BibtexConverter
     }
     $this->_options['lang'] = $translations;
     $this->_helper = new Bib2TplHelper($this->_options);
+    $this->count = 0;
   }
 
 
@@ -367,6 +368,7 @@ class BibtexConverter
   function _translate($data)
   {
     $result = $this->_template;
+    if (!$result) throw new \Exception("Template is empty");
 
     // Replace global values
     $result = preg_replace('/@globalcount@/', $this->_helper->lcount($data, 2), $result);

@@ -59,7 +59,7 @@ class Bib2TplHelper
    * @access public
    * @param array options Options array with same semantics as main class.
    */
-  function Bib2TplHelper($options=array())
+  function __construct($options=array())
   {
     $this->_options = $options;
   }

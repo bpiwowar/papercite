@@ -9,7 +9,7 @@ class PaperciteBibtexEntryFormat {
   var $formats = array();
   var $properties = array();
 
-  function PaperciteBibtexEntryFormat(&$file_content) {
+  function __construct(&$file_content) {
     $parser = xml_parser_create(); 
     if (!$parser) 
       return false;

@@ -16,7 +16,7 @@ require_once("bibtex_common.php");
  * A page range
  */
 class PaperciteBibtexPages {
-  function PaperciteBibtexPages($start, $end) {
+  function __construct($start, $end) {
     $this->start = (int)$start;
     $this->end = (int)$end;
   }

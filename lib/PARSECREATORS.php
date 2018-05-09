@@ -21,7 +21,7 @@
 */
 class PaperciteParseCreators
 {
-  function PaperciteParseCreators()
+  function __construct()
   {
   }
   /* Create writer arrays from bibtex input.

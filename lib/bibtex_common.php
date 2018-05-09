@@ -6,7 +6,7 @@ require_once 'PARSECREATORS.php';
  * A list of creators (e.g., authors, editors)
  */
 class PaperciteBibtexCreators {
-  function PaperciteBibtexCreators(&$creators) {
+  function __construct(&$creators) {
     $this->creators = &$creators;
   }
   function count() {

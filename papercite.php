@@ -307,8 +307,9 @@ class Papercite {
       if (file_exists(WP_CONTENT_DIR . "/papercite-data/$relfile"))
         return array(WP_CONTENT_DIR . "/papercite-data/$relfile", WP_CONTENT_URL . "/papercite-data/$relfile");
 
-      if (file_exists(WP_PLUGIN_DIR . "/papercite/$relfile"))
-        return array(WP_PLUGIN_DIR . "/papercite/$relfile", WP_PLUGIN_URL . "/papercite/$relfile");
+      $path = plugin_dir_path(__FILE__) . "/$relfile";
+      if (file_exists($path))
+        return array($path, plugin_dir_url($path));
    }
 
    // Nothin' found
@@ -902,9 +903,11 @@ class Papercite {
     // Fallback to defaults if needed
     if (!$main) {
       $main = $this->getContent(papercite::$default_options["${mode}_template"], "tpl", "tpl", "MIMETYPE", $goptions, true);
+      if (!$main) throw new \Exception("Could not find template ${mode}_template");
     }
     if (!$format) {
       $format = $this->getContent(papercite::$default_options["format"], "tpl", "format", "MIMETYPE", $goptions, true);
+      if (!$main) throw new \Exception("Could not find template " . papercite::$default_options["format"]);
     }
 
     $bibtexEntryTemplate = new PaperciteBibtexEntryFormat($format);

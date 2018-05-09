@@ -35,7 +35,7 @@ require_once 'bibtex_common.php';
 
 
 class PaperciteBibtexPages {
-  function PaperciteBibtexPages($start, $end) {
+  function __construct($start, $end) {
     $this->start = (int)$start;
     $this->end = (int)$end;
   }
