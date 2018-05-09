@@ -3,7 +3,7 @@
 **Tags:** formatting, bibtex, bibliography  
 **Requires at least:** 3.8  
 **Tested up to:** 4.9.1  
-**Stable tag:** 0.5.15  
+**Stable tag:** 0.5.17  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -118,13 +118,13 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 ## Screenshots 
 
 ### 1. With the bibshow & bibcite commands
-[missing image]
+![With the bibshow & bibcite commands](https://ps.w.org/papercite/assets/screenshot-1.png)
 
 ### 2. With the bibtex command
-[missing image]
+![With the bibtex command](https://ps.w.org/papercite/assets/screenshot-2.png)
 
 ### 3. The bibfilter command
-[missing image]
+![The bibfilter command](https://ps.w.org/papercite/assets/screenshot-3.png)
 
 
 
