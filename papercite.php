@@ -11,7 +11,7 @@
 */
 
 
-/*  Copyright 2012-13  Benjamin Piwowarski  (email : benjamim@bpiwowar.net)
+/*  Copyright 2012-18  Benjamin Piwowarski  (email : benjamim@bpiwowar.net)
 
     Contributors:
     - Michael Schreifels: auto-bibshow and no processing in post lists options
