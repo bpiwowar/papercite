@@ -511,8 +511,8 @@ class PaperciteBibTexEntries {
 	
 	// --- Handles common latex macros
 	$text = str_replace(
-		['\\textendash', '\\textemdash', '\\textquoteright', '\\textquoteleft'], 
-		["–", "—", "’", "‘"],
+		['\\textendash', '\\textemdash', '\\textquoteright', '\\textquoteleft', '--'], 
+		["–", "—", "’", "‘", '–'],
 		$text
 	);
   }
