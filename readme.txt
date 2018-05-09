@@ -12,6 +12,8 @@ cite papers.
 
 == Description ==
 
+[![Build Status](https://travis-ci.org/bpiwowar/papercite.svg?branch=master)](https://travis-ci.org/bpiwowar/papercite)
+
 **To report bugs or request features, please go to https://github.com/bpiwowar/papercite**.
 **Documentation can be found on http://papercite.readthedocs.org/en/latest/**.
 
@@ -113,6 +115,10 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 == Changelog ==
 
+
+ * Updated tests (docker & travis)
+ * PHP fixes
+ * Added support for -- and special latex commands (issue #111)
  * Added modifiers for output (html, strip, protect, sanitize)
  * SSL certificates can be ignored (issue #98)
 
