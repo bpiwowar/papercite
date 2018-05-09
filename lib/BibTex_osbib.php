@@ -507,7 +507,14 @@ class PaperciteBibTexEntries {
     // -1- x is not alphanumeric
     $text = preg_replace_callback("#$slash([^a-zA-Z])(.)#", "PaperciteBibTexEntries::_accents_cb", $text);
     // -2- \xy followed by a non-alphanumeric character
-    $text = preg_replace_callback("#$slash([a-zA-Z])(.)(?![a-zA-Z])#", "PaperciteBibTexEntries::_accents_cb", $text);
+	$text = preg_replace_callback("#$slash([a-zA-Z])(.)(?![a-zA-Z])#", "PaperciteBibTexEntries::_accents_cb", $text);
+	
+	// --- Handles common latex macros
+	$text = str_replace(
+		['\\textendash', '\\textemdash', '\\textquoteright', '\\textquoteleft'], 
+		["–", "—", "’", "‘"],
+		$text
+	);
   }
 
   static $accents = array(
