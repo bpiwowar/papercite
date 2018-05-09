@@ -131,6 +131,8 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 ## Changelog 
 
 
+### 0.5.17 
+
  * Updated tests (docker & travis)
  * PHP fixes
  * Added support for -- and special latex commands (issue #111)
