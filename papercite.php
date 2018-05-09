@@ -209,7 +209,7 @@ class Papercite {
 
       // Use custom field values "papercite_options"
       $option_fields = get_post_custom_values("papercite_options");
-      if (sizeof($option_fields) > 0) {
+      if ($option_fields && sizeof($option_fields) > 0) {
         foreach($option_fields as $field) {
           $matches = array();
           preg_match_all("#^\s*([\w\d-_]+)\s*=\s*(.+)$#m", $field, $matches, PREG_SET_ORDER);
