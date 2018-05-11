@@ -34,16 +34,6 @@ require_once 'PEAR.php' ;
 require_once 'bibtex_common.php';
 
 
-class PaperciteBibtexPages {
-  function __construct($start, $end) {
-    $this->start = (int)$start;
-    $this->end = (int)$end;
-  }
-  function count() {
-    return ($this->start ? 1 : 0) + ($this->end ? 1 : 0);
-  }
-}
-
 /**
  * PaperciteStructures_BibTex
  *

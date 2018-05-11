@@ -23,9 +23,9 @@ abstract class PaperciteTestCase extends WP_UnitTestCase {
 
         if ($data !== null) {
             if (is_array($data)) {
-                foreach($data as $key => &$value)
-                add_post_meta($post_id, "papercite_$key", $value);
-
+                foreach($data as $key => &$value) {
+                    add_post_meta($post_id, "papercite_$key", $value);
+                }
             } else {
                 add_post_meta($post_id, "papercite_data", $data);
             }
@@ -39,4 +39,4 @@ abstract class PaperciteTestCase extends WP_UnitTestCase {
 
         return $doc;
     }
-}
+} 

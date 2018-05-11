@@ -12,18 +12,7 @@
 
 require_once("bibtex_common.php");
 
-/**
- * A page range
- */
-class PaperciteBibtexPages {
-  function __construct($start, $end) {
-    $this->start = (int)$start;
-    $this->end = (int)$end;
-  }
-  function count() {
-    return ($this->start ? 1 : 0) + ($this->end ? 1 : 0);
-  }
-}
+
 
 /** Incremental way of finding the closing delimiter */
 class PaperciteIncrementalClosingDelimiter {
@@ -511,8 +500,8 @@ class PaperciteBibTexEntries {
 	
 	// --- Handles common latex macros
 	$text = str_replace(
-		['\\textendash', '\\textemdash', '\\textquoteright', '\\textquoteleft', '--'], 
-		["–", "—", "’", "‘", '–'],
+		array('\\textendash', '\\textemdash', '\\textquoteright', '\\textquoteleft', '--'), 
+		array("–", "—", "’", "‘", '–'),
 		$text
 	);
   }

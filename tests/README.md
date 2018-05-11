@@ -11,7 +11,7 @@ This will start the necessary services (web server, mysql) and install the tests
 # Starts the docker service
 docker-compose -f docker-compose.phpunit.yml up -d
 # install tests
-docker-compose -f docker-compose.phpunit.yml run --rm wordpress_phpunit /app/tests/install-wp-tests.sh wordpress_test root '' mysql_phpunit latest true
+docker-compose -f docker-compose.phpunit.yml run --rm wordpress_phpunit /app/bin/install-wp-tests.sh wordpress_test root '' mysql_phpunit latest true
 ```
 
 To stop the docker services

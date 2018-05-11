@@ -30,5 +30,17 @@ class PaperciteBibtexCreators {
   
 }
 
+/**
+ * A page range
+ */
+class PaperciteBibtexPages {
+  function __construct($start, $end) {
+    $this->start = (int)$start;
+    $this->end = (int)$end;
+  }
+  function count() {
+    return ($this->start ? 1 : 0) + ($this->end ? 1 : 0);
+  }
+}
 
 ?>
