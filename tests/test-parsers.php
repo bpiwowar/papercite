@@ -25,7 +25,8 @@ EOF;
             "data" => HighlightTest::$data
         ]);
 
-        $GLOBALS["papercite"]->options["bibtex_parser"] = $parser;
+        // FIXME:
+        // $GLOBALS["papercite"]->options["bibtex_parser"] = $parser;
 
         $xpath = new DOMXpath($doc);   
 
