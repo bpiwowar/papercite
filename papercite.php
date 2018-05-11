@@ -469,7 +469,7 @@ class Papercite {
       if (!$stringedFile && $this->useDb()) {
           // First delete everything
             if ($oldurlid >= 0) {
-                $wpdb->query($wpdb->prepare("DELETE FROM $papercite_table_name WHERE urlid=%d", $oldurlid));
+              $code = $wpdb->query($wpdb->prepare("DELETE FROM $papercite_table_name WHERE urlid=%d", $oldurlid));
               if ($code === FALSE) 
                     break;
             } else {
