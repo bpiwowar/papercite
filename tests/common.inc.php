@@ -3,9 +3,24 @@
 // Common class for all tests
 
 abstract class PaperciteTestCase extends WP_UnitTestCase {
+    static $SIMPLE_TEMPLATE = <<<EOF
+        @{group@
+        <div id="bibliography">
+         @{entry@  <div class="entry">@#entry@</div>END @}entry@ </div>
+        @}group@
+EOF;
+
     public function setUp() {
         parent::setUp();
         $this->user_id = $this->factory->user->create();
+    }
+
+    static function domListToText($doc, $result) {
+        $s = "";
+        foreach($result as $node) {
+            $s .= $doc->saveXML($node);
+        }       
+        return trim($s); 
     }
 
     /** 
@@ -34,8 +49,11 @@ abstract class PaperciteTestCase extends WP_UnitTestCase {
 
         $doc = new DOMDocument();
         $processed = apply_filters('the_content', $content);
-
-        $doc->loadHTML("$processed");
+        try {
+            $doc->loadHTML("$processed");
+        } catch(\Exception $e) {
+            $this->assertTrue(false, "Could not parse produced HTML [$e]: $processed");
+        }
 
         return $doc;
     }

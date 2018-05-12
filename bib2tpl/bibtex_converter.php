@@ -158,7 +158,6 @@ class BibtexConverter
     }
     $this->_options['lang'] = $translations;
     $this->_helper = new Bib2TplHelper($this->_options);
-    $this->count = 0;
   }
 
 
@@ -210,6 +209,7 @@ class BibtexConverter
     $data = $this->_sort($data);
     $this->_post_process($data);
 
+    $this->count = 0;
     $text = $this->_translate($data);
     return array("text" => &$text, "data" => &$data);
   }
@@ -516,13 +516,13 @@ class BibtexConverter
           // Stop if we reached the limit
           break;
         }
+        $this->count += 1;
         $groupPosition++;
 
         $this->_globals["positionInGroup"] = $groupPosition;
+        $this->_globals["positionInList"] = $this->count;
 
         $this->_entry = $entry;
-        $this->_globals["positionInGroup"] = $this->count;
-        $this->_globals["positionInList"] = $this->count;
         $entries .= preg_replace_callback(BibtexConverter::$mainPattern, array($this, "_callback"), $this->full_entry_tpl);
         $this->_globals["positionInList"]++;
       }
