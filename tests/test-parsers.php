@@ -6,11 +6,16 @@ require_once dirname(__FILE__) . '/common.inc.php';
 class ParsersTest extends PaperciteTestCase {
     static $data = <<<EOF
 @inproceedings{test,
-    title="Hello world",
-    author="B. Piwowarski"
+    title="Hello",
+    booktitle={{WORLD}},
+    author="B. Piwowarski",
+    year=2008
 }
 EOF;
 
+    function setDown() {
+        $GLOBALS["papercite"]->options["bibtex_parser"] = Papercite::$default_options["bibtex_parser"];
+    }
 
     function testPear() {
         $this->process("pear");
@@ -21,20 +26,16 @@ EOF;
     }
 
     function process($parser) {
-        $doc = $this->process_post("[bibtex file=custom://data highlight=\"Piwowarski\"]", [
-            "data" => HighlightTest::$data
+        $GLOBALS["papercite"]->options["bibtex_parser"] = $parser;
+        $doc = $this->process_post("[bibtex file=custom://data bibtex_template=custom://template]", [
+            "data" => self::$data,
+            "template" => self::$SIMPLE_TEMPLATE
         ]);
 
-        // FIXME: 
-        // $GLOBALS["papercite"]->options["bibtex_parser"] = $parser;
-
         $xpath = new DOMXpath($doc);   
+        $text = trim($xpath->evaluate("string(//div[@class='entry'])"));
 
-        $highlight = $xpath->evaluate("//span[@class = 'papercite_highlight']/text()");
-        $this->assertTrue($highlight->length == 1, "{$highlight->length} highlights detected - expected 1");
-        $highlight = $highlight->item(0)->wholeText;
-
-        $this->assertTrue($highlight == "Piwowarski", "The hilight [$highlight] is not as expected");
+        $this->assertEquals($text, "B. Piwowarski, “Hello,” in WORLD,  2008.");
     }
 
 

@@ -156,7 +156,7 @@ class PaperciteStructures_BibTex
      * @access public
      * @return void
      */
-    function PaperciteStructures_BibTex($options = array())
+    function __construct($options = array())
     {
         $this->_delimiters     = array('"'=>'"',
                                         '{'=>'}');
@@ -815,8 +815,8 @@ class PaperciteStructures_BibTex
     {
         //First we save the delimiters
         $beginningdels = array_keys($this->_delimiters);
-        $firstchar     = substr($entry, 0, 1);
-        $lastchar      = substr($entry, -1, 1);
+        $firstchar     = substr($value, 0, 1);
+        $lastchar      = substr($value, -1, 1);
         $begin         = '';
         $end           = '';
         while (in_array($firstchar, $beginningdels)) { //The first character is an opening delimiter
