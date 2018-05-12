@@ -3,7 +3,7 @@ Contributors: bpiwowar
 Tags: formatting, bibtex, bibliography
 Requires at least: 3.8
 Tested up to: 4.9.1
-Stable tag: 0.5.17
+Stable tag: 0.5.18
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -114,6 +114,11 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 3. The bibfilter command
 
 == Changelog ==
+
+= 0.5.18 =
+
+ * Fixed ignored limit option (issue #128)
+ * More tests to cover potential future issues
 
 = 0.5.17 =
 
