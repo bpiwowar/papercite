@@ -117,7 +117,9 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 
 = 0.5.18 =
 
-* Fixed bug for old PHP versions
+ * Fixed bug for old PHP versions
+ * Fixed ignored limit option (issue #128)
+ * More tests to cover potential future issues
 
 = 0.5.17 =
 

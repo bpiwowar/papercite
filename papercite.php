@@ -554,11 +554,11 @@ class Papercite {
       return array(
         "anonymous-whole" => true, // for compatibility in the output
         "group" => $options["group"], 
-            "group_order" => $options["group_order"], 
+        "group_order" => $options["group_order"], 
         "sort" => $options["sort"], 
-            "order" => $options["order"],
+        "order" => $options["order"],
         "key_format" => $options["key_format"],
-            "limit" => papercite::array_get($options, "limit", 0),
+        "limit" => papercite::array_get($options, "limit", 0),
         "highlight" => $options["highlight"]
       );
   }
