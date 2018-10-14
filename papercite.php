@@ -72,8 +72,9 @@ include("papercite_options.php");
               foreach($filter->creators as $author) {
                   $ok = false;
                   foreach($eAuthors->creators as $eAuthor) {
-                      if ($author["surname"] === $eAuthor["surname"]) {
-                          $ok = true;
+                      //surname has the surname filter, probably the bibtext author surname has more chars
+		      if(strpos($eAuthor['surname'],$author['surname']) !== False){
+			  $ok = true;
                           break;
                       }
                   }
@@ -805,12 +806,19 @@ class Papercite {
       
               // Retrieve and filter further
               $st = "SELECT data FROM $papercite_table_name WHERE $dbCond $denyCond $allowCond";
+		//print '<br>'.$st;
 	      $rows = $wpdb->get_col($st);
+                //print '<br>count: '.count($rows);
+                //print '<br>Results count: '.count($result);
+   
               if ($rows) foreach($rows as $data) {
                   $entry = maybe_unserialize($data);
+
                   if ($author_matcher->matches($entry) && Papercite::userFiltersMatch($options["filters"], $entry))
                       $result[] = $entry;
               }
+                //print '<br>Result after Rows? count: '.count($result);
+
           }
       }
        
@@ -972,10 +980,16 @@ class Papercite {
         
         $selected_author = false;
         $selected_type = false;
-        
+
         $original_authors = Papercite::array_get($options, "author", "");
         $original_allow = Papercite::array_get($options, "allow", "");
-        
+ 
+	//set allow by default_allow
+	if(empty($_POST) && isset($options['default_allow'])){
+	        $selected_type = $options['default_allow'];	
+		$options['allow'] = $selected_type;
+	}
+       
         if (isset($_POST) && (papercite::array_get($_POST, "papercite_post_id", 0) == $post->ID)) {
         if (isset($_POST["papercite_author"]) && !empty($_POST["papercite_author"])) 
                 $selected_author = ($options["author"] = $_POST["papercite_author"]);        
@@ -984,7 +998,7 @@ class Papercite {
                 $selected_type = ($options["allow"] = $_POST["papercite_allow"]);
         
         }
-        
+
         $result = $this->getEntries($options);
         ob_start();
         ?>
