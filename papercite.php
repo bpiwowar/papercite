@@ -96,14 +96,18 @@ function &papercite_cb($myContent)
 	    }
     }*/
 
+    $post_id = get_the_ID();
+
     $text = preg_replace_callback(
             '/\[ppcnote\](.+?)\[\/ppcnote\]/i',
-        array($papercite,'processTextualFootnotes'),
+            function($match) use($post_id,$papercite) {
+                return $papercite->processTextualFootnotes($match,$post_id);
+            },
         $text
     );
 
     if ( count($papercite->getTextualFootnotes() ) > 0) {
-	    $text .= $papercite->showTextualFootnotes();
+	    $text .= $papercite->showTextualFootnotes(get_the_ID());
     }
 
     // digfish: reset the footnotes after the end of post/page

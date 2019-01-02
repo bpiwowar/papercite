@@ -984,9 +984,13 @@ class Papercite
 
     function showTextualFootnotes()
     {
+        $post_id = '0';
+        if (func_num_args() == 1) {
+            $post_id = func_get_arg(0);
+        }
         $buf = '<UL class="ppc_footnotes" style="list-style: none">';
         foreach ($this->getTextualFootnotes() as $id => $content) {
-            $buf .= "<li>(<sup>$id</sup>) $content<a class='ppc_footnote' name='fn_$id'></a></li>";
+            $buf .= "<li><a class='ppc_footnote' name='fn_".$post_id.'_'.$id."'></a>(<sup>$id</sup>) $content</li>";
         }
         $buf .= '</UL>';
         return $buf;
@@ -1161,10 +1165,14 @@ class Papercite
 
     function processTextualFootnotes(&$matches)
     {
+        $post_id = "0";
+        if (func_num_args() == 2) {
+            $post_id = func_get_arg(1);
+        }
         $ft_id = ++$this->textual_footnotes_counter;
         $this->textual_footnotes[$ft_id] = $matches[1];
         //d($this->textual_footnotes);
-        return "<A href='#fn_$ft_id'>(<sup>$ft_id</sup>)</A>";
+        return "<A href='#fn_".$post_id.'_'.$ft_id."'>(<sup>$ft_id</sup>)</A>";
     }
 
 
