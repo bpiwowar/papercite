@@ -1,4 +1,7 @@
+**This plugin is not maintained anymore. I am looking for somebody to take over!**
+
 # papercite 
+
 **Contributors:** bpiwowar  
 **Tags:** formatting, bibtex, bibliography  
 **Requires at least:** 3.8  
