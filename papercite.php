@@ -124,7 +124,8 @@ class Papercite {
    */
   function getCached($url, $timeout = 3600, $sslverify = false) {
     // check if cached file exists
-    $name = strtolower(preg_replace("@[/:]@","_",$url));
+    $name = md5($url);
+
     $dir_path = self::getCacheDirectory( 'path' );
     $file = "$dir_path/$name.bib";
 
