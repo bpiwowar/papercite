@@ -118,6 +118,14 @@ Entries are sorted by year by default.
 The HTML rendering is isolated in two template files, located in the
 subfolders tpl (citation list rendering) and format (entry rendering).
 
+### How do I use the new textual footnotes ?
+
+Using the new shortcode `[ppcnote]`. For example:
+```
+In molecular biology, the term double helix [ppcnote]usually applies to DNA[\ppcnote] 
+```
+will result in a footnote being generated after the post text. The numbering of the footnotes is separated from the one used in the citations.
+
 
 ## Screenshots 
 
@@ -139,6 +147,7 @@ subfolders tpl (citation list rendering) and format (entry rendering).
 ### 0.6.0
 
  * Support for textual footnotes
+ * Minor bug corrections
 
 
 ### 0.5.18 
