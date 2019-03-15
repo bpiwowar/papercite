@@ -3,7 +3,7 @@
 /*
   Plugin Name: papercite
   Plugin URI: http://www.bpiwowar.net/papercite
-  Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML.
+  Description: papercite enables to add BibTeX entries formatted as HTML in wordpress pages and posts. The input data is the bibtex text file and the output is HTML. This fork adds the feature of textual footnotes, besides the references stored in bibtex files.
   Version: 0.5.18
   Author: Benjamin Piwowarski
   Author URI: http://www.bpiwowar.net
@@ -13,7 +13,7 @@
 
 // isolate papercite class in their own class file, keeping only the wordpress integtation
 // in this file
-require_once "papercite.class.php";
+require_once "papercite.classes.php";
 
 
 
@@ -129,7 +129,7 @@ function &papercite_cb($myContent)
 // --- Add the documentation link in the plugin list
 function papercite_row_cb($data, $file)
 {
-    if ($file == "papercite/papercite.php") {
+    if ($file == "papercite/papercite-wp-plugin.php") {
         $data[] = "<a href='" . WP_PLUGIN_URL . "/papercite/documentation/index.html'>Documentation</a>";
     }
     return $data;

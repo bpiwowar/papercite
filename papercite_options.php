@@ -330,12 +330,12 @@ function papercite_options_validate($input) {
   $options = get_option('papercite_options');
   $options['use_db'] = $input['use_db'] == "yes";
   $options['auto_bibshow'] = $input['auto_bibshow'] == "1";
-  $options['use_media'] = $input['use_media'] == "1";
+  $options['use_media'] = isset($input['use_media'])?  $input['use_media'] == "1" : FALSE ;
   $options['use_files'] = $input['use_files'] == "1";
-  $options['skip_for_post_lists'] = $input['skip_for_post_lists'] == "1";
+  $options['skip_for_post_lists'] = isset($input['skip_for_post_lists'])? $input['skip_for_post_lists'] == "1" : FALSE ;
   $options['process_titles'] = $input['process_titles'] == "1";
   $options['show_links'] = $input['show_links'] == "1";
-  $options['ssl_check'] = $input['ssl_check'] == "1";
+  $options['ssl_check'] = isset($input['ssl_check'])? $input['ssl_check'] == "1" : FALSE;
 
   $options['file'] = trim($input['file']);
   $options['timeout'] = trim($input["timeout"]);
@@ -344,7 +344,11 @@ function papercite_options_validate($input) {
   if (array_key_exists('form', $input))
   {
     $a = Array();
-    for($i = 0; $i < sizeof($input["checked_files_ext"]); $i++)
+    $checked_files_ext_count = 0;
+    if (isset($input["checked_files_ext"])) {
+      $checked_files_ext_count = count($input["checked_files_ext"]);
+    }
+    for($i = 0; $i <  $checked_files_ext_count; $i++)
     {
       $key = $input["checked_files_key"][$i];
       $folder = $input["checked_files_folder"][$i];
