@@ -642,7 +642,7 @@ class PaperciteBibTexEntries {
     }
 
     // Remove braces and handles capitalization
-    foreach(array("title","booktitle", "journal") as $f)
+    foreach(array("title", "booktitle", "journal", "publisher", "location") as $f)
       if (in_array($f, array_keys($ret))) 
 	$ret[$f] = $this->formatTitle($ret[$f]);
     
