@@ -144,7 +144,7 @@ will result in a footnote being generated after the post text. The numbering of 
 
 ## Changelog 
 
-### 0.6.0
+### 0.5.20
 
  * Support for textual footnotes
  * Minor bug corrections
