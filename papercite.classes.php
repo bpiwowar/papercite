@@ -650,7 +650,7 @@ class Papercite
         // Get all the options pairs and store them
         // in the $options array
         $options_pairs = array();
-        preg_match_all("/\s*([\w-:_]+)=(?:([^\"]\S*)|\"([^\"]+)\")(?:\s+|$)/", sizeof($matches) > 2 ? $matches[2] : "", $options_pairs, PREG_SET_ORDER);
+        preg_match_all("/\s*([\w\-:_]+)=(?:([^\"]\S*)|\"([^\"]+)\")(?:\s+|$)/", sizeof($matches) > 2 ? $matches[2] : "", $options_pairs, PREG_SET_ORDER);
 
 
         // print "<pre>";
