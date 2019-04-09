@@ -136,7 +136,7 @@ function papercite_row_cb($data, $file)
 }
 add_filter('plugin_row_meta', 'papercite_row_cb', 1, 2);
 
-// --- Add
+// --- Register the MIME type for Bibtex files
 function papercite_mime_types($mime_types)
 {
   // Adjust the $mime_types, which is an associative array where the key is extension and value is mime type.
@@ -144,6 +144,33 @@ function papercite_mime_types($mime_types)
     return $mime_types;
 }
 add_filter('upload_mimes', 'papercite_mime_types', 1, 1);
+
+
+/**
+ * by digfish (09 Apr 2019)
+ * Restore .bib upload functionality in Media Library for WordPress 4.9.9 and up
+ * adapted from https://gist.github.com/rmpel/e1e2452ca06ab621fe061e0fde7ae150
+ */
+add_filter('wp_check_filetype_and_ext', function($values, $file, $filename, $mimes) {
+    if ( extension_loaded( 'fileinfo' ) ) {
+        // with the php-extension, a bib file is issues type text/plain so we fix that back to
+        // application/x-bibtex by trusting the file extension.
+        $finfo     = finfo_open( FILEINFO_MIME_TYPE );
+        $real_mime = finfo_file( $finfo, $file );
+        finfo_close( $finfo );
+        if ( $real_mime === 'text/plain' && preg_match( '/\.(bib)$/i', $filename ) ) {
+            $values['ext']  = 'bib';
+            $values['type'] = 'application/x-bibtex';
+        }
+    } else {
+        // without the php- extension, we probably don't have the issue at all, but just to be sure...
+        if ( preg_match( '/\.(bib)$/i', $filename ) ) {
+            $values['ext']  = 'bib';
+            $values['type'] = 'application/x-bibtex';
+        }
+    }
+    return $values;
+}, PHP_INT_MAX, 4);
 
 // --- Add the different handlers to WordPress ---
 add_action('init', 'papercite_init');

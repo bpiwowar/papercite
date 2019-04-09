@@ -69,7 +69,7 @@ as installed on my site <a href="http://www.bpiwowar.net/wp-content/plugins/pape
 * Max Harper: patch for having good URLs
 * Martin Henze: option for highlighting name(s) of specific author(s)/editor(s)
 * Some parts of the code come from bib2html (version 0.9.3) written by Sergio Andreozzi.
-* Samuel Viana aka digfish: this fork
+* Samuel Viana aka digfish: current mantainer
 
 ## Installation 
 
@@ -143,6 +143,9 @@ will result in a footnote being generated after the post text. The numbering of 
   * Support the new citation styles in XML format
 
 ## Changelog 
+
+### 0.5.21
+ * Fixed problem with uploading .bib files to the media library was being denied for security reasons (issue #144)
 
 ### 0.5.20
 
