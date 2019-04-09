@@ -5,7 +5,7 @@
 **Tags:** formatting, bibtex, bibliography, footnotes  
 **Requires at least:** 3.8  
 **Tested up to:** 5.1.0  
-**Stable tag:** 0.5.18  
+**Stable tag:** 0.5.22 
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -139,12 +139,12 @@ will result in a footnote being generated after the post text. The numbering of 
 ![The bibfilter command](https://ps.w.org/papercite/assets/screenshot-3.png)
 
 ## TODO list
-  * Support for the all in the bibliograpgy filter dropdown
-  * Support the new citation styles in XML format
+  * All authors appear in the bibfilter dropdown by default
+  * Support the new citation styles (CSL) in XML format
 
 ## Changelog 
 
-### 0.5.21
+### 0.5.22
  * Fixed problem with uploading .bib files to the media library was being denied for security reasons (issue #144)
 
 ### 0.5.20
