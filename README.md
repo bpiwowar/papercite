@@ -4,8 +4,8 @@
 **Contributors:** bpiwowar, digfish  
 **Tags:** formatting, bibtex, bibliography, footnotes  
 **Requires at least:** 3.8  
-**Tested up to:** 5.1.0  
-**Stable tag:** 0.5.22 
+**Tested up to:** 5.4  
+**Stable tag:** 0.5.23 
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -143,6 +143,9 @@ will result in a footnote being generated after the post text. The numbering of 
   * Support the new citation styles (CSL) in XML format
 
 ## Changelog 
+
+### 0.5.23
+ * Fixed warning on PHP using continue statement (issue #147)
 
 ### 0.5.22
  * Fixed problem with uploading .bib files to the media library was being denied for security reasons (issue #144)

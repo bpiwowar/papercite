@@ -6,8 +6,8 @@ PAPERCITE
 CONTRIBUTORS: bpiwowar, digitalfisherman
 TAGS: formatting, bibtex, bibliography, footnotes
 REQUIRES AT LEAST: 3.8
-TESTED UP TO: 5.0.3
-STABLE TAG: 0.5.18
+TESTED UP TO: 5.4
+STABLE TAG: 0.5.23
 LICENSE: GPLv2 or later
 LICENSE URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -154,6 +154,9 @@ Screenshots
 
 
 Changelog
+
+0.5.23
+ * Fixed warning on PHP using continue statement (issue #147)
 
 0.5.22
  * Fixed problem with uploading .bib files to the media library was being denied for security reasons (issue #144)

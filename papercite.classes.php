@@ -1,9 +1,5 @@
 <?php
 /** Main Class Papercite moved to this file
- * Created by PhpStorm.
- * User: digfish
- * Date: 01/01/2019
- * Time: 19:17
  */
 
 /*  Copyright 2012-18  Benjamin Piwowarski  (email : benjamim@bpiwowar.net)
@@ -482,7 +478,7 @@ class Papercite
                                 $parser->processTitles($processtitles);
                                 if (!$parser->parse($data)) {
                                     $this->cache[$biburi] = false;
-                                    continue;
+                                    break;
                                 } else {
                                     $this->cache[$biburi] = &$parser->data;
                                 }
