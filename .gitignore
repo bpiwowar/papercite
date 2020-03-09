@@ -2,3 +2,4 @@ cache
 _repos
 _tests
 *.sublime-workspace
+.idea/*
