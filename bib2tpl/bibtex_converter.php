@@ -262,6 +262,7 @@ class BibtexConverter
         $id = 0;
         foreach ($data as &$entry) {
             $entry['firstauthor'] = isset($entry['author']->authors) ? $entry['author']->authors[0]["surname"] : "";
+            $entry['firstauthoreditor'] = isset($entry['author']->creators[0]["surname"]) ? $entry['author']->creators[0]["surname"] : ( isset($entry['editor']->creators[0]["surname"]) ? $entry['editor']->creators[0]["surname"] : "");
             $entry['entryid'] = $id++;
         }
     }
