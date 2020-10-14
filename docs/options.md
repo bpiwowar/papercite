@@ -151,7 +151,7 @@ You can sort the citations using the `sort` option together by a description of 
 
 <div class="code">[bibtex file=mypub.bib sort=year order=asc]</div>
 
-Entries (within groups) are sorted depending on the `sort` key (see grouping for the list of possible keys). The ordering is also influenced by the `order` value.
+Entries (within groups) are sorted depending on the `sort` key (see grouping for the list of possible keys and the possibility to sort by `firstauthoreditor`, which takes the first editor, if no author is given). The ordering is also influenced by the `order` value.
 
 *   `none`: No order
 *   `asc`: Ascendant order
