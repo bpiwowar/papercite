@@ -16,7 +16,7 @@ class PaperciteBibtexEntryFormat {
     xml_set_element_handler($parser, array($this, "start_element"), array($this, "end_element"));
     xml_set_character_data_handler ($parser,  array($this, "characters"));
     xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, false);
-    xml_parse($parser, $file_content);
+    @xml_parse($parser, $file_content); //todo: fix PHP8 issue 'Argument #1 + #2 must be passed by reference'
     xml_parser_free($parser);
     $this->format = null;
   }

@@ -81,7 +81,9 @@ function &papercite_cb($myContent)
     $text = preg_replace_callback(
  //       "/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex|bibfilter|ppcnote)(?:\s+([^[]+))?]/",
         "/\[\s*((?:\/)bibshow|bibshow|bibcite|bibtex|bibfilter)(?:\s+([^[]+))?]/",
-        array($papercite, "process"),
+        function($match) use($papercite) {
+            return $papercite->process($match);
+        },
         $myContent
     );
 

@@ -309,7 +309,7 @@ class BibtexConverter
             foreach ($data as $entry) {
                 $target =  $this->_options['group'] === 'firstauthor'
                 ? $this->_entry_template->niceAuthor($entry['firstauthor'])
-                  : $entry[$this->_options['group']];
+                  : $entry[$this->_options['group']] ?? null;
 
                 if (empty($result[$target])) {
                     $result[$target] = array();
