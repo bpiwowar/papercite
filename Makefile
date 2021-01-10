@@ -12,10 +12,14 @@ TESTS=tests
 DOC=docs
 LINTER=phpcs
 UNITTESTER=phpunit
+LINTERMAKE=checkmake
+
+.PHONY: clean all test
+
+all: help
 
 help: ## Print help for each target
 	$(info Papercite Makefile)
-	$(info ==================)
 	$(info )
 	$(info Available commands:)
 	$(info )
@@ -28,14 +32,19 @@ todo: ## Show open issues
 
 lint: ## Check for code lint
 	@echo "Running '$(LINTER)'..."
-	@command -v $(LINTER)>/dev/null 2>&1 || { echo "Install '$(LINTER)' first and put it into the path" >&2 ; exit 1; }
+	@command -v $(LINTER)>/dev/null 2>&1 || { echo "Command '$(LINTER)' not found" >&2 ; exit 1; }
 	@composer global require wp-coding-standards/wpcs
 	@phpcs --config-set installed_paths $$HOME/.composer/vendor/wp-coding-standards/wpcs
 	@$(LINTER)
 
+lint-make:
+	echo "Running '$(LINTERMAKE)'..."
+	@command -v $(LINTERMAKE)>/dev/null 2>&1 || { echo "Command '$(LINTERMAKE)' not found" >&2 ; exit 1 ; }
+	@$(LINTERMAKE) Makefile
+
 test: ## Run unit tests
 	@echo "Running '$(UNITTESTER)'..."
-	@command -v $(UNITTESTER)>/dev/null 2>&1 || { echo "Install '$(UNITTESTER)' first and put it into the path" >&2 ; exit 1; }
+	@command -v $(UNITTESTER)>/dev/null 2>&1 || { echo "Command '$(UNITTESTER)' not found" >&2 ; exit 1; }
 	@$(UNITTESTER)
 
 feedback: ## Provide feedback
