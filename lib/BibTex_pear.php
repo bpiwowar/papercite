@@ -495,7 +495,7 @@ class PaperciteStructures_BibTex
             $arr = explode('{', $entry);
             $ret['cite'] = trim($arr[1]);
             $ret['entrytype'] = strtolower(trim($arr[0]));
-            if ('@' == $ret['entrytype']{0}) {
+            if ('@' == $ret['entrytype'][0]) {
                 $ret['entrytype'] = substr($ret['entrytype'], 1);
             }
             if ($this->_options['validate']) {
