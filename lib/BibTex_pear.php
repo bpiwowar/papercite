@@ -30,8 +30,9 @@
    * @link       http://pear.php.net/package/PaperciteStructures_BibTex
    */
 
-require_once 'PEAR.php' ;
-require_once 'bibtex_common.php';
+
+require_once(__DIR__."/PEAR.php");
+require_once("bibtex_common.php");
 
 
 /**
@@ -570,9 +571,9 @@ class PaperciteStructures_BibTex
         //Then it is possible that the braces are equal even if the '=' is in an equation.
         if ($ret) {
             $entrycopy = trim($entry);
-            $lastchar  = $entrycopy{strlen($entrycopy)-1};
+            $lastchar  = $entrycopy[strlen($entrycopy)-1];
             if (',' == $lastchar) {
-                $lastchar = $entrycopy{strlen($entrycopy)-2};
+                $lastchar = $entrycopy[strlen($entrycopy)-2];
             }
             if ('"' == $lastchar) {
                 //The return value is set to false
