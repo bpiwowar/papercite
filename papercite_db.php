@@ -52,7 +52,7 @@ function papercite_install($force = false) {
             }
         }
 
-         require(ABSPATH . 'wp-admin/includes/upgrade.php');
+         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
          $sql = "CREATE TABLE $papercite_table_name (
              urlid INT UNSIGNED NOT NULL,  
