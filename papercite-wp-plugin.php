@@ -25,7 +25,6 @@ function papercite_head()
 {
     if (!function_exists('wp_enqueue_script')) {
       // In case there is no wp_enqueue_script function (WP < 2.6), we load the javascript ourselves
-        echo "\n" . '<script src="'.  get_bloginfo('wpurl') . '/wp-content/plugins/papercite/js/jquery.js"  type="text/javascript"></script>' . "\n";
         echo '<script src="'.  get_bloginfo('wpurl') . '/wp-content/plugins/papercite/js/papercite.js"  type="text/javascript"></script>' . "\n";
     }
 }
@@ -36,7 +35,7 @@ function papercite_init()
     global $papercite;
 
     if (function_exists('wp_enqueue_script')) {
-        wp_register_script('papercite', plugins_url('papercite/js/papercite.js'), array('jquery'));
+        wp_register_script('papercite', plugins_url('papercite/js/papercite.js'));
         wp_enqueue_script('papercite');
     }
 
